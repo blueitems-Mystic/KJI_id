@@ -1,0 +1,4038 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1100">
+  <title>Kim Jong-il | Concept & Full Stack Artist Portfolio</title>
+
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+  <script>
+    (function(){
+      var t = localStorage.getItem('portfolio-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <style>
+    /* === Theme Variables === */
+    :root {
+      /* backgrounds */
+      --bg-main: #6b7280;
+      --bg-deep: #f3f4f6;
+      --bg-surface: #e5e7eb;
+      --bg-overlay: #d1d5db;
+      --bg-dark-accent: #f3f4f6;
+      --stat-gauge-bg: #9ca3af;
+
+      /* window */
+      --win-bg: #ffffff;
+      --win-border: #374151;
+      --win-highlight: #111827;
+
+      /* text */
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --text-on-dark: #ffffff;
+
+      /* accents */
+      --gold: #d97706;
+      --neo-mint: #059669;
+      --cyber-pink: #ff00ff;
+
+      /* terminal buttons */
+      --terminal-bg: #1f2937;
+      --terminal-green: #39ff14;
+      --terminal-green-glow: rgba(57, 255, 20, 0.5);
+      --terminal-green-bright: #66ff4d;
+
+      /* effects */
+      --shadow-color: rgba(0,0,0,0.2);
+      --grid-line: rgba(0, 0, 0, 0.05);
+      --scanline-bar-opacity: 0.1;
+      --scanline-btn-opacity: 0.15;
+      --border-strong: #111827;
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0d0d0d;
+      --bg-deep: #0f0f0f;
+      --bg-surface: #0a0a0a;
+      --bg-overlay: #000000;
+      --bg-dark-accent: #222222;
+      --stat-gauge-bg: #333333;
+
+      --win-bg: #2a2a2a;
+      --win-border: #4a4a4a;
+      --win-highlight: #636363;
+
+      --text-primary: #e0e0e0;
+      --text-secondary: #a2a2a2;
+      --text-muted: #737373;
+      --text-on-dark: #ffffff;
+
+      --gold: #ffcc00;
+      --neo-mint: #00ffcc;
+      --cyber-pink: #ff00ff;
+
+      --terminal-bg: #000000;
+      --terminal-green: #a2a2a2;
+      --terminal-green-glow: transparent;
+      --terminal-green-bright: #00ffcc;
+
+      --shadow-color: rgba(0,0,0,0.8);
+      --grid-line: rgba(0, 255, 204, 0.03);
+      --scanline-bar-opacity: 0.35;
+      --scanline-btn-opacity: 0.4;
+      --border-strong: #ffffff;
+    }
+
+    html, body {
+      min-width: 1100px;
+    }
+    body {
+      font-family: 'Gowun Dodum', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 30px 30px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      padding-top: 48px;
+    }
+
+    .pixel-font {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      line-height: 1.5;
+    }
+
+    /* === Header Styling === */
+    header h1.text-yellow-400 {
+      color: #ffffff !important;
+      text-shadow:
+        1px 1px 0px rgba(0,0,0,0.4),
+        2px 2px 0px rgba(0,0,0,0.15),
+        0px 0px 5px rgba(255,255,255,0.1);
+      letter-spacing: 2px;
+    }
+    header p.text-green-400 {
+      color: var(--terminal-green) !important;
+      text-shadow: 1px 1px 0px rgba(0,0,0,0.4);
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    [data-theme="dark"] header h1.text-yellow-400 {
+      color: var(--gold) !important;
+      text-shadow: none;
+      letter-spacing: normal;
+    }
+    [data-theme="dark"] header p.text-green-400 {
+      color: var(--neo-mint) !important;
+      text-shadow: none;
+      font-weight: normal;
+      letter-spacing: normal;
+    }
+
+    /* === Top Status Bar (RPG Style) === */
+    .status-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: var(--bg-overlay);
+      color: var(--text-primary);
+      border-bottom: 3px solid var(--win-border);
+      z-index: 10000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 0.7rem;
+    }
+    .status-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, var(--scanline-bar-opacity)) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .stat-gauge {
+      width: 70px;
+      height: 8px;
+      background: var(--stat-gauge-bg);
+      border: 1px solid var(--border-strong);
+      display: inline-block;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .stat-fill { height: 100%; }
+
+    .pwr-btn-top {
+      background: #dc2626;
+      color: #fff;
+      border: 2px solid var(--border-strong);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+      padding: 4px 8px;
+      font-size: 0.6rem;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: 0.1s;
+      position: relative;
+      z-index: 2;
+    }
+    .pwr-btn-top:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px rgba(0,0,0,0.5); }
+    .pwr-btn-top.off { background: var(--text-muted); color: var(--text-secondary); }
+    .pwr-btn-top.theme-toggle { background: var(--win-border); color: #ffffff; }
+    [data-theme="dark"] .pwr-btn-top.theme-toggle { background: #b0b0b0; color: #1a1a1a; }
+
+    /* === OS Window Style === */
+    .os-window {
+      background-color: var(--win-bg);
+      border: 4px solid var(--win-border);
+      border-radius: 2px;
+      box-shadow: 8px 8px 0px var(--shadow-color);
+      transition: all 0.3s ease;
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .os-window:hover {
+      border-color: var(--win-highlight);
+    }
+    .os-header {
+      background: var(--win-border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #000;
+      transition: background 0.3s ease;
+    }
+    .os-window:hover .os-header {
+      background: var(--win-highlight);
+    }
+    .os-header-title {
+      font-family: 'Press Start 2P', sans-serif;
+      font-size: 0.75rem;
+      color: #ffffff;
+      text-shadow: 1px 1px 0px #000;
+      transition: color 0.3s ease;
+    }
+    [data-theme="dark"] .os-header-title {
+      color: #b8b8b8;
+    }
+    .os-window:hover .os-header-title {
+      color: #ffffff;
+    }
+
+    .os-header-squares { display: flex; gap: 4px; }
+    .os-square { width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.4); }
+    .os-square.y { background: #eab308; }
+    .os-square.g { background: #22c55e; }
+    .os-square.r { background: #ef4444; }
+
+    .os-body { padding: 24px; }
+
+    .rpg-title {
+      border-bottom: 2px dashed var(--win-border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      color: var(--gold);
+      text-shadow: 1px 1px 0px var(--shadow-color);
+    }
+    /* === Terminal Style Buttons === */
+    .btn-pixel {
+      background-color: var(--terminal-bg);
+      color: var(--terminal-green);
+      text-shadow: 0 0 5px var(--terminal-green-glow);
+      border: 2px solid var(--border-strong);
+      padding: 12px 20px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      box-shadow: 4px 4px 0px var(--shadow-color);
+      position: relative;
+      transition: all 0.15s ease;
+      overflow: hidden;
+    }
+    .btn-pixel::after {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, var(--scanline-btn-opacity)) 0px,
+        rgba(0, 0, 0, var(--scanline-btn-opacity)) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none; z-index: 5;
+      animation: scanlineScroll 12s linear infinite;
+    }
+    @keyframes scanlineScroll {
+      from { background-position: 0 0; }
+      to { background-position: 0 100%; }
+    }
+    .btn-pixel > svg {
+      width: 18px; height: 18px; fill: currentColor; flex-shrink: 0;
+      margin-right: 12px; position: relative; z-index: 4;
+      filter: drop-shadow(0 0 3px var(--terminal-green-glow));
+    }
+    .btn-pixel-text { position: relative; z-index: 4; display: inline-flex; align-items: center; }
+    .btn-pixel-text::before { content: ">"; color: var(--terminal-green-bright); margin-right: 8px; animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .btn-pixel:hover { color: var(--terminal-green-bright); box-shadow: 2px 2px 0px var(--shadow-color); transform: translate(2px, 2px); }
+    .btn-pixel:active { box-shadow: 0px 0px 0px rgba(0,0,0,1); transform: translate(4px, 4px); background-color: #111; }
+
+    .yt-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+    .yt-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .video-card { background-color: var(--win-bg); border: 3px solid var(--win-border); box-shadow: 4px 4px 0 var(--shadow-color); overflow: hidden; transition: border-color 0.3s; }
+    .video-card:hover { border-color: var(--win-highlight); }
+
+    .text-yellow-400 { color: var(--gold) !important; font-weight: 700; }
+    .text-yellow-300 { color: var(--gold) !important; font-weight: 700; }
+    .text-green-400 { color: var(--neo-mint) !important; font-weight: 700; }
+    .text-blue-400 { color: #1d4ed8 !important; font-weight: 700; }
+    .text-blue-200 { color: #2563eb !important; font-weight: 700; }
+    [data-theme="dark"] .text-yellow-300 { color: #facc15 !important; }
+    [data-theme="dark"] .text-blue-400 { color: #7a8898 !important; font-weight: normal; }
+    [data-theme="dark"] .text-blue-200 { color: var(--neo-mint) !important; opacity: 0.8; font-weight: normal; }
+    [data-theme="dark"] .text-green-400 { font-weight: normal; }
+    [data-theme="dark"] .text-yellow-400 { font-weight: normal; }
+
+    /* Light mode: Tailwind gray overrides for readability on white bg */
+    .text-gray-300 { color: #1f2937 !important; }
+    .text-gray-400 { color: #4b5563 !important; }
+    .text-gray-500 { color: #374151 !important; }
+    .text-white { color: #111827 !important; }
+    [data-theme="dark"] .text-gray-300 { color: #d1d5db !important; }
+    [data-theme="dark"] .text-gray-400 { color: #9ca3af !important; }
+    [data-theme="dark"] .text-gray-500 { color: #6b7280 !important; }
+    [data-theme="dark"] .text-white { color: #ffffff !important; }
+
+    /* === CRT Overlay Effect === */
+    .crt-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+      background-size: 100% 3px, 3px 100%;
+      z-index: 9997;
+      pointer-events: none;
+    }
+    [data-theme="dark"] .crt-overlay {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 3px 100%;
+    }
+
+    /* === Edit Mode UI === */
+    .login-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .login-modal-box { background: var(--win-bg); border: 3px solid var(--win-border); border-radius: 4px; padding: 24px; min-width: 320px; max-width: 90vw; color: var(--text-primary); }
+    .login-modal-box .title { font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.8rem; color: var(--gold); margin-bottom: 12px; }
+    .login-modal-box .error { color: #e74c3c; font-size: 0.85rem; margin-bottom: 8px; }
+    .login-modal-box input[type="password"] { width: 100%; padding: 10px 12px; background: var(--bg-deep); border: 2px solid var(--win-border); color: var(--text-primary); border-radius: 2px; font-size: 1rem; outline: none; }
+    .login-modal-box input[type="password"]:focus { border-color: var(--gold); }
+    .login-modal-box .btns { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+    .login-modal-box button { font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.7rem; padding: 8px 14px; border-radius: 2px; cursor: pointer; border: 2px solid var(--win-border); }
+    .login-modal-box .btn-enter { background: var(--gold); color: var(--text-on-dark); border-color: var(--gold); }
+    .login-modal-box .btn-enter:hover { background: var(--win-highlight); }
+    .login-modal-box .btn-cancel { background: transparent; color: var(--text-secondary); }
+    .login-modal-box .btn-cancel:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+    .publish-confirm-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .publish-confirm-box { background: var(--win-bg); border: 4px solid var(--gold); padding: 24px; max-width: 400px; font-family: 'Press Start 2P', sans-serif; color: var(--text-primary); }
+    .publish-confirm-box .title { color: var(--gold); font-size: 0.9rem; margin-bottom: 16px; }
+    .publish-confirm-box .message { color: var(--text-primary); font-family: 'Gowun Dodum', sans-serif; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; }
+    .publish-confirm-box .btns { display: flex; gap: 12px; justify-content: flex-end; }
+    .publish-confirm-box .btn-confirm { background: var(--gold); color: var(--text-on-dark); border: none; padding: 8px 16px; cursor: pointer; font-family: 'Press Start 2P', sans-serif; font-size: 0.7rem; }
+    .publish-confirm-box .btn-cancel { background: transparent; color: var(--text-secondary); border: 2px solid var(--text-secondary); padding: 6px 14px; cursor: pointer; font-family: 'Press Start 2P', sans-serif; font-size: 0.7rem; }
+    .publish-confirm-box .btn-cancel:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+    .history-dropdown-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: flex-start; justify-content: center; z-index: 9998; padding-top: 100px; }
+    .history-dropdown { background: var(--win-bg); border: 4px solid var(--gold); padding: 20px; width: 360px; max-height: 70vh; overflow-y: auto; font-family: 'Press Start 2P', sans-serif; color: var(--text-primary); }
+    .history-dropdown .title { color: var(--gold); font-size: 0.85rem; margin-bottom: 12px; }
+    .history-dropdown .empty { color: var(--text-secondary); font-family: 'Gowun Dodum', sans-serif; padding: 12px 0; text-align: center; }
+    .history-dropdown .error { color: #fca5a5; font-family: 'Gowun Dodum', sans-serif; padding: 12px 0; }
+    .history-dropdown .error .retry { margin-left: 8px; background: var(--bg-dark-accent); color: var(--gold); border: 2px solid var(--gold); padding: 2px 8px; cursor: pointer; font-family: 'Press Start 2P', sans-serif; font-size: 0.6rem; }
+    .history-dropdown .snapshot-list { list-style: none; padding: 0; margin: 0 0 12px; }
+    .history-dropdown .snapshot-list li { margin-bottom: 4px; }
+    .history-dropdown .snapshot-list button { width: 100%; background: var(--bg-deep); border: 1px solid var(--win-border); color: var(--text-primary); padding: 8px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: 'Gowun Dodum', sans-serif; font-size: 0.85rem; }
+    .history-dropdown .snapshot-list button:hover:not(:disabled) { background: var(--bg-surface); border-color: var(--gold); }
+    .history-dropdown .snapshot-list .ts { font-weight: bold; }
+    .history-dropdown .close { background: transparent; color: var(--text-secondary); border: 2px solid var(--text-secondary); padding: 4px 12px; cursor: pointer; font-family: 'Press Start 2P', sans-serif; font-size: 0.65rem; float: right; }
+
+    .footer-edit-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; padding: 2px 6px; margin-left: 8px; transition: color 0.2s; }
+    .footer-edit-btn:hover { color: var(--gold); }
+    @media (max-width: 767px) { .footer-edit-btn { display: none !important; } }
+
+    .edit-mode-root { position: relative; padding-top: 56px; }
+    .edit-toolbar-sticky { position: fixed; top: 0; left: 0; right: 0; height: 48px; background: var(--bg-surface); border-bottom: 3px solid var(--gold); display: flex; align-items: center; padding: 0 16px; z-index: 10001; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.7rem; gap: 12px; color: var(--text-primary); }
+    .edit-toolbar-sticky .badge { background: #16a34a; color: #fff; padding: 4px 8px; border-radius: 2px; }
+    .edit-toolbar-sticky .status { color: var(--text-secondary); flex: 1; }
+    .edit-toolbar-sticky .status.dirty { color: var(--gold); }
+    .edit-toolbar-sticky .status.error { color: #ef4444; }
+    .edit-toolbar-sticky button { background: transparent; border: 2px solid var(--win-border); color: var(--text-primary); padding: 6px 12px; border-radius: 2px; cursor: pointer; font-family: inherit; font-size: 0.7rem; }
+    .edit-toolbar-sticky .toolbar-btn { background: var(--bg-dark-accent); color: var(--gold); border: 2px solid var(--gold); padding: 4px 10px; font-family: 'Press Start 2P', sans-serif; font-size: 0.65rem; cursor: pointer; margin: 0 2px; }
+    .edit-toolbar-sticky .toolbar-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .edit-toolbar-sticky .toolbar-btn:hover:not(:disabled) { background: var(--gold); color: var(--text-on-dark); }
+    .edit-toolbar-sticky .unpublished-badge { background: #7f1d1d; color: #fde68a; padding: 2px 8px; font-family: 'Press Start 2P', sans-serif; font-size: 0.6rem; border: 1px solid #fde68a; margin: 0 4px; }
+
+    .block-edit-wrap { position: relative; padding: 4px; border: 1px dashed transparent; transition: border-color 0.15s; }
+    .block-edit-wrap:hover { border-color: rgba(241, 196, 15, 0.5); }
+    .block-mini-toolbar { position: absolute; top: -14px; right: 8px; display: none; gap: 2px; background: var(--bg-surface); border: 1px solid var(--win-border); border-radius: 2px; padding: 2px; z-index: 10; }
+    .block-edit-wrap:hover .block-mini-toolbar { display: flex; }
+    .block-mini-toolbar button { background: transparent; border: none; color: var(--text-primary); font-size: 0.85rem; width: 22px; height: 22px; cursor: pointer; padding: 0; }
+    .block-mini-toolbar button:hover { color: var(--gold); }
+    .block-mini-toolbar button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .block-mini-toolbar .separator { width: 1px; background: var(--win-border); margin: 2px 2px; }
+
+    .block-drag-handle { position: absolute; left: -18px; top: 50%; transform: translateY(-50%); display: none; color: var(--text-muted); cursor: grab; user-select: none; font-size: 1rem; padding: 4px; }
+    .block-edit-wrap:hover .block-drag-handle { display: block; }
+    .block-drag-handle:hover { color: var(--gold); }
+    .block-edit-wrap.dragging { opacity: 0.4; }
+    .block-edit-wrap.drag-over-top { border-top: 2px solid var(--gold); }
+    .block-edit-wrap.drag-over-bottom { border-bottom: 2px solid var(--gold); }
+
+    .block-insert-gap { position: relative; height: 12px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s, height 0.15s; }
+    .block-insert-gap:hover { opacity: 1; height: 24px; }
+    .block-insert-gap::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(241, 196, 15, 0.5); }
+    .block-insert-gap button { position: relative; background: var(--bg-surface); border: 1px solid var(--gold); color: var(--gold); width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; z-index: 1; }
+    .block-insert-gap button:hover { background: var(--gold); color: var(--text-on-dark); }
+
+    .block-type-picker-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998; display: flex; align-items: center; justify-content: center; }
+    .block-type-picker { background: var(--win-bg); border: 3px solid var(--win-border); border-radius: 4px; padding: 20px; min-width: 360px; }
+    .block-type-picker .title { font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.8rem; color: var(--gold); margin-bottom: 12px; text-align: center; }
+    .block-type-picker .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .block-type-picker .grid button { background: var(--bg-deep); border: 2px solid var(--win-border); color: var(--text-primary); padding: 14px 6px; border-radius: 2px; cursor: pointer; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.55rem; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .block-type-picker .grid button .emoji { font-size: 1.2rem; }
+    .block-type-picker .grid button:hover { border-color: var(--gold); color: var(--gold); }
+    .block-type-picker .cancel { margin-top: 12px; background: transparent; border: 2px solid var(--win-border); color: var(--text-secondary); padding: 6px 12px; border-radius: 2px; cursor: pointer; width: 100%; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.7rem; }
+    .block-type-picker .cancel:hover { color: var(--gold); border-color: var(--gold); }
+
+    .block-edit-wrap [contenteditable="true"] { outline: 1px dashed rgba(241,196,15,0.8); outline-offset: 2px; cursor: text; min-height: 1em; }
+    .block-edit-wrap [contenteditable="true"]:focus { outline-color: var(--gold); }
+
+    .floating-rich-toolbar { position: fixed; z-index: 1500; background: var(--bg-surface); border: 2px solid var(--gold); border-radius: 2px; padding: 4px; display: flex; gap: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .floating-rich-toolbar button { background: transparent; border: none; color: var(--text-primary); width: 28px; height: 28px; cursor: pointer; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.75rem; padding: 0; }
+    .floating-rich-toolbar button:hover { color: var(--gold); }
+    .floating-rich-toolbar .link-input { display: flex; gap: 4px; padding: 2px 4px; }
+    .floating-rich-toolbar input { background: var(--win-bg); border: 1px solid var(--win-border); color: var(--text-primary);
+      padding: 3px 6px;
+      border-radius: 2px;
+      outline: none;
+      font-size: 0.85rem;
+      width: 180px;
+    }
+    .floating-rich-toolbar input:focus { border-color: var(--gold); }
+
+    .settings-panel-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1200; }
+    .settings-panel { position: fixed; top: 48px; right: 0; bottom: 0; width: 380px; max-width: 90vw; background: var(--win-bg); border-left: 3px solid var(--win-border); z-index: 1201; padding: 20px; overflow-y: auto; color: var(--text-primary); }
+    .settings-panel .title { font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.75rem; color: var(--gold); margin-bottom: 16px; }
+    .settings-panel label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; margin-top: 12px; font-weight: bold; }
+    .settings-panel input[type="text"], .settings-panel input[type="url"], .settings-panel input[type="number"], .settings-panel select, .settings-panel textarea { width: 100%; background: var(--bg-deep); border: 2px solid var(--win-border); color: var(--text-primary); padding: 8px 10px; border-radius: 2px; font-size: 0.9rem; font-family: inherit; outline: none; }
+    .settings-panel input:focus, .settings-panel select:focus, .settings-panel textarea:focus { border-color: var(--gold); }
+    .settings-panel textarea { min-height: 80px; resize: vertical; }
+    .settings-panel .close-btn { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem; }
+    .settings-panel .close-btn:hover { color: var(--gold); }
+
+    .image-dropzone { border: 2px dashed var(--win-border); border-radius: 2px; padding: 20px; text-align: center; color: var(--text-secondary); margin-top: 8px; cursor: pointer; }
+    .image-dropzone.over { border-color: var(--gold); color: var(--gold); }
+    .image-dropzone.busy { opacity: 0.6; pointer-events: none; }
+    .profile-edit-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .profile-edit-row .label-col { flex: 0 0 110px; }
+    .profile-edit-row .value-col { flex: 1; }
+    .profile-edit-row input[type="text"], .profile-edit-row select { width: 100%; background: var(--bg-deep); border: 1px solid var(--win-border); color: var(--text-primary); padding: 4px 8px; font-size: 0.9rem; border-radius: 2px; font-family: inherit; }
+    .profile-edit-row button.remove { background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 0 4px; }
+    .profile-edit-add { background: transparent; border: 2px dashed var(--win-border); color: var(--text-secondary); padding: 6px 10px; width: 100%; border-radius: 2px; cursor: pointer; font-family: inherit; font-size: 0.8rem; margin-top: 4px; }
+    .profile-edit-add:hover { color: var(--gold); border-color: var(--gold); }
+    .profile-image-replace { display: inline-block; margin-left: 12px; background: transparent; border: 2px solid var(--win-border); color: var(--text-secondary); padding: 4px 8px; cursor: pointer; border-radius: 2px; font-size: 0.75rem; font-family: inherit; }
+    .profile-image-replace:hover { color: var(--gold); border-color: var(--gold); }
+
+    /* ============================================================
+       HEADER STAGE — grayscale SNES-style side-scrolling hero
+       (Drop-in replacement for the old <Header> text block)
+       ============================================================ */
+    .hero-shell {
+      position: relative;
+      width: 100%;
+      height: calc(var(--hero-base-h, 420px) - var(--hero-crop-top, 0px) - var(--hero-crop-bot, 0px));
+      max-width: 1100px;
+      margin: var(--hero-mt, 24px) auto var(--hero-mb, 36px);
+      overflow: hidden;
+      border: 4px solid #1a1a1a;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.35);
+      background: #c0c0c0;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    [data-theme="dark"] .hero-shell {
+      border-color: #d0d0d0;
+      box-shadow: 8px 8px 0 rgba(255,255,255,0.12);
+    }
+    /* Canvas wrapper stays at the ORIGINAL full height so the game scene
+       is not scaled; the shell clips the top/bottom. */
+    .hero-canvas-wrap {
+      position: absolute;
+      left: 0; right: 0;
+      top: calc(-1 * var(--hero-crop-top, 0px) + var(--hero-pan-y, 0px));
+      height: var(--hero-base-h, 420px);
+      pointer-events: none;
+    }
+    .hero-canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .hero-scanlines {
+      position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 3px);
+      z-index: 4;
+    }
+    .hero-hud-top {
+      position: absolute; top: 10px; left: 14px; right: 14px; z-index: 5;
+      display: flex; justify-content: space-between;
+      font-family: 'Press Start 2P', sans-serif;
+      font-size: 0.75rem;
+      color: #1a1a1a;
+      text-shadow: 2px 2px 0 #ffffff;
+      letter-spacing: 2px;
+      pointer-events: none;
+    }
+    .hero-hud-top .coin-ico { color: #606060; text-shadow: 1px 1px 0 #ffffff; }
+    .hero-overlay-title {
+      position: absolute; left: 0; right: 0; top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      text-align: center;
+      pointer-events: none;
+      font-family: 'Press Start 2P', sans-serif;
+      padding: 0 20px;
+    }
+    .hero-overlay-title .main {
+      color: #ffffff;
+      font-size: clamp(1.44rem, 3.3vw, 2.4rem);
+      letter-spacing: 3px;
+      text-shadow:
+        2px 0 0 #1a1a1a, -2px 0 0 #1a1a1a, 0 2px 0 #1a1a1a, 0 -2px 0 #1a1a1a,
+        2px 2px 0 #1a1a1a, -2px -2px 0 #1a1a1a, 2px -2px 0 #1a1a1a, -2px 2px 0 #1a1a1a,
+        5px 5px 0 #606060;
+      margin: 0 0 10px 0;
+    }
+    .hero-overlay-title .sub {
+      color: #1a1a1a;
+      font-size: clamp(0.57rem, 0.96vw, 0.78rem);
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 0 #ffffff, 3px 3px 0 rgba(0,0,0,0.25);
+    }
+
+    /* Goomba speech bubbles — pixel-art style, sits between canvas and overlay title */
+    .hero-bubbles-layer {
+      position: absolute;
+      left: 0; right: 0;
+      top: calc(-1 * var(--hero-crop-top, 0px) + var(--hero-pan-y, 0px));
+      height: var(--hero-base-h, 420px);
+      z-index: 3;
+      pointer-events: none;
+    }
+    .hero-bubble {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      background: #ffffff;
+      color: #1a1a1a;
+      border: 2px solid #1a1a1a;
+      padding: 4px 7px;
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      white-space: normal;
+      max-width: 220px;
+      text-align: center;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.35);
+      image-rendering: pixelated;
+    }
+    .hero-bubble::after {
+      /* tail pointing down to the goomba */
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -7px;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid #1a1a1a;
+    }
+    .hero-bubble::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -4px;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+      border-top: 5px solid #ffffff;
+      z-index: 1;
+    }
+    [data-theme="dark"] .hero-bubble {
+      background: #1a1a1a;
+      color: #ffffff;
+      border-color: #e0e0e0;
+    }
+    [data-theme="dark"] .hero-bubble::after { border-top-color: #e0e0e0; }
+    [data-theme="dark"] .hero-bubble::before { border-top-color: #1a1a1a; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="crt-overlay" class="crt-overlay"></div>
+
+  <script type="text/babel">
+    const API_BASE = "https://kji-gallery-api.blueitems7.workers.dev";
+
+    const DEFAULT_CONTENT = {
+      version: "1.0",
+      updatedAt: null,
+      header: {
+        title: "Kim Jong-il",
+        subtitle: "Concept & Full Stack Artist",
+      },
+      profile: {
+        imageUrl: "KJI_Profilel00.gif",
+        imageAlt: "Profile",
+        imageWidth: 280,
+        statusTitle: "Status",
+        status: [
+          { label: "Email", labelColor: "yellow-300", value: "blueitems7@gmail.com" },
+          { label: "Mobile", labelColor: "yellow-300", value: "010-5778-7748" },
+          { label: "Skill Set", labelColor: "green-400", value: "C, Python, VEX, Unreal Blueprint" },
+          { label: "Software", labelColor: "blue-400", value: "Unreal Engine, Houdini, Blender, Photoshop" },
+        ],
+        inventoryTitle: "Inventory",
+        inventory: [
+          { icon: "artstation", label: "ArtStation", href: "https://www.artstation.com/blueitems", target: "_blank" },
+          { icon: "gallery", label: "Gallery", href: "gallery.html", target: "_self" },
+          { icon: "youtube", label: "YouTube", href: "https://www.youtube.com/@blueitems", target: "_blank" },
+        ],
+      },
+      sections: [
+        {
+          id: "experiences",
+          title: "Experiences (Career)",
+          titleEmoji: null,
+          subtitle: null,
+          blocks: [
+            {
+              id: "b_exp_grid",
+              type: "cardgrid",
+              cols: 3,
+              variant: "text",
+              cards: [
+                { title: "NC soft", titleColor: "yellow-400", description: "Tectan - 캐릭터 배경컨셉 팀장" },
+                { title: "XL Games", titleColor: "yellow-400", description: "ArcheAge 2 - 캐릭터 배경 컨셉" },
+                { title: "TranceStudio", titleColor: "yellow-400", description: "Triple X - AD" },
+                { title: "NHN Entertainment", titleColor: "yellow-400", description: "Heroes Wanted - 배경 캐릭터컨셉 / UI" },
+                { title: "NC soft", titleColor: "yellow-400", description: "Lineage Eternal / MBA / Steel Dog - 배경컨셉" },
+                { title: "Blueside", titleColor: "yellow-400", description: "KUF2 / Project Theta - 배경컨셉" },
+                { title: "GorillaBanana", titleColor: "yellow-400", description: "RedBlood Online - 배경컨셉" },
+              ],
+            },
+          ],
+        },
+        {
+          id: "mysticisland",
+          title: "Project: MysticIsland",
+          titleEmoji: "\u{1F3DD}\u{FE0F}",
+          subtitle: "소규모 개발 환경의 한계를 돌파하는 오픈월드 자동화 파이프라인 프레임워크 (개인프로젝트)",
+          blocks: [
+            { id: "b_mi_h1", type: "heading", level: 3, emoji: "\u{1F3AF}", text: "Overview" },
+            { id: "b_mi_t1", type: "text", html: "점차 증가하는 게임 개발 리스크와 비용 문제에 대한 근본적인 고찰에서 출발한 프로젝트입니다. 소규모 팀이나 개인 단위의 개발에서도 규모의 제약을 넘어, 기획적 의도가 반영된 방대한 오픈월드와 선형 레벨을 빠르게 구축하고 지속적으로 수정할 수 있는 통합 자동화 파이프라인 및 툴셋을 개발하고 있습니다. (Unreal Engine 5.4+ 환경)" },
+            { id: "b_mi_yt", type: "youtube", videoId: "oE25G0tBFSM", start: 27, title: "MysticIsland Overview" },
+            { id: "b_mi_h2", type: "heading", level: 3, emoji: "\u{1F4A1}", text: "Core Features & Value" },
+            {
+              id: "b_mi_l1",
+              type: "list",
+              style: "disc",
+              items: [
+                { strong: "Houdini ↔ Unreal Engine 양방향 동기화:", text: " 실시간으로 레벨을 수정하고 새로운 구역을 추가하며, 다양한 에셋들을 조건에 맞게 자동 배치하는 유기적인 환경 구축." },
+                { strong: "고효율 프로토타이핑 & 스캐폴딩 지원:", text: " 기획적 니즈를 즉각적으로 반영하여 맵을 구성하고 검증. 각종 테스트 비용을 획기적으로 낮춤." },
+                { strong: "지속 가능한 아트 개발 파이프라인:", text: " 단순한 에셋 제작을 넘어, 씬(Scene) 전체를 논리와 알고리즘으로 구성." },
+              ],
+            },
+            { id: "b_mi_h3", type: "heading", level: 3, emoji: "\u{1F680}", text: "Evolution: AI Agent Integration (2026.02 ~)" },
+            {
+              id: "b_mi_l2",
+              type: "list",
+              style: "disc",
+              marginBottom: "mb-8",
+              spaceY: "",
+              items: [
+                { strong: "제작 패러다임의 전환:", text: " 기존 수작업 중심의 코드 구현 방식에서 AI Agent를 적극 활용하는 개발 방식으로 완전히 전환." },
+                { strong: "자동화의 확장:", text: " AI를 파이프라인에 통합하여 툴 개발 범위를 넓히고 작업 속도 단축 및 완성도 향상." },
+                { note: true, text: "(※ 단, 아래 시각적 결과물들은 모두 AI 도입 이전, 직접 코드를 작성하여 구현한 결과입니다.)" },
+              ],
+            },
+            {
+              id: "b_mi_grid",
+              type: "cardgrid",
+              cols: 2,
+              variant: "video",
+              cards: [
+                { videoId: "271IyXBPOyc", title: "Procedural House" },
+                { videoId: "nBMWcNQ7u7Q", title: "Procedural Roof" },
+                { videoId: "bkdqgtGb7Ds", title: "Procedural Rock 02 for Game" },
+                { videoId: "8DSYbFOeZHY", title: "Procedural Rocks 01" },
+                { videoId: "NQgXI9P0SUI", title: "Korean Traditional House Breakdown" },
+              ],
+            },
+          ],
+        },
+      ],
+      footer: {
+        text: "\u00A9 2026 Kim Jong-il. All rights reserved.",
+      },
+    };
+
+    // DEFAULT_CONTENT 재귀 freeze — fallback 상수가 state 로 새어나가 변이되는 사고 차단
+    (function deepFreeze(obj) {
+      if (obj === null || typeof obj !== "object") return;
+      for (const key of Object.keys(obj)) deepFreeze(obj[key]);
+      Object.freeze(obj);
+    })(DEFAULT_CONTENT);
+
+    // --- Auth + Draft API client (Plan B) ---
+    const ADMIN_TOKEN_KEY = "admin_token";
+
+    function getAdminToken() {
+      try { return sessionStorage.getItem(ADMIN_TOKEN_KEY) || null; }
+      catch (_) { return null; }
+    }
+    function setAdminToken(token) {
+      try { sessionStorage.setItem(ADMIN_TOKEN_KEY, token); } catch (_) {}
+    }
+    function clearAdminToken() {
+      try { sessionStorage.removeItem(ADMIN_TOKEN_KEY); } catch (_) {}
+    }
+
+    // Worker 엔드포인트 — 전부 Authorization: Bearer <token> 필요
+    async function fetchPortfolioDraft(token) {
+      const res = await fetch(`${API_BASE}/api/portfolio/draft`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      // 첫 진입: draft/published 양쪽 모두 KV 에 없을 때 Worker 가 404 반환 — null 로 변환하여
+      // 호출자(LoginModal 검증, useEditContent 초기 로드)가 DEFAULT_CONTENT fallback 으로 계속 진행.
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function savePortfolioDraft(token, content) {
+      const res = await fetch(`${API_BASE}/api/portfolio/draft`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(content),
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function publishPortfolio(token) {
+      const res = await fetch(`${API_BASE}/api/portfolio/publish`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function fetchPortfolioHistoryList(token) {
+      const res = await fetch(`${API_BASE}/api/portfolio/history`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json(); // { items: [{ timestamp, key }] }
+    }
+
+    async function fetchPortfolioHistoryItem(token, timestamp) {
+      const res = await fetch(`${API_BASE}/api/portfolio/history/${encodeURIComponent(timestamp)}`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json(); // content object
+    }
+
+    async function uploadPortfolioImage(token, file) {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`${API_BASE}/api/portfolio/upload`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: fd,
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json(); // { url, publicId, width, height }
+    }
+
+    // --- Debounce hook ---
+    function useDebouncedCallback(fn, delayMs) {
+      const timerRef = React.useRef(null);
+      const fnRef = React.useRef(fn);
+      React.useEffect(() => { fnRef.current = fn; }, [fn]);
+      const cancel = React.useCallback(() => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      }, []);
+      const trigger = React.useCallback((...args) => {
+        cancel();
+        timerRef.current = setTimeout(() => {
+          timerRef.current = null;
+          try {
+            const ret = fnRef.current(...args);
+            // fire-and-forget: doSave 의 re-throw 는 flushAndWait 용이므로 여기선 삼킴
+            if (ret && typeof ret.catch === "function") ret.catch(() => {});
+          } catch (_) { /* 동기 throw 도 삼킴 */ }
+        }, delayMs);
+      }, [cancel, delayMs]);
+      const flush = React.useCallback(() => {
+        if (timerRef.current) {
+          cancel();
+          return fnRef.current();
+        }
+        return undefined;
+      }, [cancel]);
+      React.useEffect(() => cancel, [cancel]);
+      return [trigger, flush, cancel];
+    }
+
+    // --- History stack hook (Plan C Task 2) ---
+    // Undo/Redo 엔진. 입력 content 는 이미 Plan A deepFreeze 대상 + 새 참조로 교체 방식이라
+    // deep copy 없이 참조 push 로 충분. structural/atomic 은 즉시 push, typing 은 500ms debounce.
+    // past/future 는 Content[] 배열. max 30, 초과 시 shift.
+    const HISTORY_MAX = 30;
+    const HISTORY_DEBOUNCE_MS = 500;
+
+    function useHistoryStack(initialContent) {
+      const [present, setPresent] = React.useState(initialContent);
+      // presentRef 는 최신 present 를 ref 로 유지 — state updater 밖에서 curr 값 접근용.
+      // React 가 state updater 를 순수하게 요구하므로 (StrictMode 이중 실행),
+      // push/undo/redo 는 updater 밖에서 먼저 ref 돌리고 그 후 setPresent(newValue) 를 호출한다.
+      const presentRef = React.useRef(initialContent);
+      React.useEffect(() => { presentRef.current = present; }, [present]);
+
+      const pastRef = React.useRef([]);
+      const futureRef = React.useRef([]);
+      const pendingRef = React.useRef(null); // { prev, timer }
+      const publishedBaselineRef = React.useRef(initialContent);
+      // canUndo / canRedo 는 렌더 대상이므로 state 로 노출
+      const [canUndo, setCanUndo] = React.useState(false);
+      const [canRedo, setCanRedo] = React.useState(false);
+      const [hasUnpublishedChanges, setHasUnpublishedChanges] = React.useState(false);
+
+      const recomputeFlags = React.useCallback(() => {
+        setCanUndo(pastRef.current.length > 0 || pendingRef.current !== null);
+        setCanRedo(futureRef.current.length > 0);
+      }, []);
+
+      const commitPendingImmediate = React.useCallback(() => {
+        if (!pendingRef.current) return;
+        const { prev, timer } = pendingRef.current;
+        if (timer) clearTimeout(timer);
+        pastRef.current.push(prev);
+        if (pastRef.current.length > HISTORY_MAX) pastRef.current.shift();
+        pendingRef.current = null;
+      }, []);
+
+      // push 는 prev 를 past 에 싣는다 (즉시 또는 debounce). setPresent 는 이 밖에서 호출.
+      const push = React.useCallback((prev, opts) => {
+        const immediate = !!(opts && opts.immediate);
+        futureRef.current = []; // 새 action 은 redo 스택 초기화
+        if (immediate) {
+          // pending 중인 타이핑 스냅샷이 있었다면 먼저 commit
+          commitPendingImmediate();
+          pastRef.current.push(prev);
+          if (pastRef.current.length > HISTORY_MAX) pastRef.current.shift();
+        } else {
+          // 이미 pending 이 있으면 "타이핑 continuation" — 기존 prev 유지, 타이머만 재설정
+          if (pendingRef.current) {
+            clearTimeout(pendingRef.current.timer);
+            pendingRef.current.timer = setTimeout(commitPendingImmediate, HISTORY_DEBOUNCE_MS);
+          } else {
+            pendingRef.current = {
+              prev,
+              timer: setTimeout(commitPendingImmediate, HISTORY_DEBOUNCE_MS),
+            };
+          }
+        }
+        recomputeFlags();
+      }, [commitPendingImmediate, recomputeFlags]);
+
+      // setPresentAndPush: updater 밖에서 curr 을 presentRef 로 읽고, push 먼저 수행 후 setPresent.
+      // 이로써 state updater 함수는 순수한 identity function 이 되어 StrictMode 이중 실행에 안전.
+      const setPresentAndPush = React.useCallback((next, opts) => {
+        const curr = presentRef.current;
+        push(curr, opts);
+        const newVal = typeof next === "function" ? next(curr) : next;
+        presentRef.current = newVal; // 동기 ref 업데이트 — 동일 tick 내 후속 호출 대비
+        setPresent(newVal);
+      }, [push]);
+
+      const undo = React.useCallback(() => {
+        // pending 이 있으면 먼저 commit → 그 다음 past.pop()
+        commitPendingImmediate();
+        if (pastRef.current.length === 0) return;
+        const curr = presentRef.current;
+        const prev = pastRef.current.pop();
+        futureRef.current.unshift(curr);
+        if (futureRef.current.length > HISTORY_MAX) futureRef.current.pop();
+        presentRef.current = prev;
+        setPresent(prev);
+        recomputeFlags();
+      }, [commitPendingImmediate, recomputeFlags]);
+
+      const redo = React.useCallback(() => {
+        if (futureRef.current.length === 0) return;
+        const curr = presentRef.current;
+        pastRef.current.push(curr);
+        if (pastRef.current.length > HISTORY_MAX) pastRef.current.shift();
+        const next = futureRef.current.shift();
+        presentRef.current = next;
+        setPresent(next);
+        recomputeFlags();
+      }, [recomputeFlags]);
+
+      const markPublished = React.useCallback(() => {
+        publishedBaselineRef.current = presentRef.current;
+        setHasUnpublishedChanges(false);
+      }, []);
+
+      // present 가 baseline 과 참조 다르면 "변경 있음".
+      // 의도적 asymmetry: 한 번 true 가 되면 markPublished() 이전에는 false 로 돌아가지 않음.
+      // Plan C spec — 사용자 혼란 최소화 위해 "publish 후 스택이 움직이면 점등, 유지" 정책.
+      React.useEffect(() => {
+        if (publishedBaselineRef.current !== present) {
+          setHasUnpublishedChanges(true);
+        }
+      }, [present]);
+
+      // 외부에서 직접 present 를 교체해야 할 때 (History restore 등)
+      const replacePresent = React.useCallback((next, opts) => {
+        setPresentAndPush(next, opts || { immediate: true });
+      }, [setPresentAndPush]);
+
+      // flush (beforeunload 등): pending commit 만 처리
+      const flushPending = React.useCallback(() => {
+        commitPendingImmediate();
+      }, [commitPendingImmediate]);
+
+      // 언마운트 시 pending 타이머 정리 — ghost timer / 스테일 closure 방지.
+      React.useEffect(() => {
+        return () => {
+          if (pendingRef.current && pendingRef.current.timer) {
+            clearTimeout(pendingRef.current.timer);
+            pendingRef.current = null;
+          }
+        };
+      }, []);
+
+      return {
+        present, setPresent: setPresentAndPush, replacePresent,
+        undo, redo, canUndo, canRedo,
+        hasUnpublishedChanges, markPublished,
+        flushPending,
+        // debug 용 (stale between renders — real-time 값은 canUndo/canRedo 참고)
+        _pastLength: pastRef.current.length,
+        _futureLength: futureRef.current.length,
+      };
+    }
+
+    // --- Editor keyboard hook (Plan C Task 4) ---
+    // Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y 감지 → undo/redo. input/textarea 에서는 native 동작 유지.
+    // contentEditable 영역은 커스텀 undo 우선 — 타이핑 debounce 가 pending 이면 useHistoryStack.undo
+    // 가 내부적으로 먼저 flush 하므로 일관된 동작 보장.
+    function useEditorKeyboard({ undo, redo, canUndo, canRedo }) {
+      const handler = React.useCallback((e) => {
+        const mod = e.ctrlKey || e.metaKey;
+        if (!mod) return;
+        const target = e.target;
+        // input/textarea 에서는 브라우저 native 동작 유지 (설정 패널 필드)
+        if (target && typeof target.closest === "function" && target.closest("input,textarea")) {
+          return;
+        }
+        const key = e.key.toLowerCase();
+        // preventDefault 는 canUndo/canRedo 와 무관하게 먼저 실행 — contentEditable 의
+        // native undo 스택이 영향받는 것을 차단. undo()/redo() 호출만 상태 가드.
+        if (key === "z" && !e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (canUndo) undo();
+        } else if ((key === "z" && e.shiftKey) || key === "y") {
+          e.preventDefault();
+          e.stopPropagation();
+          if (canRedo) redo();
+        }
+      }, [undo, redo, canUndo, canRedo]);
+      return handler;
+    }
+
+    // --- Edit content state hook (Plan C Task 3: history stack 흡수) ---
+    // 반환: { content, setContent, replaceContent, dirty, savedAt, savingState, flush, flushAndWait, loadError,
+    //        undo, redo, canUndo, canRedo, hasUnpublishedChanges, markPublished, flushPending }
+    // savingState: "idle" | "saving" | "saved" | "error"
+    // setContent 시그니처: setContent(next: Content | (prev) => Content, opts?: { immediate?: boolean })
+    //   - default: typing — 500 ms debounce 로 history push
+    //   - { immediate: true }: structural/atomic — 즉시 history push
+    function useEditContent(token) {
+      const initial = React.useMemo(() => (
+        typeof structuredClone === "function"
+          ? structuredClone(DEFAULT_CONTENT)
+          : JSON.parse(JSON.stringify(DEFAULT_CONTENT))
+      ), []);
+      // NOTE: useHistoryStack 은 매 렌더마다 새 object literal 을 반환하므로 `history`
+      // 전체를 useCallback 의존성으로 쓰면 모든 래퍼가 매 렌더 재생성된다. 내부 메서드들은
+      // 각자 stable useCallback (deps 가 [] 또는 다른 stable 콜백) 이므로 ID 가 유지됨 —
+      // 여기서 개별 메서드를 따로 보관하여 `setContent`/`replaceContent`/`flushAndWait` 의
+      // 의존성을 안정화한다. publishedBaselineRef 는 initial 과 동일 참조를 공유하지만
+      // codebase 가 replace-not-mutate 패턴만 쓰므로 안전.
+      const history = useHistoryStack(initial);
+      const histSetPresent = history.setPresent;
+      const histReplacePresent = history.replacePresent;
+      const histFlushPending = history.flushPending;
+      const histMarkPublished = history.markPublished;
+      const content = history.present;
+      const [dirty, setDirty] = React.useState(false);
+      const [savedAt, setSavedAt] = React.useState(null);
+      const [savingState, setSavingState] = React.useState("idle");
+      const [loadError, setLoadError] = React.useState(null);
+      const contentRef = React.useRef(content);
+      React.useEffect(() => { contentRef.current = content; }, [content]);
+
+      // 초기 로드 — history stack 의 present 를 교체하되 Undo 스택 오염 최소화
+      React.useEffect(() => {
+        if (!token) return;
+        let cancelled = false;
+        fetchPortfolioDraft(token)
+          .then(data => {
+            if (cancelled) return;
+            if (data) {
+              // 초기 로드는 Undo 대상 아님 — past 에 DEFAULT_CONTENT 가 남는 현상은
+              // 명시적 한계로 수용. Ctrl+Z 하면 최초 DEFAULT_CONTENT 로 돌아감.
+              histReplacePresent(data, { immediate: true });
+              setSavedAt(data.updatedAt || null);
+              // publish baseline 을 로드된 draft 로 맞춤: 이미 published 와 동일한 것으로 간주
+              histMarkPublished();
+            }
+            setDirty(false);
+          })
+          .catch(err => {
+            if (cancelled) return;
+            console.warn("Draft load failed:", err);
+            setLoadError(err.message);
+          });
+        return () => { cancelled = true; };
+        // histReplacePresent / histMarkPublished 는 identity-stable — token 변경 시에만 재실행.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [token]);
+
+      // auto-save (2s debounce)
+      const doSave = React.useCallback(() => {
+        if (!token) return Promise.resolve();
+        setSavingState("saving");
+        return savePortfolioDraft(token, contentRef.current)
+          .then(data => {
+            setSavingState("saved");
+            setDirty(false);
+            setSavedAt(data && data.updatedAt ? data.updatedAt : new Date().toISOString());
+          })
+          .catch(err => {
+            console.warn("Draft save failed:", err);
+            if (err.message === "UNAUTHORIZED") {
+              setLoadError("UNAUTHORIZED");
+            }
+            setSavingState("error");
+            throw err;
+          });
+      }, [token]);
+
+      const [triggerSave, flushSave] = useDebouncedCallback(doSave, 2000);
+
+      // setContent 래퍼 — opts 지원 + history push + dirty + triggerSave
+      const setContent = React.useCallback((updater, opts) => {
+        histSetPresent(prev => (
+          typeof updater === "function" ? updater(prev) : updater
+        ), opts);
+        setDirty(true);
+        triggerSave();
+      }, [histSetPresent, triggerSave]);
+
+      // replaceContent: History restore 등 "스택에 현재 값 push 하고 외부에서 준 값으로 교체"
+      const replaceContent = React.useCallback((next) => {
+        histReplacePresent(next, { immediate: true });
+        setDirty(true);
+        triggerSave();
+      }, [histReplacePresent, triggerSave]);
+
+      const flushAndWait = React.useCallback(() => {
+        histFlushPending(); // pending history 먼저 commit
+        const result = flushSave();
+        return result instanceof Promise ? result : Promise.resolve();
+      }, [histFlushPending, flushSave]);
+
+      return {
+        content, setContent, replaceContent,
+        dirty, savedAt, savingState,
+        flush: flushSave, flushAndWait, loadError,
+        undo: history.undo, redo: history.redo,
+        canUndo: history.canUndo, canRedo: history.canRedo,
+        hasUnpublishedChanges: history.hasUnpublishedChanges,
+        markPublished: histMarkPublished,
+        flushPending: histFlushPending,
+      };
+    }
+
+    // --- LoginModal ---
+    // props: { onSuccess(token), onCancel() }
+    // 검증: 입력한 pw 로 GET /api/portfolio/draft 호출 → 성공 시 onSuccess(pw) + token 저장, 실패 시 에러 표시
+    function LoginModal({ onSuccess, onCancel }) {
+      const [pw, setPw] = React.useState("");
+      const [error, setError] = React.useState(null);
+      const [busy, setBusy] = React.useState(false);
+      const inputRef = React.useRef(null);
+
+      React.useEffect(() => {
+        if (inputRef.current) inputRef.current.focus();
+      }, []);
+
+      const submit = React.useCallback(async () => {
+        if (!pw || busy) return;
+        setBusy(true);
+        setError(null);
+        try {
+          await fetchPortfolioDraft(pw);
+          setAdminToken(pw);
+          onSuccess(pw);
+        } catch (e) {
+          if (e.message === "UNAUTHORIZED") setError("비밀번호가 틀렸습니다.");
+          else setError(`오류: ${e.message}`);
+          setBusy(false);
+        }
+      }, [pw, busy, onSuccess]);
+
+      const handleKey = (e) => {
+        if (e.key === "Enter") submit();
+        if (e.key === "Escape") onCancel();
+      };
+
+      return (
+        <div className="login-modal-backdrop" onClick={(e) => {
+          if (!busy && e.target === e.currentTarget) onCancel();
+        }}>
+          <div className="login-modal-box">
+            <div className="title">Admin Login</div>
+            {error && <div className="error">{error}</div>}
+            <input
+              ref={inputRef}
+              type="password"
+              placeholder="Password"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              onKeyDown={handleKey}
+              disabled={busy}
+            />
+            <div className="btns">
+              <button className="btn-enter" onClick={submit} disabled={busy}>
+                {busy ? "..." : "Enter"}
+              </button>
+              <button className="btn-cancel" onClick={onCancel} disabled={busy}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- HTML sanitizer (리치 텍스트 블록용) ---
+    // 허용 태그: b, strong, i, em, a (href/target/rel)
+    // 그 외 태그/속성 모두 제거. XSS + TGL#1 회귀 방지.
+    function sanitizeRichHtml(html) {
+      if (!html) return "";
+      const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+      const root = doc.body.firstChild;
+      const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "A"]);
+      const ALLOWED_ATTRS = {
+        A: new Set(["href", "target", "rel"]),
+      };
+
+      function walk(node) {
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+          if (child.nodeType === Node.TEXT_NODE) continue;
+          if (child.nodeType !== Node.ELEMENT_NODE) {
+            child.remove();
+            continue;
+          }
+          const tag = child.tagName;
+          if (!ALLOWED_TAGS.has(tag)) {
+            // 태그 제거하되 자식 텍스트는 보존 (unwrap)
+            const textContent = document.createTextNode(child.textContent);
+            child.replaceWith(textContent);
+            continue;
+          }
+          // 속성 화이트리스트
+          const allowedAttrs = ALLOWED_ATTRS[tag] || new Set();
+          for (const attr of Array.from(child.attributes)) {
+            if (!allowedAttrs.has(attr.name.toLowerCase())) {
+              child.removeAttribute(attr.name);
+            }
+          }
+          // href 는 허용 스킴 화이트리스트 (http/https/mailto/tel/fragment/상대경로)
+          // 제어문자·공백 제거 후 검사 → `java\tscript:` 등 우회 차단
+          if (tag === "A") {
+            const rawHref = child.getAttribute("href") || "";
+            const cleaned = rawHref.replace(/[\u0000-\u001F\u007F\s]/g, "");
+            let safe = false;
+            if (cleaned.startsWith("#")) {
+              safe = true; // fragment
+            } else if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(cleaned)) {
+              const scheme = cleaned.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/)[1].toLowerCase();
+              safe = ["http", "https", "mailto", "tel"].includes(scheme);
+            } else if (!cleaned.startsWith("//")) {
+              safe = true; // 상대 경로 (protocol-relative //evil.com 차단)
+            }
+            if (!safe) {
+              child.removeAttribute("href");
+            }
+            // 외부 링크는 rel 보강
+            if (child.getAttribute("target") === "_blank") {
+              child.setAttribute("rel", "noopener noreferrer");
+            }
+          }
+          walk(child);
+        }
+      }
+
+      walk(root);
+      return root.innerHTML;
+    }
+
+    // href 스킴 화이트리스트 — sanitizer 의 A 태그 분기와 동일 규칙을 scalar href 필드에 적용
+    // (ButtonBlock, ProfileSection inventory 등 HTML 아닌 직접 속성 바인딩 경로용)
+    function safeHref(raw) {
+      if (!raw) return "#";
+      const cleaned = String(raw).replace(/[\u0000-\u001F\u007F\s]/g, "");
+      if (!cleaned) return "#";
+      if (cleaned.startsWith("#")) return cleaned;
+      const schemeMatch = cleaned.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+      if (schemeMatch) {
+        const scheme = schemeMatch[1].toLowerCase();
+        return ["http", "https", "mailto", "tel"].includes(scheme) ? cleaned : "#";
+      }
+      if (cleaned.startsWith("//")) return "#";
+      return cleaned;
+    }
+
+    // --- SVG 아이콘 프리셋 (커스텀 업로드 금지 — path 문자열 화이트리스트) ---
+    const ICON_PATHS = {
+      artstation: "M0 17.723l2.027 3.505h.001a2.424 2.424 0 0 0 2.164 1.333h13.457l-2.792-4.838H0zm24 .025c0-.484-.143-.935-.388-1.314L15.728 2.728a2.424 2.424 0 0 0-2.142-1.289H9.419L21.598 22.54l1.92-3.325c.378-.637.482-.919.482-1.467zm-11.129-3.462L7.428 4.858l-5.444 9.428h10.887z",
+      gallery: "M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z",
+      youtube: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
+      github: "M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12",
+      mail: "M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",
+      phone: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z",
+      instagram: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z",
+      link: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z",
+    };
+
+    function IconSvg({ name }) {
+      const d = ICON_PATHS[name];
+      if (!d) return null;
+      return (
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d={d} />
+        </svg>
+      );
+    }
+
+    // --- Block renderers (7 types, read-only) ---
+
+    function TextBlock({ block }) {
+      const safeHtml = sanitizeRichHtml(block.html);
+      return (
+        <p
+          className="mb-6 text-lg leading-relaxed text-gray-300"
+          dangerouslySetInnerHTML={{ __html: safeHtml }}
+        />
+      );
+    }
+
+    function HeadingBlock({ block }) {
+      const sizeClass = block.level === 2
+        ? "pixel-font text-xl md:text-2xl rpg-title"
+        : "pixel-font text-lg text-yellow-300 mt-6 mb-2";
+      const Tag = block.level === 2 ? "h2" : "h3";
+      return (
+        <Tag className={sizeClass}>
+          {block.emoji && <span>{block.emoji} </span>}
+          {block.text}
+        </Tag>
+      );
+    }
+
+    function ListBlock({ block }) {
+      const listClass = block.style === "decimal" ? "list-decimal" : "list-disc";
+      const mb = block.marginBottom || "mb-6";
+      const spaceY = block.spaceY !== undefined ? block.spaceY : "space-y-2";
+      const ulClass = `${listClass} pl-6 ${mb} ${spaceY} text-lg text-gray-300`.replace(/\s+/g, " ").trim();
+      return (
+        <ul className={ulClass}>
+          {block.items.map((item, i) => {
+            if (item.note) {
+              const noteHtml = sanitizeRichHtml(item.text || "");
+              return (
+                <li
+                  key={i}
+                  className="text-gray-400 text-base mt-2 list-none"
+                  dangerouslySetInnerHTML={{ __html: noteHtml }}
+                />
+              );
+            }
+            const strongHtml = sanitizeRichHtml(item.strong || "");
+            const textHtml = sanitizeRichHtml(item.text || "");
+            return (
+              <li key={i}>
+                {item.strong && (
+                  <strong
+                    className="text-white"
+                    dangerouslySetInnerHTML={{ __html: strongHtml }}
+                  />
+                )}
+                <span dangerouslySetInnerHTML={{ __html: textHtml }} />
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+
+    function ImageBlock({ block }) {
+      return (
+        <figure className="mb-6">
+          <img
+            src={block.url}
+            alt={block.alt || ""}
+            style={{
+              width: block.width ? `${block.width}px` : "100%",
+              maxWidth: "100%",
+              height: "auto",
+              border: "3px solid #6c6c6c",
+              boxShadow: "4px 4px 0px #000",
+            }}
+          />
+          {block.caption && (
+            <figcaption className="pixel-font text-center py-3 px-2" style={{ fontSize: "0.6rem", color: "#f1c40f" }}>
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    }
+
+    function YoutubeBlock({ block }) {
+      // mediaKind === "image": Cloudinary 호스팅 이미지/GIF 렌더
+      // mediaKind === "video" 또는 미지정(하위호환): YouTube iframe
+      if (block.mediaKind === "image" && block.imageUrl) {
+        return (
+          <div className="mb-8" style={{ border: "3px solid #6c6c6c", boxShadow: "4px 4px 0px #000" }}>
+            <img
+              src={block.imageUrl}
+              alt={block.imageAlt || block.title || ""}
+              style={{ display: "block", width: "100%", height: "auto" }}
+              loading="lazy"
+            />
+            {block.imageCaption && (
+              <div className="text-center text-sm text-gray-400 mt-2 mb-2 pixel-font">
+                {block.imageCaption}
+              </div>
+            )}
+          </div>
+        );
+      }
+      const src = `https://www.youtube.com/embed/${block.videoId || ""}${block.start ? `?start=${block.start}` : ""}`;
+      return (
+        <div className="yt-container mb-8" style={{ border: "3px solid #6c6c6c", boxShadow: "4px 4px 0px #000" }}>
+          <iframe
+            src={src}
+            title={block.title || ""}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      );
+    }
+
+    function ButtonBlock({ block }) {
+      return (
+        <a
+          href={safeHref(block.href)}
+          target={block.target || "_self"}
+          rel={block.target === "_blank" ? "noopener noreferrer" : undefined}
+          className="btn-pixel"
+        >
+          <IconSvg name={block.icon} />
+          <span className="btn-pixel-text">{block.label}</span>
+        </a>
+      );
+    }
+
+    function CardGridBlock({ block }) {
+      const colsClass = block.cols === 2
+        ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
+        : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
+
+      // per-card kind 폴백: card.kind → block.variant → "text"
+      // (기존 DEFAULT_CONTENT 데이터는 card.kind 없이 block.variant 만 있으므로 그대로 호환)
+      const resolveKind = (c) => c.kind || block.variant || "text";
+
+      function renderCard(c, i) {
+        const kind = resolveKind(c);
+        if (kind === "video") {
+          return (
+            <div key={i} className="video-card">
+              <div className="yt-container">
+                <iframe
+                  src={`https://www.youtube.com/embed/${c.videoId || ""}`}
+                  title={c.title || ""}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <p className="pixel-font text-center py-3 px-2" style={{ fontSize: "0.6rem", color: "var(--gold)" }}>
+                {c.title}
+              </p>
+            </div>
+          );
+        }
+        if (kind === "image") {
+          return (
+            <figure key={i} className="video-card">
+              <img
+                src={c.url || ""}
+                alt={c.alt || ""}
+                loading="lazy"
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+              {c.caption && (
+                <p className="pixel-font text-center py-3 px-2" style={{ fontSize: "0.6rem", color: "var(--gold)" }}>
+                  {c.caption}
+                </p>
+              )}
+            </figure>
+          );
+        }
+        // text (Experiences 스타일)
+        return (
+          <div key={i}>
+            <span className={`text-${c.titleColor || "yellow-400"} font-bold text-lg`}>{c.title}</span>
+            <br />
+            <span className="text-gray-300">{c.description}</span>
+          </div>
+        );
+      }
+
+      return (
+        <div className={colsClass}>
+          {block.cards.map(renderCard)}
+        </div>
+      );
+    }
+
+    // --- Block dispatcher ---
+    function Block({ block }) {
+      switch (block.type) {
+        case "text":     return <TextBlock block={block} />;
+        case "heading":  return <HeadingBlock block={block} />;
+        case "list":     return <ListBlock block={block} />;
+        case "image":    return <ImageBlock block={block} />;
+        case "youtube":  return <YoutubeBlock block={block} />;
+        case "button":   return <ButtonBlock block={block} />;
+        case "cardgrid": return <CardGridBlock block={block} />;
+        default:
+          console.warn("Unknown block type:", block.type);
+          return null;
+      }
+    }
+
+    /* ============================================================
+       HEADER STAGE — grayscale side-scrolling pixel game stage.
+       Pure Canvas 2D. Parallax sky/mountains/clouds + tile ground,
+       walking hero, question blocks, bricks, coins, pipes, goomba.
+       Hero jumps when a pipe enters the trigger zone.
+       ============================================================ */
+    // Pixel-art helper: each char in a sprite row is a palette index. '.' = transparent.
+    function drawHeroSprite(ctx, sprite, palette, x, y, scale) {
+      for (let row = 0; row < sprite.length; row++) {
+        const line = sprite[row];
+        for (let col = 0; col < line.length; col++) {
+          const ch = line[col];
+          if (ch === '.' || ch === ' ') continue;
+          const color = palette[ch];
+          if (!color) continue;
+          ctx.fillStyle = color;
+          ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+        }
+      }
+    }
+
+    // Grayscale 4-tone DMG-style palette. 0=#1a1a1a, 1=#606060, 2=#c0c0c0, 3=#ffffff
+    const HERO_PAL    = { '0':'#1a1a1a','r':'#1a1a1a','s':'#ffffff','b':'#606060','y':'#c0c0c0','w':'#ffffff','h':'#1a1a1a' };
+    const QBLOCK_PAL  = { '0':'#1a1a1a','y':'#c0c0c0','o':'#606060','d':'#1a1a1a','w':'#ffffff' };
+    const BRICK_PAL   = { '0':'#1a1a1a','r':'#c0c0c0','h':'#606060','d':'#1a1a1a' };
+    const COIN_PAL    = { '0':'#1a1a1a','y':'#c0c0c0','o':'#606060','w':'#ffffff' };
+    const PIPE_PAL    = { '0':'#1a1a1a','g':'#606060','d':'#1a1a1a','l':'#c0c0c0' };
+    const GROUND_PAL  = { '0':'#1a1a1a','g':'#c0c0c0','G':'#606060','d':'#606060','D':'#1a1a1a','k':'#1a1a1a' };
+    const CLOUD_PAL   = { '0':'#1a1a1a','w':'#ffffff','g':'#c0c0c0' };
+    const BUSH_PAL    = { '0':'#1a1a1a','g':'#606060','l':'#c0c0c0','d':'#1a1a1a' };
+    const GOOM_PAL    = { '0':'#1a1a1a','b':'#606060','d':'#1a1a1a','f':'#c0c0c0','w':'#ffffff','k':'#1a1a1a' };
+
+    const HERO_WALK_A = [
+      "....0000........","...0rrrr0.......","..0rrrrrr0......","..0hhsss0.......",
+      ".0hshsssss0.....",".0hshhssss0.....",".0hhssssss0.....","..0sssss0.......",
+      "...0bybyb0......","..0bbybybb0.....","..0bbbbbbb0.....",".0bb0bbb0bb0....",
+      ".0b0.00.0b0.....",".0..0ss0..0.....","...0ssss0.......","..00....00......",
+    ];
+    const HERO_WALK_B = [
+      "....0000........","...0rrrr0.......","..0rrrrrr0......","..0hhsss0.......",
+      ".0hshsssss0.....",".0hshhssss0.....",".0hhssssss0.....","..0sssss0.......",
+      "..0bybyb0.......",".0bbybybb0......",".0bbbbbbb0......","..0bbb0bbb0.....",
+      "...0b0.0bb0.....","....0..00b0.....","...00...0ss0....","..0ss0...00.....",
+    ];
+    const HERO_IDLE = [
+      "....0000........","...0rrrr0.......","..0rrrrrr0......","..0hhsss0.......",
+      ".0hshsssss0.....",".0hshhssss0.....",".0hhssssss0.....","..0sssss0.......",
+      ".0bbybybb0......","0bbbbbbbbb0.....","0bbbb0bbbbb0....","0bbb00bbb00b0...",
+      ".0b0..0b0.0b0...","..0....0..0.....","..0ss0.0ss0.....","..0000.0000.....",
+    ];
+    const HERO_JUMP = [
+      "....0000........","...0rrrr0.......","..0rrrrrr0......","..0hhsss0.......",
+      ".0hshsssss0.....",".0hshhssss0.....",".0hhssssss0.....","..0sssss0.......",
+      "..0bybyb0.......",".0bbybybb0......","0bbbbbbbbbb0....","0bb0bbbb0bb0....",
+      "0b0.0bbb0.0b0...",".0...0b0...0....","....0ssss0......","...0ss0ss0......",
+    ];
+    const QBLOCK = [
+      "0000000000000000","0ywyyyyyyyyyyyo0","0ywyyyyyyyyyyyo0","0yyy0000000yyyo0",
+      "0yy0ddddddd0yyo0","0yy0dd000dd0yyo0","0yy0dd0yd00dyyo0","0yyyyyyd0dddyyo0",
+      "0yyyyyy0ddddyyo0","0yyyyy0dddyyyyo0","0yyyyy0dddyyyyo0","0yyyyyyyyyyyyyo0",
+      "0yyyy0dd0yyyyyo0","0yyyy0dd0yyyyyo0","0ooooooooooooo00","0000000000000000",
+    ];
+    const BRICK = [
+      "0000000000000000","0rrrrr0rrrrrrrr0","0hhhhh0hhhhhhhh0","0rrrrr0rrrrrrrr0",
+      "0000000000000000","0rrrrrrrrrrr0rr0","0hhhhhhhhhhh0hh0","0rrrrrrrrrrr0rr0",
+      "0000000000000000","0rrrrr0rrrrrrrr0","0hhhhh0hhhhhhhh0","0rrrrr0rrrrrrrr0",
+      "0000000000000000","0rrrrrrrrrrr0rr0","0hhhhhhhhhhh0hh0","0000000000000000",
+    ];
+    const COIN_A = [
+      "....0000....","...0yyyy0...","..0ywyyyo0..",".0ywy00yo0..",".0ywy00yo0..",
+      ".0ywy00yo0..",".0ywy00yo0..",".0ywy00yo0..",".0ywy00yo0..",".0ywy00yo0..",
+      ".0ywy00yo0..","..0yyyyo0...","...0yyo0....","....0000....",
+    ];
+    const COIN_B = [
+      ".....00.....","....0yy0....","....0yy0....","....0yy0....","....0yo0....",
+      "....0yo0....","....0yo0....","....0yo0....","....0yo0....","....0yo0....",
+      "....0yo0....","....0yo0....","....0yo0....",".....00.....",
+    ];
+    const PIPE_TOP = [
+      "00000000000000000000000000000000",
+      "0llllllllllllllllllllllllllllld0",
+      "0lggggggggggggggggggggggggggggd0",
+      "0lggggggggggggggggggggggggggggd0",
+      "0lggggggggggggggggggggggggggggd0",
+      "0lggggggggggggggggggggggggggggd0",
+      "0dddddddddddddddddddddddddddddd0",
+      "00..00000000000000000000000..000",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+      "....0lgggggggggggggggggggd0.....",
+    ];
+    const GROUND = [
+      "gggggggggggggggg","GgGgGgGgGgGgGgGg","GgGGgGGgGGgGGgGG","dddddddddddddddd",
+      "DdDdddDddDddDddD","dDddDDddDdDdDddD","DdDddDdDdDdDdDdD","dDddDDddDdDdDdDd",
+      "DdDddDdDdDdDdDdD","dDdDdDddDdDdDdDd","DdDddDdDdDdDdDdD","dDdDdDddDdDdDdDd",
+      "DdDddDdDdDdDdDdD","dDdDdDddDdDdDdDd","DdDddDdDdDdDdDdD","kkkkkkkkkkkkkkkk",
+    ];
+    function drawHeroMountain(ctx, x, y, scale, w, h) {
+      const s1="#606060", s2="#1a1a1a", ss="#ffffff", se="#1a1a1a";
+      for (let row = 0; row < h; row++) {
+        const progress = row / h;
+        const half = Math.round(progress * (w / 2));
+        const xs = w/2 - half, xe = w/2 + half;
+        for (let col = Math.floor(xs); col < Math.ceil(xe); col++) {
+          let c = s1;
+          if (col < w/2 - half*0.55) c = s2;
+          if (row < h*0.18 && col > w/2 - half*0.9 && col < w/2 + half*0.9) c = ss;
+          if (col === Math.floor(xs) || col === Math.ceil(xe)-1) c = se;
+          ctx.fillStyle = c;
+          ctx.fillRect(x + col*scale, y + row*scale, scale, scale);
+        }
+      }
+    }
+    const CLOUD = [
+      "....0000........","...0wwww0000....","..0wwwwwwww0....",".0wwwwwwwwww000.",
+      "0wwwwwwwwwwwww0.","0wggwwggwwggwww0","0wwwwwwwwwwwww0.",".00000000000000.",
+    ];
+    const BUSH = [
+      "....0000...0000.....","...0llgg0.0llgg0....",".000llggg000llggg0..",
+      "0llgggggggglllggggg0","0lggggdggggggggdgggg","0dddddddddddddddddd0",
+    ];
+    const GOOM_A = [
+      "....000000......","..00bbbbbb00....",".0bbbbbbbbbb0...",".0bdbbbbbbdb0...",
+      "0bbbbbbbbbbbb0..","0bbdbbbbbbdbb0..","0bbddbbbbddbb0..","0bbdddddddddb0..",
+      "0bbdddbbbddbb0..",".0fffffffff0....",".0fwkfffkwf0....","0ffkkfffkkff0...",
+      "0fffffffffff0...","0dd0000dd00dd0..","0dd0..0dd0..0d..","0000..00000..0..",
+    ];
+
+    // Goomba dialogue keyed by world x (matches OBJECTS).
+    // Default lines; can be overridden from the Tweaks panel.
+    const GOOMBA_DEFAULT_LINES = {
+      560:  "Hi~ Jongil",
+      1060: "Please don't tread me",
+      1100: "I'm not gonna hurt you",
+    };
+    const GOOMBA_ORDER = [560, 1060, 1100]; // index → world x
+    function goombaLineFor(worldX) {
+      try {
+        const arr = (window.__heroBubbleTweaks && window.__heroBubbleTweaks.lines) || null;
+        const idx = GOOMBA_ORDER.indexOf(worldX);
+        if (arr && idx >= 0 && typeof arr[idx] === 'string' && arr[idx].length) return arr[idx];
+      } catch(_) {}
+      return GOOMBA_DEFAULT_LINES[worldX] || "...";
+    }
+
+    function HeaderStage({ header }) {
+      const canvasRef = React.useRef(null);
+      const rafRef = React.useRef(0);
+      const [bubbles, setBubbles] = React.useState([]);
+      const bubblesRef = React.useRef([]);       // canonical list updated in tick
+      const bubbleSyncRef = React.useRef(0);
+      const triggeredRef = React.useRef(new Set()); // which (goombaX, cycle) already spoken
+      const stateRef = React.useRef({
+        scroll: 0, speed: 40,
+        walkFrame: 0, walkTimer: 0,
+        coinFrame: 0, coinTimer: 0,
+        goombaWobble: 0,
+        jumpT: -1, jumpDur: 0.7,
+        jumpedPipes: new Set(),
+        lastCycle: 0,
+      });
+
+      React.useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+
+        const VH = 180;
+        let VW = 320, SCALE = 2;
+
+        function resize() {
+          const rect = canvas.getBoundingClientRect();
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = rect.width * dpr;
+          canvas.height = rect.height * dpr;
+          SCALE = Math.max(1, Math.floor(canvas.height / VH));
+          VW = Math.ceil(canvas.width / SCALE);
+          ctx.imageSmoothingEnabled = false;
+          ctx.setTransform(1,0,0,1,0,0);
+        }
+        resize();
+        const ro = new ResizeObserver(resize);
+        ro.observe(canvas);
+
+        const LEVEL_LEN = 1600;
+        const GROUND_Y = VH - 32;
+        const OBJECTS = [
+          { type:'qblock', x:160, y:GROUND_Y-52 }, { type:'brick', x:192, y:GROUND_Y-52 },
+          { type:'qblock', x:224, y:GROUND_Y-52 }, { type:'brick', x:256, y:GROUND_Y-52 },
+          { type:'qblock', x:240, y:GROUND_Y-100 },
+          { type:'coin', x:328, y:GROUND_Y-48 }, { type:'coin', x:352, y:GROUND_Y-48 }, { type:'coin', x:376, y:GROUND_Y-48 },
+          { type:'pipe', x:440, y:GROUND_Y-16 },
+          { type:'goomba', x:560, y:GROUND_Y-18 },
+          { type:'qblock', x:660, y:GROUND_Y-52 }, { type:'brick', x:692, y:GROUND_Y-52 },
+          { type:'brick', x:724, y:GROUND_Y-52 }, { type:'qblock', x:756, y:GROUND_Y-52 },
+          { type:'coin', x:820, y:GROUND_Y-72 }, { type:'coin', x:844, y:GROUND_Y-72 },
+          { type:'pipe', x:920, y:GROUND_Y-16 },
+          { type:'goomba', x:1060, y:GROUND_Y-18 }, { type:'goomba', x:1100, y:GROUND_Y-18 },
+          { type:'brick', x:1180, y:GROUND_Y-52 }, { type:'qblock', x:1212, y:GROUND_Y-52 },
+          { type:'brick', x:1244, y:GROUND_Y-52 },
+          { type:'pipe', x:1340, y:GROUND_Y-16 },
+          { type:'coin', x:1460, y:GROUND_Y-48 }, { type:'coin', x:1484, y:GROUND_Y-48 },
+        ];
+        const MOUNTAINS = [
+          { x:60,w:56,h:28 },{ x:220,w:72,h:36 },{ x:420,w:60,h:30 },
+          { x:640,w:80,h:40 },{ x:860,w:64,h:32 },{ x:1080,w:72,h:36 },{ x:1300,w:56,h:28 },
+        ];
+        const CLOUDS = [
+          { x:40,y:24 },{ x:180,y:40 },{ x:340,y:18 },{ x:520,y:36 },
+          { x:700,y:22 },{ x:860,y:42 },{ x:1020,y:26 },{ x:1200,y:38 },{ x:1380,y:20 },
+        ];
+        const BUSHES = [
+          { x:80 },{ x:340 },{ x:600 },{ x:780 },{ x:1000 },{ x:1260 },{ x:1480 },
+        ];
+
+        function drawBG() {
+          ctx.fillStyle = "#c0c0c0";
+          ctx.fillRect(0,0,canvas.width,canvas.height);
+          ctx.fillStyle = "#d0d0d0";
+          ctx.fillRect(0,0,canvas.width, 20*SCALE);
+        }
+        function drawClouds(s) {
+          const cs = s*0.3;
+          for (const c of CLOUDS) {
+            let cx = ((c.x - cs) % LEVEL_LEN);
+            if (cx < -40) cx += LEVEL_LEN;
+            drawHeroSprite(ctx, CLOUD, CLOUD_PAL, cx*SCALE, c.y*SCALE, SCALE);
+          }
+        }
+        function drawMountains(s) {
+          const ms = s*0.5;
+          for (const m of MOUNTAINS) {
+            let mx = ((m.x - ms) % LEVEL_LEN);
+            if (mx < -m.w) mx += LEVEL_LEN;
+            drawHeroMountain(ctx, mx*SCALE, (GROUND_Y - m.h)*SCALE, SCALE, m.w, m.h);
+          }
+        }
+        function drawBushes(s) {
+          const bs = s*0.85;
+          for (const b of BUSHES) {
+            let bx = ((b.x - bs) % LEVEL_LEN);
+            if (bx < -40) bx += LEVEL_LEN;
+            drawHeroSprite(ctx, BUSH, BUSH_PAL, bx*SCALE, (GROUND_Y-6)*SCALE, SCALE);
+          }
+        }
+        function drawGround(s) {
+          const tileW = 16;
+          const startX = -((s) % tileW);
+          for (let r = 0; r < 2; r++) {
+            for (let x = startX; x < VW + tileW; x += tileW) {
+              drawHeroSprite(ctx, GROUND, GROUND_PAL, x*SCALE, (GROUND_Y + r*tileW)*SCALE, SCALE);
+            }
+          }
+        }
+        function drawObjects(s, coinFrame, goombaWobble) {
+          for (const o of OBJECTS) {
+            let ox = o.x - s;
+            ox = ((ox % LEVEL_LEN) + LEVEL_LEN) % LEVEL_LEN;
+            if (ox > VW + 40) ox -= LEVEL_LEN;
+            if (ox < -40) continue;
+            if (o.type==='qblock') drawHeroSprite(ctx, QBLOCK, QBLOCK_PAL, ox*SCALE, o.y*SCALE, SCALE);
+            else if (o.type==='brick') drawHeroSprite(ctx, BRICK, BRICK_PAL, ox*SCALE, o.y*SCALE, SCALE);
+            else if (o.type==='coin') {
+              const sprite = coinFrame ? COIN_A : COIN_B;
+              drawHeroSprite(ctx, sprite, COIN_PAL, ox*SCALE, o.y*SCALE, SCALE);
+            }
+            else if (o.type==='pipe') drawHeroSprite(ctx, PIPE_TOP, PIPE_PAL, ox*SCALE, o.y*SCALE, SCALE);
+            else if (o.type==='goomba') {
+              const wob = Math.sin(goombaWobble + o.x*0.01) * 1;
+              drawHeroSprite(ctx, GOOM_A, GOOM_PAL, ox*SCALE, (o.y+wob)*SCALE, SCALE);
+            }
+          }
+        }
+        function drawHero(frame, jumpOffset, isJumping) {
+          const hx = Math.floor(VW * 0.22);
+          const hy = GROUND_Y - 16 - jumpOffset;
+          const bob = (frame % 2 === 0) ? 0 : -1;
+          const sprite = isJumping ? HERO_JUMP :
+            (frame===0 ? HERO_WALK_A : frame===1 ? HERO_IDLE : HERO_WALK_B);
+          drawHeroSprite(ctx, sprite, HERO_PAL, hx*SCALE, (hy+bob)*SCALE, SCALE);
+          if (!isJumping) {
+            ctx.fillStyle = "rgba(0,0,0,0.25)";
+            ctx.fillRect((hx-3)*SCALE, (hy+14)*SCALE, 2*SCALE, 2*SCALE);
+          }
+        }
+
+        let last = performance.now();
+        function tick(now) {
+          const dt = Math.min(0.05, (now - last)/1000);
+          last = now;
+          const st = stateRef.current;
+
+          // Boost forward speed while airborne so hero clears the pipe.
+          const effSpeed = st.jumpT >= 0 ? st.speed * 2.4 : st.speed;
+          st.scroll += effSpeed * dt;
+          if (st.scroll >= LEVEL_LEN) st.scroll -= LEVEL_LEN;
+
+          st.walkTimer += dt;
+          if (st.walkTimer > 0.15) { st.walkTimer = 0; st.walkFrame = (st.walkFrame+1) % 3; }
+          st.coinTimer += dt;
+          if (st.coinTimer > 0.2) { st.coinTimer = 0; st.coinFrame = (st.coinFrame+1) % 2; }
+          st.goombaWobble += dt * 6;
+
+          // Jump trigger: start the hop so apex aligns with the pipe.
+          const hxWorld = st.scroll + Math.floor(VW * 0.22);
+          for (const o of OBJECTS) {
+            if (o.type !== 'pipe') continue;
+            let dx = o.x - hxWorld;
+            if (dx < -LEVEL_LEN/2) dx += LEVEL_LEN;
+            if (dx > LEVEL_LEN/2) dx -= LEVEL_LEN;
+            if (dx > 8 && dx < 28 && st.jumpT < 0 && !st.jumpedPipes.has(o.x)) {
+              st.jumpT = 0;
+              st.jumpedPipes.add(o.x);
+            }
+          }
+          // Clean up jumped-pipe memory when it's far behind
+          for (const x of Array.from(st.jumpedPipes)) {
+            if (x < st.scroll - 80 || x > st.scroll + LEVEL_LEN - 40) st.jumpedPipes.delete(x);
+          }
+          // Advance jump
+          let jumpOffset = 0;
+          let isJumping = false;
+          if (st.jumpT >= 0) {
+            st.jumpT += dt / st.jumpDur;
+            if (st.jumpT >= 1) { st.jumpT = -1; jumpOffset = 0; isJumping = false; }
+            else { jumpOffset = Math.sin(st.jumpT * Math.PI) * 40; isJumping = true; }
+          }
+
+          ctx.setTransform(1,0,0,1,0,0);
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          drawBG();
+          drawClouds(st.scroll);
+          drawMountains(st.scroll);
+          drawBushes(st.scroll);
+          drawObjects(st.scroll, st.coinFrame, st.goombaWobble);
+          drawGround(st.scroll);
+          drawHero(st.walkFrame, jumpOffset, isJumping);
+
+          /* ---- Goomba speech bubbles ---- */
+          const goombas = OBJECTS.filter(o => o.type === 'goomba');
+          const heroLogicalX = st.scroll + VW * 0.22;
+          // Detect loop (scroll wrapped): clear triggered set so bubbles re-appear each lap
+          if (st.scroll < st.lastCycle - LEVEL_LEN/2) {
+            triggeredRef.current.clear();
+          }
+          st.lastCycle = st.scroll;
+
+          const TW = window.__heroBubbleTweaks || {};
+          const trigX = (TW.bubbleTrigX == null ? 20 : TW.bubbleTrigX);   // start bubble when hero is within X logical px ahead of goomba
+          const bubbleDur = (TW.bubbleDuration == null ? 2.0 : TW.bubbleDuration);
+          const bubbleFade = (TW.bubbleFade == null ? 0.3 : TW.bubbleFade);
+
+          for (const g of goombas) {
+            // trigger when hero is approaching the goomba from the left
+            let dx = g.x - heroLogicalX;
+            if (dx < -LEVEL_LEN/2) dx += LEVEL_LEN;
+            if (dx > LEVEL_LEN/2) dx -= LEVEL_LEN;
+            const key = g.x;
+            if (!triggeredRef.current.has(key) && dx > 0 && dx <= trigX) {
+              triggeredRef.current.add(key);
+              bubblesRef.current.push({
+                id: key + '_' + performance.now().toFixed(0),
+                goombaX: g.x,
+                text: goombaLineFor(g.x),
+                t: 0,
+                dur: bubbleDur,
+                fade: bubbleFade,
+              });
+            }
+          }
+          // Advance lifetimes
+          for (let i = bubblesRef.current.length - 1; i >= 0; i--) {
+            const b = bubblesRef.current[i];
+            b.t += dt;
+            if (b.t > b.dur) bubblesRef.current.splice(i, 1);
+          }
+          // Compute screen positions (CSS px within hero-canvas-wrap)
+          const rect = canvas.getBoundingClientRect();
+          const cssPerLogical = rect.width / VW;
+          const bubbleList = bubblesRef.current.map(b => {
+            let gx = b.goombaX - st.scroll;
+            gx = ((gx % LEVEL_LEN) + LEVEL_LEN) % LEVEL_LEN;
+            if (gx > VW + 40) gx -= LEVEL_LEN;
+            // Goomba top in logical px = GROUND_Y - 18 (its y)
+            const goombaLogicalTop = GROUND_Y - 18;
+            const left = gx * cssPerLogical;
+            const top = goombaLogicalTop * cssPerLogical;
+            // Fade envelope
+            const f = b.fade;
+            const inA = Math.min(1, b.t / f);
+            const outA = Math.min(1, Math.max(0, (b.dur - b.t) / f));
+            const alpha = Math.min(inA, outA);
+            // Rise animation
+            const rise = (1 - inA) * 6;
+            return { id: b.id, left, top: top - rise, alpha, text: b.text };
+          });
+          // Push to React state only when the list shape changed or ~20Hz
+          bubbleSyncRef.current += dt;
+          if (bubbleSyncRef.current > 0.05) {
+            bubbleSyncRef.current = 0;
+            setBubbles(bubbleList);
+          }
+
+          rafRef.current = requestAnimationFrame(tick);
+        }
+        rafRef.current = requestAnimationFrame(tick);
+
+        return () => {
+          cancelAnimationFrame(rafRef.current);
+          ro.disconnect();
+        };
+      }, []);
+
+      return (
+        <div className="hero-shell">
+          <div className="hero-canvas-wrap">
+            <canvas ref={canvasRef} className="hero-canvas" />
+          </div>
+          <div className="hero-bubbles-layer">
+            {bubbles.map(b => {
+              const TW = (typeof window !== 'undefined' && window.__heroBubbleTweaks) || {};
+              const size = TW.bubbleSize == null ? 10 : TW.bubbleSize; // font-size px
+              const yOff = TW.bubbleYOffset == null ? 18 : TW.bubbleYOffset; // lift above goomba
+              return (
+                <div
+                  key={b.id}
+                  className="hero-bubble"
+                  style={{
+                    left: b.left + 'px',
+                    top: (b.top - yOff) + 'px',
+                    opacity: b.alpha,
+                    fontSize: size + 'px',
+                  }}>
+                  {b.text}
+                </div>
+              );
+            })}
+          </div>
+          <div className="hero-scanlines" />
+          <div className="hero-hud-top">
+            <div>
+              <div>KIM JONG-IL</div>
+              <div style={{ color: "#606060" }}>000046</div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div>WORLD</div>
+              <div style={{ color: "#606060" }}>1-1</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div><span className="coin-ico">✦</span> ×24</div>
+              <div style={{ color: "#606060" }}>TIME 400</div>
+            </div>
+          </div>
+          <div className="hero-overlay-title">
+            <div className="main">{header.title}</div>
+            <div className="sub">{header.subtitle}</div>
+          </div>
+        </div>
+      );
+    }
+
+    function Header({ header }) {
+      return <HeaderStage header={header} />;
+    }
+
+    /* Tweakable defaults (editable via the Tweaks panel). */
+    const HERO_TWEAKS = /*EDITMODE-BEGIN*/{
+      "heroBaseH": 434,
+      "heroCropTop": 64,
+      "heroCropBot": 98,
+      "heroPanY": 7,
+      "heroMt": 0,
+      "heroMb": 24,
+      "bubbleSize": 10,
+      "bubbleYOffset": 18,
+      "bubbleTrigX": 20,
+      "bubbleDuration": 2.8,
+      "bubbleFade": 0.3,
+      "goombaLine1": "Welcome my Guest ",
+      "goombaLine2": "Check out the Gallery page",
+      "goombaLine3": "His Private project, too"
+    }/*EDITMODE-END*/;
+
+    function applyHeroTweaks(t) {
+      const r = document.documentElement.style;
+      r.setProperty('--hero-base-h', (t.heroBaseH|0) + 'px');
+      r.setProperty('--hero-crop-top', (t.heroCropTop|0) + 'px');
+      r.setProperty('--hero-crop-bot', (t.heroCropBot|0) + 'px');
+      r.setProperty('--hero-pan-y', (t.heroPanY|0) + 'px');
+      r.setProperty('--hero-mt', (t.heroMt|0) + 'px');
+      r.setProperty('--hero-mb', (t.heroMb|0) + 'px');
+      window.__heroBubbleTweaks = {
+        bubbleSize: t.bubbleSize,
+        bubbleYOffset: t.bubbleYOffset,
+        bubbleTrigX: t.bubbleTrigX,
+        bubbleDuration: t.bubbleDuration,
+        bubbleFade: t.bubbleFade,
+        lines: [
+          typeof t.goombaLine1 === 'string' ? t.goombaLine1 : GOOMBA_DEFAULT_LINES[560],
+          typeof t.goombaLine2 === 'string' ? t.goombaLine2 : GOOMBA_DEFAULT_LINES[1060],
+          typeof t.goombaLine3 === 'string' ? t.goombaLine3 : GOOMBA_DEFAULT_LINES[1100],
+        ],
+      };
+    }
+    // Apply on boot from localStorage (if any) else defaults
+    (function(){
+      try {
+        const saved = JSON.parse(localStorage.getItem('hero-tweaks') || 'null');
+        applyHeroTweaks(Object.assign({}, HERO_TWEAKS, saved || {}));
+      } catch(_) {
+        applyHeroTweaks(HERO_TWEAKS);
+      }
+    })();
+
+    function HeroTweaksPanel() {
+      const [open, setOpen] = React.useState(true);
+      const [visible, setVisible] = React.useState(false);
+      const [t, setT] = React.useState(() => {
+        try {
+          const saved = JSON.parse(localStorage.getItem('hero-tweaks') || 'null');
+          return Object.assign({}, HERO_TWEAKS, saved || {});
+        } catch(_) { return Object.assign({}, HERO_TWEAKS); }
+      });
+
+      React.useEffect(() => {
+        const onMsg = (e) => {
+          if (!e.data || typeof e.data !== 'object') return;
+          if (e.data.type === '__activate_edit_mode') setVisible(true);
+          if (e.data.type === '__deactivate_edit_mode') setVisible(false);
+        };
+        window.addEventListener('message', onMsg);
+        try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(_) {}
+        return () => window.removeEventListener('message', onMsg);
+      }, []);
+
+      const update = (key, val) => {
+        const next = Object.assign({}, t, { [key]: val });
+        setT(next);
+        applyHeroTweaks(next);
+        try { localStorage.setItem('hero-tweaks', JSON.stringify(next)); } catch(_) {}
+        try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*'); } catch(_) {}
+      };
+
+      if (!visible) return null;
+
+      const row = (label, key, min, max, step) => {
+        const isFloat = (step || 1) < 1;
+        return (
+          <div style={{ display:'grid', gridTemplateColumns:'110px 1fr 48px', gap:8, alignItems:'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, color:'#111', fontFamily:'Press Start 2P, monospace', letterSpacing:1 }}>{label}</div>
+            <input
+              type="range" min={min} max={max} step={step || 1}
+              value={t[key]}
+              onChange={(e) => update(key, isFloat ? parseFloat(e.target.value) : parseInt(e.target.value, 10))}
+              style={{ width:'100%' }}
+            />
+            <div style={{ fontSize: 11, color:'#333', textAlign:'right', fontFamily:'monospace' }}>
+              {isFloat ? Number(t[key]).toFixed(2) : t[key]}
+            </div>
+          </div>
+        );
+      };
+      const textRow = (label, key, maxLen) => (
+        <div style={{ display:'grid', gridTemplateColumns:'110px 1fr', gap:8, alignItems:'center', marginBottom: 8 }}>
+          <div style={{ fontSize: 10, color:'#111', fontFamily:'Press Start 2P, monospace', letterSpacing:1 }}>{label}</div>
+          <input
+            type="text"
+            maxLength={maxLen || 40}
+            value={t[key] || ''}
+            onChange={(e) => update(key, e.target.value)}
+            style={{ width:'100%', border:'2px solid #111', padding:'4px 6px', fontSize: 11, fontFamily:'Gowun Dodum, sans-serif' }}
+          />
+        </div>
+      );
+
+      return (
+        <div style={{
+          position:'fixed', right: 16, bottom: 16, zIndex: 99999,
+          background:'#f3f4f6', border:'3px solid #111', boxShadow:'6px 6px 0 rgba(0,0,0,0.35)',
+          padding: 12, width: 360, maxHeight: '90vh', overflowY: 'auto', fontFamily:'Gowun Dodum, sans-serif'
+        }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 10 }}>
+            <div style={{ fontFamily:'Press Start 2P, monospace', fontSize: 11, letterSpacing: 2 }}>TWEAKS</div>
+            <button onClick={() => setOpen(o => !o)}
+              style={{ border:'2px solid #111', background:'#fff', padding:'2px 8px', fontFamily:'Press Start 2P, monospace', fontSize: 9, cursor:'pointer' }}>
+              {open ? '—' : '+'}
+            </button>
+          </div>
+          {open && (
+            <div>
+              <div style={{ fontSize: 10, color:'#666', marginBottom: 8, lineHeight: 1.5 }}>
+                HUD과 타이틀은 크롭해도 가시영역 내 고정. 게임 화면만 위/아래 크롭/패닝됩니다.
+              </div>
+              {row('CROP TOP', 'heroCropTop', 0, 200, 1)}
+              {row('CROP BOT', 'heroCropBot', 0, 200, 1)}
+              {row('PAN Y',    'heroPanY',   -200, 200, 1)}
+              {row('MARGIN T', 'heroMt',     0, 200, 1)}
+              {row('MARGIN B', 'heroMb',     0, 200, 1)}
+              <div style={{ height: 1, background:'#ccc', margin:'10px 0' }} />
+              {row('BASE H',   'heroBaseH',  240, 600, 2)}
+              <div style={{ height: 1, background:'#ccc', margin:'10px 0' }} />
+              <div style={{ fontSize: 10, color:'#666', marginBottom: 8, lineHeight: 1.5 }}>
+                굼바 말풍선
+              </div>
+              {row('BUB SIZE',   'bubbleSize',      7, 22, 1)}
+              {row('BUB Y OFF',  'bubbleYOffset',   0, 60, 1)}
+              {row('BUB TRIG X', 'bubbleTrigX',     4, 80, 1)}
+              {row('BUB DUR',    'bubbleDuration',  0.5, 5.0, 0.1)}
+              {row('BUB FADE',   'bubbleFade',      0.05, 1.5, 0.05)}
+              <div style={{ height: 1, background:'#ccc', margin:'10px 0' }} />
+              <div style={{ fontSize: 10, color:'#666', marginBottom: 8, lineHeight: 1.5 }}>
+                굼바 대사 (순서대로 1·2·3번 굼바)
+              </div>
+              {textRow('LINE 1', 'goombaLine1', 40)}
+              {textRow('LINE 2', 'goombaLine2', 40)}
+              {textRow('LINE 3', 'goombaLine3', 40)}
+              <button
+                onClick={() => {
+                  const d = Object.assign({}, HERO_TWEAKS);
+                  setT(d); applyHeroTweaks(d);
+                  try { localStorage.removeItem('hero-tweaks'); } catch(_) {}
+                  try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: d }, '*'); } catch(_) {}
+                }}
+                style={{ marginTop: 6, border:'2px solid #111', background:'#fff', padding:'4px 10px', fontFamily:'Press Start 2P, monospace', fontSize: 9, cursor:'pointer', width:'100%' }}>
+                RESET
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function StatusBar({ theme, toggleTheme, isCrt, toggleCrt }) {
+      return (
+        <div className="status-bar pixel-font w-full">
+          <div className="flex items-center">
+            <span className="text-yellow-400 mr-4 sm:mr-8 text-[10px] sm:text-xs">LV.46 KIM JONG-IL</span>
+            <span className="hidden md:flex items-center text-[10px]">
+              <span className="flex items-center mr-4">HP <div className="stat-gauge"><div className="stat-fill bg-red-500" style={{width: '80%'}}></div></div></span>
+              <span className="flex items-center mr-4">MP <div className="stat-gauge"><div className="stat-fill bg-blue-500" style={{width: '100%'}}></div></div></span>
+              <span className="flex items-center">EXP <div className="stat-gauge"><div className="stat-fill bg-green-500" style={{width: '100%'}}></div></div></span>
+            </span>
+          </div>
+          <div className="flex items-center">
+            <nav className="hidden sm:flex gap-4 text-[10px] mr-4">
+              <a href="#about" className="hover:text-yellow-400">ABOUT</a>
+              <a href="#mysticisland" className="hover:text-yellow-400">SYSTEM</a>
+              <a href="#experiences" className="hover:text-yellow-400">LOGS</a>
+            </nav>
+            <button
+              className="pwr-btn-top theme-toggle pixel-font"
+              onClick={toggleTheme}
+              title="Theme Toggle"
+            >{theme === 'dark' ? 'DARK' : 'LIGHT'}</button>
+            <button
+              className={`pwr-btn-top pixel-font${isCrt ? '' : ' off'}`}
+              onClick={toggleCrt}
+              title="Scanline Toggle"
+            >SCN</button>
+          </div>
+        </div>
+      );
+    }
+
+    function ProfileSection({ profile }) {
+      return (
+        <div id="about" className="os-window">
+          <div className="os-header">
+            <span className="os-header-title">USER_PROFILE.EXE</span>
+            <div className="os-header-squares">
+              <div className="os-square y"></div>
+              <div className="os-square g"></div>
+              <div className="os-square r"></div>
+            </div>
+          </div>
+          <div className="os-body">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex-shrink-0">
+                <img
+                  src={profile.imageUrl}
+                  alt={profile.imageAlt || "Profile"}
+                  style={{
+                    width: `${profile.imageWidth || 280}px`,
+                    height: "auto",
+                    border: "4px solid var(--win-highlight)",
+                    borderRadius: "2px",
+                  }}
+                />
+              </div>
+              <div className="flex-1">
+                <h2 className="pixel-font text-xl md:text-2xl rpg-title">{profile.statusTitle || "Status"}</h2>
+                <ul className="space-y-3 text-lg">
+                  {profile.status.map((s, i) => (
+                    <li key={i}>
+                      <span className={`text-${s.labelColor} font-bold`}>{s.label}:</span> {s.value}
+                    </li>
+                  ))}
+                </ul>
+                <div style={{ borderTop: "2px dashed var(--win-border)", marginTop: "16px", paddingTop: "16px" }}>
+                  <h3 className="pixel-font text-lg text-yellow-400 mb-6">{profile.inventoryTitle || "Inventory"}</h3>
+                  <div className="flex flex-col gap-4">
+                    {profile.inventory.map((inv, i) => (
+                      <ButtonBlock key={i} block={inv} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Section({ section }) {
+      const headerTitle = (section.id || "SYSTEM").toUpperCase() + ".SYS";
+      return (
+        <div id={section.id} className="os-window">
+          <div className="os-header">
+            <span className="os-header-title">{headerTitle}</span>
+            <div className="os-header-squares">
+              <div className="os-square y"></div>
+              <div className="os-square g"></div>
+              <div className="os-square r"></div>
+            </div>
+          </div>
+          <div className="os-body">
+            <h2 className={section.subtitle ? "pixel-font text-2xl md:text-3xl rpg-title flex items-center gap-3" : "pixel-font text-xl md:text-2xl rpg-title"}>
+              {section.titleEmoji && <span>{section.titleEmoji}</span>}
+              <span>{section.title}</span>
+            </h2>
+            {section.subtitle && (
+              <p className="text-xl mb-6 text-blue-200 font-bold">{section.subtitle}</p>
+            )}
+            {section.blocks.map(b => <Block key={b.id} block={b} />)}
+          </div>
+        </div>
+      );
+    }
+
+    function Footer({ footer, onEditClick }) {
+      return (
+        <footer className="text-center text-gray-500 text-sm mt-12 mb-8 pixel-font">
+          {footer.text}
+          {onEditClick && (
+            <button
+              className="footer-edit-btn"
+              onClick={onEditClick}
+              title="관리자 편집"
+              aria-label="관리자 편집"
+            >
+              ✎
+            </button>
+          )}
+        </footer>
+      );
+    }
+
+    function Portfolio() {
+      // Read-only 용 state
+      const [content, setContent] = React.useState(() =>
+        typeof structuredClone === "function"
+          ? structuredClone(DEFAULT_CONTENT)
+          : JSON.parse(JSON.stringify(DEFAULT_CONTENT))
+      );
+      // Edit mode 상태
+      const [editMode, setEditMode] = React.useState(false);
+      const [editToken, setEditToken] = React.useState(null);
+      const [loginOpen, setLoginOpen] = React.useState(false);
+      // Theme toggle
+      const [theme, setTheme] = React.useState(
+        () => localStorage.getItem('portfolio-theme') || 'light'
+      );
+      // CRT toggle
+      const [isCrt, setIsCrt] = React.useState(true);
+
+      React.useEffect(() => {
+        let cancelled = false;
+        fetch(`${API_BASE}/api/portfolio/content`)
+          .then(res => {
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+          })
+          .then(data => {
+            if (cancelled) return;
+            if (data) setContent(data);
+          })
+          .catch(err => {
+            if (cancelled) return;
+            console.warn("Portfolio content fetch failed, using DEFAULT_CONTENT:", err);
+          });
+        return () => { cancelled = true; };
+      }, []);
+
+      // 세션 토큰 복원 — 페이지 새로고침 후 로그인 상태 유지
+      React.useEffect(() => {
+        const existing = getAdminToken();
+        if (existing) setEditToken(existing);
+      }, []);
+
+      // CRT overlay 토글
+      React.useEffect(() => {
+        const crt = document.getElementById('crt-overlay');
+        if (crt) crt.style.display = isCrt ? 'block' : 'none';
+      }, [isCrt]);
+
+      // Theme toggle
+      React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('portfolio-theme', theme);
+      }, [theme]);
+
+      const handleEditClick = React.useCallback(() => {
+        if (window.innerWidth < 1024) {
+          alert("편집은 1024px 이상 뷰포트에서만 가능합니다.\n데스크톱 브라우저에서 접속해 주세요.");
+          return;
+        }
+        if (editToken) {
+          setEditMode(true); // 토큰 이미 있음 → 바로 진입
+        } else {
+          setLoginOpen(true);
+        }
+      }, [editToken]);
+      const handleLoginSuccess = React.useCallback((token) => {
+        setEditToken(token);
+        setLoginOpen(false);
+        setEditMode(true);
+      }, []);
+      const handleLoginCancel = React.useCallback(() => setLoginOpen(false), []);
+      const handleExitEdit = React.useCallback(() => setEditMode(false), []);
+      const handleLogout = React.useCallback(() => {
+        clearAdminToken();
+        setEditToken(null);
+        setEditMode(false);
+      }, []);
+
+      if (editMode && editToken) {
+        return (
+          <PortfolioEditView
+            token={editToken}
+            onExit={handleExitEdit}
+            onLogout={handleLogout}
+          />
+        );
+      }
+
+      return (
+        <React.Fragment>
+          <StatusBar
+            theme={theme}
+            toggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            isCrt={isCrt}
+            toggleCrt={() => setIsCrt(v => !v)}
+          />
+          <div style={{ maxWidth: "1100px", position: "relative", zIndex: 10 }} className="mx-auto p-4 sm:p-8">
+            <Header header={content.header} />
+            <ProfileSection profile={content.profile} />
+            {content.sections.map(s => <Section key={s.id} section={s} />)}
+            <Footer footer={content.footer} onEditClick={handleEditClick} />
+          </div>
+          <HeroTweaksPanel />
+          {loginOpen && (
+            <LoginModal
+              onSuccess={handleLoginSuccess}
+              onCancel={handleLoginCancel}
+            />
+          )}
+        </React.Fragment>
+      );
+    }
+
+    // --- Block factory (Plan B Task 8 / Plan C Task 1: stable IDs) ---
+    function newBlockId() {
+      // crypto.randomUUID 는 secure context (https / http://127.0.0.1) 에서 지원.
+      // file:// 에서는 메서드는 존재하나 호출 시 DOMException 발생 → try/catch 로 fallback 경로 확보.
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        try {
+          return "b_" + crypto.randomUUID();
+        } catch (_) {
+          // insecure context (file://) 에서 randomUUID 가 throw — fallback 으로 내려감
+        }
+      }
+      return "b_" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    }
+    function createEmptyBlock(type) {
+      const id = newBlockId();
+      switch (type) {
+        case "text":
+          return { id, type: "text", html: "새 문단을 입력하세요." };
+        case "heading":
+          return { id, type: "heading", level: 3, text: "새 제목", emoji: null };
+        case "list":
+          return { id, type: "list", style: "disc", items: [{ strong: "", text: "새 항목" }] };
+        case "image":
+          return { id, type: "image", url: "", alt: "", caption: "", width: null };
+        case "youtube":
+          return {
+            id, type: "youtube",
+            mediaKind: "video",
+            videoId: "", start: null, title: "",
+            imageUrl: "", imageAlt: "", imageCaption: "",
+          };
+        case "button":
+          return { id, type: "button", icon: "link", label: "New Button", href: "#", target: "_self" };
+        case "cardgrid":
+          return {
+            id, type: "cardgrid", cols: 2, variant: "text",
+            cards: [
+              { title: "Card 1", titleColor: "yellow-400", description: "설명" },
+              { title: "Card 2", titleColor: "yellow-400", description: "설명" },
+            ],
+          };
+        default:
+          return { id, type: "text", html: "" };
+      }
+    }
+
+    // --- BlockTypePicker (Task 8) ---
+    const BLOCK_TYPES = [
+      { type: "text",     label: "Text",     emoji: "📝" },
+      { type: "heading",  label: "Heading",  emoji: "🔤" },
+      { type: "list",     label: "List",     emoji: "📋" },
+      { type: "image",    label: "Image",    emoji: "🖼" },
+      { type: "youtube",  label: "Media",    emoji: "🎞" },
+      { type: "button",   label: "Button",   emoji: "🔘" },
+      { type: "cardgrid", label: "Card Grid", emoji: "▦" },
+    ];
+    function BlockTypePicker({ onPick, onCancel }) {
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === "Escape") onCancel(); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [onCancel]);
+      return (
+        <div className="block-type-picker-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+          <div className="block-type-picker">
+            <div className="title">블록 타입 선택</div>
+            <div className="grid">
+              {BLOCK_TYPES.map(bt => (
+                <button key={bt.type} onClick={() => onPick(bt.type)}>
+                  <span className="emoji">{bt.emoji}</span>
+                  <span>{bt.label}</span>
+                </button>
+              ))}
+            </div>
+            <button className="cancel" onClick={onCancel}>취소</button>
+          </div>
+        </div>
+      );
+    }
+
+    // --- BlockInsertGap (Task 8) ---
+    function BlockInsertGap({ onInsert }) {
+      return (
+        <div className="block-insert-gap">
+          <button onClick={onInsert} title="블록 추가">+</button>
+        </div>
+      );
+    }
+
+    // --- BlockEditWrapper (Task 7: drag 추가) ---
+    function BlockEditWrapper({
+      index, lastIndex,
+      onMoveUp, onMoveDown, onDelete, onSettings,
+      onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
+      isDragging, dragOverPos, // "top" | "bottom" | null
+      children,
+    }) {
+      const handleDelete = () => {
+        if (window.confirm("이 블록을 삭제할까요?")) onDelete();
+      };
+      const classes = ["block-edit-wrap"];
+      if (isDragging) classes.push("dragging");
+      if (dragOverPos === "top") classes.push("drag-over-top");
+      if (dragOverPos === "bottom") classes.push("drag-over-bottom");
+
+      return (
+        <div
+          className={classes.join(" ")}
+          draggable
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onDragEnd={onDragEnd}
+        >
+          <span className="block-drag-handle" title="드래그하여 이동">⋮⋮</span>
+          <div className="block-mini-toolbar">
+            <button onClick={onMoveUp} disabled={index === 0} title="위로">↑</button>
+            <button onClick={onMoveDown} disabled={index === lastIndex} title="아래로">↓</button>
+            <span className="separator" />
+            <button onClick={onSettings} title="설정">⚙</button>
+            <button onClick={handleDelete} title="삭제">🗑</button>
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    // --- Task 9: Inline contentEditable block editors ---
+
+    // EditableTextBlock: uncontrolled, uses ref to set innerHTML only when block.html changes
+    function EditableTextBlock({ block, onChange }) {
+      const ref = React.useRef(null);
+
+      React.useEffect(() => {
+        if (ref.current && ref.current.innerHTML !== block.html) {
+          ref.current.innerHTML = block.html || "";
+        }
+      }, [block.html]);
+
+      const handleBlur = () => {
+        const raw = ref.current.innerHTML;
+        const clean = sanitizeRichHtml(raw);
+        if (clean !== block.html) {
+          onChange({ ...block, html: clean });
+        }
+      };
+
+      return (
+        <p
+          ref={ref}
+          className="text-lg leading-relaxed text-gray-300 mb-4"
+          contentEditable="true"
+          suppressContentEditableWarning
+          onBlur={handleBlur}
+        />
+      );
+    }
+
+    // EditableHeadingBlock: plain text (no rich), emoji stays outside editable span
+    function EditableHeadingBlock({ block, onChange }) {
+      const ref = React.useRef(null);
+      React.useEffect(() => {
+        if (ref.current && ref.current.textContent !== block.text) {
+          ref.current.textContent = block.text || "";
+        }
+      }, [block.text]);
+
+      const handleBlur = () => {
+        const text = ref.current.textContent || "";
+        if (text !== block.text) onChange({ ...block, text });
+      };
+
+      const Tag = block.level === 2 ? "h2" : "h3";
+      const cls = block.level === 2
+        ? "pixel-font rpg-title text-2xl mb-4"
+        : "pixel-font text-yellow-300 text-xl mb-3";
+      return (
+        <Tag className={cls}>
+          {block.emoji && <span className="mr-2">{block.emoji}</span>}
+          <span
+            ref={ref}
+            contentEditable="true"
+            suppressContentEditableWarning
+            onBlur={handleBlur}
+          />
+        </Tag>
+      );
+    }
+
+    // EditableInline: generic span contentEditable — rich=true uses innerHTML+sanitize, rich=false uses textContent
+    function EditableInline({ value, rich, onCommit, onEnter, onBackspaceEmpty }) {
+      const ref = React.useRef(null);
+      React.useEffect(() => {
+        if (!ref.current) return;
+        const current = rich ? ref.current.innerHTML : ref.current.textContent;
+        if (current !== value) {
+          if (rich) ref.current.innerHTML = value || "";
+          else ref.current.textContent = value || "";
+        }
+      }, [value, rich]);
+
+      const handleBlur = () => {
+        const raw = rich ? ref.current.innerHTML : ref.current.textContent;
+        const next = rich ? sanitizeRichHtml(raw) : (raw || "");
+        if (next !== value) onCommit(next);
+      };
+      const handleKey = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          ref.current.blur();
+          if (onEnter) onEnter();
+        }
+        if (e.key === "Backspace") {
+          const raw = rich ? ref.current.innerHTML : ref.current.textContent;
+          // rich 분기: 브라우저가 빈 contenteditable 에 <br> placeholder 를 자동 삽입하므로
+          // 이를 제거한 뒤에 빈지 검사한다. 공백만 남는 경우도 빈 것으로 간주.
+          const isEmpty = rich
+            ? (!raw || raw.replace(/<br\s*\/?>/gi, "").replace(/&nbsp;/g, "").trim() === "")
+            : !raw;
+          if (isEmpty && onBackspaceEmpty) {
+            e.preventDefault();
+            onBackspaceEmpty();
+          }
+        }
+      };
+
+      return (
+        <span
+          ref={ref}
+          contentEditable="true"
+          suppressContentEditableWarning
+          onBlur={handleBlur}
+          onKeyDown={handleKey}
+        />
+      );
+    }
+
+    // EditableListBlock: each item has strong + text via EditableInline, supports note items
+    function EditableListBlock({ block, onChange }) {
+      const updateItem = (i, patch) => {
+        const next = block.items.map((it, idx) => idx === i ? { ...it, ...patch } : it);
+        onChange({ ...block, items: next });
+      };
+      const addItem = (afterIdx) => {
+        const next = block.items.slice();
+        next.splice(afterIdx + 1, 0, { strong: "", text: "" });
+        onChange({ ...block, items: next });
+      };
+      const removeItem = (i) => {
+        if (block.items.length <= 1) return;
+        const next = block.items.filter((_, idx) => idx !== i);
+        onChange({ ...block, items: next });
+      };
+
+      const ListTag = block.style === "decimal" ? "ol" : "ul";
+      const listCls = block.style === "decimal" ? "list-decimal" : "list-disc";
+      const spaceY = block.spaceY || "space-y-2";
+      const mb = block.marginBottom || "mb-4";
+
+      return (
+        <ListTag className={`${listCls} pl-5 ${spaceY} ${mb} text-gray-300`}>
+          {block.items.map((item, i) => {
+            if (item.note) {
+              return (
+                <li key={i} className="list-none text-sm text-gray-500 italic mt-1">
+                  <EditableInline
+                    value={item.text || ""}
+                    rich={false}
+                    onCommit={(text) => updateItem(i, { text })}
+                    onEnter={() => addItem(i)}
+                    onBackspaceEmpty={() => removeItem(i)}
+                  />
+                </li>
+              );
+            }
+            return (
+              <li key={i}>
+                <strong>
+                  <EditableInline
+                    value={item.strong || ""}
+                    rich={false}
+                    onCommit={(strong) => updateItem(i, { strong })}
+                  />
+                </strong>
+                <span>{" "}</span>
+                <EditableInline
+                  value={item.text || ""}
+                  rich={true}
+                  onCommit={(text) => updateItem(i, { text })}
+                  onEnter={() => addItem(i)}
+                  onBackspaceEmpty={() => removeItem(i)}
+                />
+              </li>
+            );
+          })}
+        </ListTag>
+      );
+    }
+
+    // EditableBlockContent: dispatcher — text/heading/list → editable versions, others → read-only Block
+    function EditableBlockContent({ block, onChange }) {
+      switch (block.type) {
+        case "text":    return <EditableTextBlock block={block} onChange={onChange} />;
+        case "heading": return <EditableHeadingBlock block={block} onChange={onChange} />;
+        case "list":    return <EditableListBlock block={block} onChange={onChange} />;
+        // image / youtube / button / cardgrid — settings panel based (Task 11+)
+        default:        return <Block block={block} />;
+      }
+    }
+
+    // --- Task 11: SettingsPanel shell ---
+    function SettingsPanel({ title, onClose, children }) {
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === "Escape") onClose(); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [onClose]);
+      return (
+        <React.Fragment>
+          <div className="settings-panel-backdrop" onClick={onClose} />
+          <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={onClose} aria-label="닫기">×</button>
+            <div className="title">{title}</div>
+            {children}
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    // --- ImageBlockEdit ---
+    function ImageBlockEdit({ block, onChange, token, onClose }) {
+      const [uploading, setUploading] = React.useState(false);
+      const [uploadError, setUploadError] = React.useState(null);
+      const [dragOver, setDragOver] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+
+      const handleFile = async (file) => {
+        if (!file) return;
+        setUploading(true);
+        setUploadError(null);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          onChange({
+            ...block,
+            url: data.url,
+            width: data.width || block.width,
+          }, { immediate: true });
+        } catch (e) {
+          setUploadError(e.message);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      return (
+        <SettingsPanel title="Image Block" onClose={onClose}>
+          <label>URL</label>
+          <input
+            type="url"
+            value={block.url || ""}
+            onChange={(e) => onChange({ ...block, url: e.target.value })}
+          />
+
+          <label>대체 텍스트 (alt)</label>
+          <input
+            type="text"
+            value={block.alt || ""}
+            onChange={(e) => onChange({ ...block, alt: e.target.value })}
+          />
+
+          <label>캡션</label>
+          <input
+            type="text"
+            value={block.caption || ""}
+            onChange={(e) => onChange({ ...block, caption: e.target.value })}
+          />
+
+          <label>너비 (px, 비우면 100%)</label>
+          <input
+            type="number"
+            value={block.width || ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              onChange({ ...block, width: v ? parseInt(v, 10) : null });
+            }}
+          />
+
+          <label>업로드</label>
+          <div
+            className={`image-dropzone${dragOver ? " over" : ""}${uploading ? " busy" : ""}`}
+            onClick={() => fileInputRef.current && fileInputRef.current.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const file = e.dataTransfer.files && e.dataTransfer.files[0];
+              if (file) handleFile(file);
+            }}
+          >
+            {uploading ? "업로드 중..." : "클릭 또는 드롭하여 업로드"}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => handleFile(e.target.files && e.target.files[0])}
+          />
+          {uploadError && (
+            <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 8 }}>
+              업로드 실패: {uploadError}
+            </div>
+          )}
+          {block.url && (
+            <div style={{ marginTop: 12 }}>
+              <img src={block.url} alt={block.alt || ""} style={{ maxWidth: "100%", borderRadius: 2 }} />
+            </div>
+          )}
+        </SettingsPanel>
+      );
+    }
+
+    // --- Task 12: YoutubeBlockEdit ---
+    function normalizeYoutubeId(input) {
+      if (!input) return "";
+      const m = input.match(/(?:youtu\.be\/|v=)([A-Za-z0-9_-]{6,})/);
+      return m ? m[1] : input.trim();
+    }
+    function YoutubeBlockEdit({ block, onChange, token, onClose }) {
+      const [uploading, setUploading] = React.useState(false);
+      const [uploadError, setUploadError] = React.useState(null);
+      const [dragOver, setDragOver] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+      const mediaKind = block.mediaKind || "video";
+
+      const handleFile = async (file) => {
+        if (!file || uploading) return;
+        setUploading(true);
+        setUploadError(null);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          // 업로드 성공 → 자동으로 image 모드 전환 + URL 저장
+          onChange({ ...block, mediaKind: "image", imageUrl: data.url }, { immediate: true });
+        } catch (e) {
+          setUploadError(e.message);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      return (
+        <SettingsPanel title="Media Block" onClose={onClose}>
+          <label>미디어 타입</label>
+          <select
+            value={mediaKind}
+            onChange={(e) => onChange({ ...block, mediaKind: e.target.value }, { immediate: true })}
+          >
+            <option value="video">🎬 YouTube 임베드</option>
+            <option value="image">🖼 이미지 / GIF</option>
+          </select>
+
+          {mediaKind === "video" && (
+            <React.Fragment>
+              <label>Video ID 또는 URL</label>
+              <input
+                type="text"
+                value={block.videoId || ""}
+                onChange={(e) => onChange({ ...block, videoId: normalizeYoutubeId(e.target.value) })}
+                placeholder="oE25G0tBFSM 또는 https://youtu.be/..."
+              />
+              <label>시작 초 (선택)</label>
+              <input
+                type="number"
+                value={block.start || ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  onChange({ ...block, start: v ? parseInt(v, 10) : null });
+                }}
+              />
+              <label>제목</label>
+              <input
+                type="text"
+                value={block.title || ""}
+                onChange={(e) => onChange({ ...block, title: e.target.value })}
+              />
+              {block.videoId && (
+                <div style={{ marginTop: 12, fontSize: "0.8rem", color: "#a2a2a2" }}>
+                  미리보기는 블록 본문에서 확인
+                </div>
+              )}
+            </React.Fragment>
+          )}
+
+          {mediaKind === "image" && (
+            <React.Fragment>
+              <label>이미지 URL</label>
+              <input
+                type="url"
+                value={block.imageUrl || ""}
+                onChange={(e) => onChange({ ...block, imageUrl: e.target.value })}
+                placeholder="Cloudinary URL 또는 아래 업로드"
+              />
+              <label>대체 텍스트 (alt)</label>
+              <input
+                type="text"
+                value={block.imageAlt || ""}
+                onChange={(e) => onChange({ ...block, imageAlt: e.target.value })}
+              />
+              <label>캡션</label>
+              <input
+                type="text"
+                value={block.imageCaption || ""}
+                onChange={(e) => onChange({ ...block, imageCaption: e.target.value })}
+              />
+              <label>파일 업로드 (GIF / JPG / PNG)</label>
+              <div
+                className={`image-dropzone${dragOver ? " over" : ""}${uploading ? " busy" : ""}`}
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                  if (file) handleFile(file);
+                }}
+              >
+                {uploading ? "업로드 중..." : "클릭 또는 드롭하여 업로드"}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleFile(e.target.files && e.target.files[0])}
+              />
+              {uploadError && (
+                <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 8 }}>
+                  업로드 실패: {uploadError}
+                </div>
+              )}
+              {block.imageUrl && (
+                <div style={{ marginTop: 12 }}>
+                  <img src={block.imageUrl} alt={block.imageAlt || ""} style={{ maxWidth: "100%", borderRadius: 2 }} />
+                </div>
+              )}
+            </React.Fragment>
+          )}
+        </SettingsPanel>
+      );
+    }
+
+    // --- ButtonBlockEdit ---
+    const ICON_OPTIONS = Object.keys(ICON_PATHS);
+    function ButtonBlockEdit({ block, onChange, onClose }) {
+      return (
+        <SettingsPanel title="Button Block" onClose={onClose}>
+          <label>아이콘</label>
+          <select
+            value={block.icon || "link"}
+            onChange={(e) => onChange({ ...block, icon: e.target.value }, { immediate: true })}
+          >
+            {ICON_OPTIONS.map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+          <label>라벨</label>
+          <input
+            type="text"
+            value={block.label || ""}
+            onChange={(e) => onChange({ ...block, label: e.target.value })}
+          />
+          <label>링크 (href)</label>
+          <input
+            type="url"
+            value={block.href || ""}
+            onChange={(e) => onChange({ ...block, href: e.target.value })}
+          />
+          <label>새 창 열기</label>
+          <select
+            value={block.target || "_self"}
+            onChange={(e) => onChange({ ...block, target: e.target.value }, { immediate: true })}
+          >
+            <option value="_self">같은 창 (_self)</option>
+            <option value="_blank">새 창 (_blank)</option>
+          </select>
+        </SettingsPanel>
+      );
+    }
+
+    // --- CardgridBlockEdit ---
+    // CARD_COLORS: fixed palette matching DEFAULT_CONTENT — Tailwind JIT needs to see these class names
+    const CARD_COLORS = ["yellow-300", "yellow-400", "green-400", "blue-400", "gray-300", "gray-400"];
+
+    // 카드 팩토리 — kind 별 빈 카드 생성
+    function createEmptyCard(kind) {
+      if (kind === "video") return { kind: "video", videoId: "", title: "" };
+      if (kind === "image") return { kind: "image", url: "", alt: "", caption: "" };
+      return { kind: "text", title: "New", titleColor: "yellow-400", description: "" };
+    }
+
+    // --- CardgridCardEditor — 카드 1개 편집기 (per-card kind + 이미지 업로드) ---
+    // 컴포넌트로 분리하여 각 카드가 독자적 uploading/fileInputRef 를 가짐
+    function CardgridCardEditor({ card, index, token, blockVariant, onUpdate, onRemove }) {
+      // kind 폴백: card.kind → blockVariant → "text" (기존 DEFAULT_CONTENT 데이터 호환)
+      const kind = card.kind || blockVariant || "text";
+      const [uploading, setUploading] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+
+      const handleFile = async (file) => {
+        if (!file || uploading) return;
+        setUploading(true);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          onUpdate({ ...card, kind: "image", url: data.url }, { immediate: true });
+        } catch (e) {
+          alert(`업로드 실패: ${e.message}`);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      // kind 전환 시 해당 kind 의 필수 필드를 얕게 보존/초기화
+      // (예: text → image 전환 시 기존 title/description 은 그대로 둠, 렌더는 새 kind 의 필드만 사용)
+      const handleKindChange = (nextKind) => {
+        onUpdate({ ...card, kind: nextKind }, { immediate: true });
+      };
+
+      return (
+        <div style={{ border: "1px solid #6c6c6c", padding: 8, marginBottom: 8, borderRadius: 2 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, gap: 6 }}>
+            <span style={{ fontSize: "0.75rem", color: "#a2a2a2", flex: "0 0 auto" }}>#{index + 1}</span>
+            <select
+              value={kind}
+              onChange={(e) => handleKindChange(e.target.value)}
+              style={{ flex: 1 }}
+            >
+              <option value="text">📝 Text</option>
+              <option value="video">🎬 Video</option>
+              <option value="image">🖼 Image / GIF</option>
+            </select>
+            <button
+              onClick={onRemove}
+              style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", padding: "0 4px", fontSize: "1rem" }}
+              aria-label="카드 삭제"
+              title="카드 삭제"
+            >🗑</button>
+          </div>
+
+          {kind === "text" && (
+            <React.Fragment>
+              <input type="text" placeholder="제목" value={card.title || ""} onChange={(e) => onUpdate({ ...card, title: e.target.value })} />
+              <select
+                value={card.titleColor || "yellow-400"}
+                onChange={(e) => onUpdate({ ...card, titleColor: e.target.value }, { immediate: true })}
+                style={{ marginTop: 4 }}
+              >
+                {CARD_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <textarea placeholder="설명" value={card.description || ""} onChange={(e) => onUpdate({ ...card, description: e.target.value })} style={{ marginTop: 4 }} />
+            </React.Fragment>
+          )}
+
+          {kind === "video" && (
+            <React.Fragment>
+              <input type="text" placeholder="Video ID 또는 URL" value={card.videoId || ""} onChange={(e) => onUpdate({ ...card, videoId: normalizeYoutubeId(e.target.value) })} />
+              <input type="text" placeholder="제목" value={card.title || ""} onChange={(e) => onUpdate({ ...card, title: e.target.value })} style={{ marginTop: 4 }} />
+            </React.Fragment>
+          )}
+
+          {kind === "image" && (
+            <React.Fragment>
+              <input type="url" placeholder="이미지 URL" value={card.url || ""} onChange={(e) => onUpdate({ ...card, url: e.target.value })} />
+              <input type="text" placeholder="alt (대체 텍스트)" value={card.alt || ""} onChange={(e) => onUpdate({ ...card, alt: e.target.value })} style={{ marginTop: 4 }} />
+              <input type="text" placeholder="캡션" value={card.caption || ""} onChange={(e) => onUpdate({ ...card, caption: e.target.value })} style={{ marginTop: 4 }} />
+              <button
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                disabled={uploading}
+                style={{
+                  width: "100%",
+                  marginTop: 6,
+                  background: "transparent",
+                  border: "2px dashed #6c6c6c",
+                  color: uploading ? "#737373" : "#a2a2a2",
+                  padding: 6,
+                  borderRadius: 2,
+                  cursor: uploading ? "wait" : "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "0.8rem",
+                }}
+              >
+                {uploading ? "업로드 중..." : "📤 파일 업로드 (GIF / JPG / PNG)"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleFile(e.target.files && e.target.files[0])}
+              />
+              {card.url && (
+                <div style={{ marginTop: 6 }}>
+                  <img src={card.url} alt={card.alt || ""} style={{ maxWidth: "100%", borderRadius: 2, display: "block" }} />
+                </div>
+              )}
+            </React.Fragment>
+          )}
+        </div>
+      );
+    }
+
+    function CardgridBlockEdit({ block, onChange, token, onClose }) {
+      const updateCard = (i, nextCard, opts) => {
+        const cards = block.cards.map((c, idx) => idx === i ? nextCard : c);
+        onChange({ ...block, cards }, opts);
+      };
+      const addCard = () => {
+        const defaultKind = block.variant || "text";
+        onChange({ ...block, cards: [...block.cards, createEmptyCard(defaultKind)] }, { immediate: true });
+      };
+      const removeCard = (i) => {
+        onChange({ ...block, cards: block.cards.filter((_, idx) => idx !== i) }, { immediate: true });
+      };
+
+      return (
+        <SettingsPanel title="Card Grid Block" onClose={onClose}>
+          <label>컬럼 수</label>
+          <select
+            value={block.cols || 2}
+            onChange={(e) => onChange({ ...block, cols: parseInt(e.target.value, 10) }, { immediate: true })}
+          >
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+          </select>
+
+          <label>새 카드 기본 타입</label>
+          <select
+            value={block.variant || "text"}
+            onChange={(e) => {
+              const nextVariant = e.target.value;
+              // 기존에 kind 필드가 없던 카드(구 DEFAULT_CONTENT 데이터) 는 현재 variant 로 stamp
+              // → default 바꿔도 기존 카드 flip 방지
+              const currentImplicitKind = block.variant || "text";
+              const migratedCards = block.cards.map(c =>
+                c.kind ? c : { ...c, kind: currentImplicitKind }
+              );
+              onChange({ ...block, cards: migratedCards, variant: nextVariant }, { immediate: true });
+            }}
+          >
+            <option value="text">📝 Text</option>
+            <option value="video">🎬 Video</option>
+            <option value="image">🖼 Image / GIF</option>
+          </select>
+          <div style={{ fontSize: "0.72rem", color: "#a2a2a2", marginTop: 4, lineHeight: 1.4 }}>
+            ※ 이 값은 "+ 카드 추가" 시 기본값으로만 쓰입니다. 각 카드의 타입은 아래에서 개별적으로 변경 가능.
+          </div>
+
+          <label>카드 목록</label>
+          {block.cards.map((card, i) => (
+            <CardgridCardEditor
+              key={i}
+              card={card}
+              index={i}
+              token={token}
+              blockVariant={block.variant}
+              onUpdate={(next, opts) => updateCard(i, next, opts)}
+              onRemove={() => removeCard(i)}
+            />
+          ))}
+          <button
+            onClick={addCard}
+            style={{ width: "100%", background: "transparent", border: "2px dashed #6c6c6c", color: "#a2a2a2", padding: 8, borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+          >+ 카드 추가</button>
+        </SettingsPanel>
+      );
+    }
+
+    // --- Task 10: FloatingRichTextToolbar ---
+    // Subscribes to document selectionchange. Shows above selected text inside [contenteditable].
+    // execCommand is deprecated but works in all current browsers — intentional (Plan B scope).
+    function FloatingRichTextToolbar() {
+      const [state, setState] = React.useState({ visible: false, top: 0, left: 0 });
+      const [linkMode, setLinkMode] = React.useState(false);
+      const [linkUrl, setLinkUrl] = React.useState("");
+      const savedRangeRef = React.useRef(null);
+
+      React.useEffect(() => {
+        const onSelectionChange = () => {
+          const sel = document.getSelection();
+          if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+            setState(prev => prev.visible ? { visible: false, top: 0, left: 0 } : prev);
+            setLinkMode(false);
+            return;
+          }
+          const range = sel.getRangeAt(0);
+          const anchor = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+          if (!anchor || !anchor.closest("[contenteditable='true']")) {
+            setState(prev => prev.visible ? { visible: false, top: 0, left: 0 } : prev);
+            return;
+          }
+          const rect = range.getBoundingClientRect();
+          if (rect.width === 0 && rect.height === 0) return;
+          savedRangeRef.current = range.cloneRange();
+          setState({
+            visible: true,
+            top: rect.top - 40,
+            left: rect.left + rect.width / 2 - 60,
+          });
+        };
+        document.addEventListener("selectionchange", onSelectionChange);
+        return () => document.removeEventListener("selectionchange", onSelectionChange);
+      }, []);
+
+      // Keyboard shortcuts Ctrl+B / Ctrl+I / Ctrl+K
+      React.useEffect(() => {
+        const onKey = (e) => {
+          if (!state.visible && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("[contenteditable='true']"))) return;
+          if (!(e.ctrlKey || e.metaKey)) return;
+          if (e.key.toLowerCase() === "b") { e.preventDefault(); captureCurrentRange(); document.execCommand("bold"); }
+          if (e.key.toLowerCase() === "i") { e.preventDefault(); captureCurrentRange(); document.execCommand("italic"); }
+          if (e.key.toLowerCase() === "k") { e.preventDefault(); captureCurrentRange(); openLinkMode(); }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [state.visible]);
+
+      const restoreSelection = () => {
+        const sel = document.getSelection();
+        if (savedRangeRef.current && sel) {
+          sel.removeAllRanges();
+          sel.addRange(savedRangeRef.current);
+        }
+      };
+
+      const captureCurrentRange = () => {
+        const sel = document.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          savedRangeRef.current = sel.getRangeAt(0).cloneRange();
+        }
+      };
+
+      const openLinkMode = () => {
+        setLinkMode(true);
+        setLinkUrl("");
+      };
+      const applyLink = () => {
+        restoreSelection();
+        if (linkUrl) {
+          document.execCommand("createLink", false, linkUrl);
+          const sel = document.getSelection();
+          if (sel && sel.anchorNode) {
+            const a = sel.anchorNode.parentElement && sel.anchorNode.parentElement.closest("a");
+            if (a && linkUrl.match(/^https?:/)) {
+              a.setAttribute("target", "_blank");
+              a.setAttribute("rel", "noopener noreferrer");
+            }
+          }
+        }
+        setLinkMode(false);
+        const active = document.activeElement;
+        if (active && typeof active.blur === "function") active.blur();
+      };
+
+      if (!state.visible) return null;
+
+      return (
+        <div
+          className="floating-rich-toolbar"
+          style={{ top: state.top, left: state.left }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {linkMode ? (
+            <div className="link-input">
+              <input
+                autoFocus
+                type="url"
+                placeholder="https://..."
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); applyLink(); }
+                  if (e.key === "Escape") { e.preventDefault(); setLinkMode(false); }
+                }}
+              />
+              <button onClick={applyLink}>OK</button>
+            </div>
+          ) : (
+            <React.Fragment>
+              <button onClick={() => { captureCurrentRange(); document.execCommand("bold"); }} title="Bold (Ctrl+B)">B</button>
+              <button onClick={() => { captureCurrentRange(); document.execCommand("italic"); }} title="Italic (Ctrl+I)"><i>I</i></button>
+              <button onClick={() => { captureCurrentRange(); openLinkMode(); }} title="Link (Ctrl+K)">🔗</button>
+            </React.Fragment>
+          )}
+        </div>
+      );
+    }
+
+    // --- EditableSection (Task 7: drag + Task 8: insert gap + Task 11: settings) ---
+    function EditableSection({ section, onSectionChange, token }) {
+      const [dragIdx, setDragIdx] = React.useState(null);
+      const [overIdx, setOverIdx] = React.useState(null);
+      const [overPos, setOverPos] = React.useState(null); // "top" | "bottom"
+      const [pickerAt, setPickerAt] = React.useState(null); // 삽입할 index (0=맨 앞)
+      const [settingsIdx, setSettingsIdx] = React.useState(null); // Task 11: 설정 패널 열 블록 인덱스
+
+      const moveBlock = (idx, delta) => {
+        onSectionChange(prev => {
+          const next = { ...prev, blocks: prev.blocks.slice() };
+          const j = idx + delta;
+          if (j < 0 || j >= next.blocks.length) return prev;
+          [next.blocks[idx], next.blocks[j]] = [next.blocks[j], next.blocks[idx]];
+          return next;
+        }, { immediate: true });
+      };
+      const deleteBlock = (idx) => {
+        onSectionChange(prev => ({
+          ...prev,
+          blocks: prev.blocks.filter((_, i) => i !== idx),
+        }), { immediate: true });
+      };
+      const openSettings = (idx) => setSettingsIdx(idx);
+
+      const insertBlockAt = (idx, type) => {
+        // block 을 updater 밖에서 생성 — React 18/StrictMode 에서 updater 재실행 시 ID 불일치 방지
+        const newBlock = createEmptyBlock(type);
+        onSectionChange(prev => ({
+          ...prev,
+          blocks: [
+            ...prev.blocks.slice(0, idx),
+            newBlock,
+            ...prev.blocks.slice(idx),
+          ],
+        }), { immediate: true });
+        setPickerAt(null);
+      };
+
+      // picker / settings Escape 핸들러 effect 재등록 최소화
+      const closePicker = React.useCallback(() => setPickerAt(null), []);
+      const closeSettings = React.useCallback(() => setSettingsIdx(null), []);
+
+      const renderSettingsPanel = () => {
+        if (settingsIdx === null) return null;
+        const block = section.blocks[settingsIdx];
+        if (!block) return null;
+        const onBlockChange = (updated, opts) => {
+          onSectionChange(prev => ({
+            ...prev,
+            blocks: prev.blocks.map((b, i) => i === settingsIdx ? updated : b),
+          }), opts);
+        };
+        switch (block.type) {
+          case "image":    return <ImageBlockEdit    block={block} onChange={onBlockChange} token={token} onClose={closeSettings} />;
+          case "youtube":  return <YoutubeBlockEdit  block={block} onChange={onBlockChange} token={token} onClose={closeSettings} />;
+          case "button":   return <ButtonBlockEdit   block={block} onChange={onBlockChange}               onClose={closeSettings} />;
+          case "cardgrid": return <CardgridBlockEdit block={block} onChange={onBlockChange} token={token} onClose={closeSettings} />;
+          default:
+            return (
+              <SettingsPanel title={`${block.type} Block`} onClose={closeSettings}>
+                <div style={{ fontSize: "0.85rem", color: "#a2a2a2" }}>
+                  text / heading / list 은 본문 직접 클릭으로 편집합니다.
+                </div>
+              </SettingsPanel>
+            );
+        }
+      };
+
+      const handleDragStart = (idx) => (e) => {
+        setDragIdx(idx);
+        e.dataTransfer.effectAllowed = "move";
+        // 섹션 ID 를 payload 에 실어 섹션 경계 차단에 사용
+        e.dataTransfer.setData("text/plain", JSON.stringify({ section: section.id, idx }));
+      };
+      const handleDragOver = (idx) => (e) => {
+        e.preventDefault();
+        if (dragIdx === null || dragIdx === idx) { setOverIdx(null); return; }
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const pos = e.clientY < midY ? "top" : "bottom";
+        setOverIdx(idx);
+        setOverPos(pos);
+      };
+      const handleDragLeave = () => {
+        // leave 는 약식 처리 — overIdx 를 비워 아웃라인 제거. 잦은 flicker 는 다음 dragover 가 복구.
+      };
+      const handleDrop = (idx) => (e) => {
+        e.preventDefault();
+        if (dragIdx === null || dragIdx === idx) {
+          setDragIdx(null); setOverIdx(null); setOverPos(null);
+          return;
+        }
+        let targetIdx = idx;
+        if (overPos === "bottom") targetIdx = idx + 1;
+        // 자기 자신 다음으로 떨어지면 변동 없음 보정
+        if (targetIdx > dragIdx) targetIdx -= 1;
+        onSectionChange(prev => {
+          const next = { ...prev, blocks: prev.blocks.slice() };
+          const [moved] = next.blocks.splice(dragIdx, 1);
+          next.blocks.splice(targetIdx, 0, moved);
+          return next;
+        }, { immediate: true });
+        setDragIdx(null); setOverIdx(null); setOverPos(null);
+      };
+      const handleDragEnd = () => {
+        setDragIdx(null); setOverIdx(null); setOverPos(null);
+      };
+
+      const headerTitle = (section.id || "SYSTEM").toUpperCase() + ".SYS";
+      return (
+        <div id={section.id} className="os-window">
+          <div className="os-header">
+            <span className="os-header-title">{headerTitle}</span>
+            <div className="os-header-squares">
+              <div className="os-square y"></div>
+              <div className="os-square g"></div>
+              <div className="os-square r"></div>
+            </div>
+          </div>
+          <div className="os-body">
+          <div style={{display: "flex", alignItems: "center", gap: 8, marginBottom: 4}}>
+            {section.titleEmoji !== undefined && (
+              <EditableInline
+                value={section.titleEmoji || ""}
+                rich={false}
+                onCommit={(emoji) => onSectionChange(prev => ({ ...prev, titleEmoji: emoji || null }))}
+              />
+            )}
+            <h2 className="pixel-font rpg-title text-2xl sm:text-3xl">
+              <EditableInline
+                value={section.title || ""}
+                rich={false}
+                onCommit={(title) => onSectionChange(prev => ({ ...prev, title }))}
+              />
+            </h2>
+          </div>
+          <p className="text-gray-400 italic mb-6">
+            <EditableInline
+              value={section.subtitle || ""}
+              rich={false}
+              onCommit={(subtitle) => onSectionChange(prev => ({ ...prev, subtitle: subtitle || null }))}
+            />
+          </p>
+          <BlockInsertGap onInsert={() => setPickerAt(0)} />
+          {section.blocks.map((block, idx) => (
+            <React.Fragment key={block.id}>
+              <BlockEditWrapper
+                index={idx}
+                lastIndex={section.blocks.length - 1}
+                onMoveUp={() => moveBlock(idx, -1)}
+                onMoveDown={() => moveBlock(idx, +1)}
+                onDelete={() => deleteBlock(idx)}
+                onSettings={() => openSettings(idx)}
+                onDragStart={handleDragStart(idx)}
+                onDragOver={handleDragOver(idx)}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop(idx)}
+                onDragEnd={handleDragEnd}
+                isDragging={dragIdx === idx}
+                dragOverPos={overIdx === idx ? overPos : null}
+              >
+                <EditableBlockContent
+                  block={block}
+                  onChange={(updated) => onSectionChange(prev => ({
+                    ...prev,
+                    blocks: prev.blocks.map((b, i) => i === idx ? updated : b),
+                  }))}
+                />
+              </BlockEditWrapper>
+              <BlockInsertGap onInsert={() => setPickerAt(idx + 1)} />
+            </React.Fragment>
+          ))}
+          {pickerAt !== null && (
+            <BlockTypePicker
+              onPick={(type) => insertBlockAt(pickerAt, type)}
+              onCancel={closePicker}
+            />
+          )}
+          {renderSettingsPanel()}
+          </div>
+        </div>
+      );
+    }
+
+    // --- PublishConfirmDialog (Plan C Task 12) ---
+    function PublishConfirmDialog({ onConfirm, onCancel }) {
+      const confirmRef = React.useRef(null);
+      React.useEffect(() => {
+        const onKey = (e) => {
+          if (e.key === "Escape") { onCancel(); return; }
+          if (e.key === "Enter" && document.activeElement === confirmRef.current) onConfirm();
+        };
+        document.addEventListener("keydown", onKey);
+        if (confirmRef.current) confirmRef.current.focus();
+        return () => document.removeEventListener("keydown", onKey);
+      }, [onConfirm, onCancel]);
+      return (
+        <div className="publish-confirm-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+          <div className="publish-confirm-box">
+            <div className="title">포트폴리오를 게시하시겠습니까?</div>
+            <div className="message">
+              방문자에게 즉시 반영됩니다. Undo 로 되돌릴 수 있습니다.
+            </div>
+            <div className="btns">
+              <button className="btn-cancel" onClick={onCancel}>취소</button>
+              <button ref={confirmRef} className="btn-confirm" onClick={onConfirm}>🚀 Publish</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- HistoryDropdown (Plan C Task 13) ---
+    function formatSnapshotTs(ts) {
+      if (!ts) return "(시간 미상)";
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return String(ts);
+      return d.toLocaleString();
+    }
+
+    function HistoryDropdown({ token, onRestore, onClose }) {
+      const [snapshots, setSnapshots] = React.useState(null); // null = loading
+      const [error, setError] = React.useState(null);
+      const [confirmTs, setConfirmTs] = React.useState(null);
+      const [restoring, setRestoring] = React.useState(false);
+      const confirmTsRef = React.useRef(null);
+      // confirmTs 변경 시 ref 동기화 — ESC 핸들러 stale closure 방지
+      React.useEffect(() => { confirmTsRef.current = confirmTs; }, [confirmTs]);
+
+      const loadList = React.useCallback(() => {
+        setError(null);
+        setSnapshots(null);
+        fetchPortfolioHistoryList(token)
+          .then(data => {
+            const list = Array.isArray(data) ? data : (data.items || []);
+            setSnapshots(list);
+          })
+          .catch(e => setError(e.message));
+      }, [token]);
+
+      React.useEffect(() => { loadList(); }, [loadList]);
+
+      React.useEffect(() => {
+        const onKey = (e) => {
+          if (e.key !== "Escape") return;
+          // confirm 서브 모달이 열려있으면 서브 모달만 닫음
+          if (confirmTsRef.current) { setConfirmTs(null); return; }
+          onClose();
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [onClose]);
+
+      const doRestore = async (timestamp) => {
+        setRestoring(true);
+        try {
+          const content = await fetchPortfolioHistoryItem(token, timestamp);
+          onRestore(content);
+        } catch (e) {
+          setError(`복원 실패: ${e.message}`);
+        } finally {
+          setRestoring(false);
+          setConfirmTs(null);
+        }
+      };
+
+      return (
+        <div className="history-dropdown-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="history-dropdown">
+            <div className="title">이전 버전 복원</div>
+            {snapshots === null && !error && <div className="empty">불러오는 중...</div>}
+            {error && (
+              <div className="error">
+                {error}
+                <button className="retry" onClick={loadList}>재시도</button>
+              </div>
+            )}
+            {snapshots && snapshots.length === 0 && (
+              <div className="empty">저장된 스냅샷이 없습니다.</div>
+            )}
+            {snapshots && snapshots.length > 0 && (
+              <ul className="snapshot-list">
+                {snapshots.map((snap, idx) => {
+                  const ts = snap.timestamp || snap.ts || snap.key || "";
+                  return (
+                    <li key={ts || idx}>
+                      <button onClick={() => setConfirmTs(ts)} disabled={restoring}>
+                        <span className="ts">{formatSnapshotTs(ts)}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <button className="close" onClick={onClose}>닫기</button>
+          </div>
+          {confirmTs && (
+            <div className="publish-confirm-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setConfirmTs(null); }}>
+              <div className="publish-confirm-box">
+                <div className="title">현재 draft 덮어쓰기</div>
+                <div className="message">
+                  {formatSnapshotTs(confirmTs)} 스냅샷으로 덮어쓸까요? 현재 작업은 Undo 로 되돌릴 수 있습니다.
+                </div>
+                <div className="btns">
+                  <button className="btn-cancel" onClick={() => setConfirmTs(null)} disabled={restoring}>취소</button>
+                  <button className="btn-confirm" onClick={() => doRestore(confirmTs)} disabled={restoring}>
+                    {restoring ? "..." : "복원"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // --- EditToolbar (Plan C Task 5: Undo/Redo + 배지 + History/Export + Publish confirm) ---
+    function EditToolbar({
+      dirty, savingState, savedAt,
+      onFlushAndWait, onPublish, onExit, onLogout,
+      canUndo, canRedo, onUndo, onRedo,
+      hasUnpublishedChanges,
+      content, token, onRestore,
+    }) {
+      const [publishing, setPublishing] = React.useState(false);
+      const [publishMsg, setPublishMsg] = React.useState(null);
+      const [confirmOpen, setConfirmOpen] = React.useState(false); // Task 12 에서 PublishConfirmDialog 로 연결
+      const [historyOpen, setHistoryOpen] = React.useState(false); // Task 13 에서 HistoryDropdown 으로 연결
+
+      React.useEffect(() => {
+        if (!publishMsg || publishMsg.startsWith("게시 완료") === false) return;
+        const t = setTimeout(() => setPublishMsg(null), 2000);
+        return () => clearTimeout(t);
+      }, [publishMsg]);
+
+      const statusClass =
+        savingState === "error" ? "status error"
+        : dirty || savingState === "saving" ? "status dirty"
+        : "status";
+      const statusText =
+        savingState === "saving" ? "저장 중..."
+        : savingState === "error" ? "저장 실패 (재시도 대기)"
+        : dirty ? "변경 사항 있음"
+        : savedAt ? `저장됨 · ${new Date(savedAt).toLocaleTimeString()}`
+        : "변경 없음";
+
+      const doPublish = async () => {
+        setPublishing(true);
+        setPublishMsg(null);
+        try {
+          if (dirty) await onFlushAndWait();
+          await onPublish();
+          setPublishMsg("게시 완료");
+        } catch (e) {
+          if (e.message === "UNAUTHORIZED") {
+            setPublishMsg(`인증 만료 — 다시 로그인 필요`);
+          } else {
+            setPublishMsg(`게시 실패: ${e.message}`);
+          }
+        } finally {
+          setPublishing(false);
+        }
+      };
+
+      const handlePublishClick = () => {
+        setConfirmOpen(true); // Task 12 에서 PublishConfirmDialog 로 연결 — 현재는 confirmOpen=true 만 세팅
+      };
+      const handleConfirmPublish = () => {
+        setConfirmOpen(false);
+        doPublish();
+      };
+      const handleCancelPublish = () => setConfirmOpen(false);
+
+      // JSON Export — Task 14 에서 검증만 수행 (본 Task 5 에서 실구현)
+      const handleExport = () => {
+        if (!content) return; // 로딩 중에 눌렸을 때 "undefined" 문자열 파일 방지
+        const blob = new Blob([JSON.stringify(content, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob); // blob: 스킴 — safeHref 불필요
+        const a = document.createElement("a");
+        const ts = new Date();
+        const pad = (n) => String(n).padStart(2, "0");
+        const fname = `portfolio-draft-${ts.getFullYear()}${pad(ts.getMonth() + 1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}.json`;
+        a.href = url;
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setPublishMsg("💾 내보냄. repo 에 수동 commit 하면 git 이력 확보 가능");
+        setTimeout(() => setPublishMsg(null), 4000);
+      };
+
+      return (
+        <React.Fragment>
+          <div className="edit-toolbar-sticky">
+            <span className="badge">편집 중</span>
+            <button
+              className="toolbar-btn"
+              onClick={onUndo}
+              disabled={!canUndo}
+              title="실행 취소 (Ctrl+Z)"
+              aria-label="실행 취소"
+            >⟲</button>
+            <button
+              className="toolbar-btn"
+              onClick={onRedo}
+              disabled={!canRedo}
+              title="다시 실행 (Ctrl+Shift+Z)"
+              aria-label="다시 실행"
+            >⟳</button>
+            <span className={statusClass}>
+              {publishMsg || statusText}
+            </span>
+            {hasUnpublishedChanges && (
+              <span className="unpublished-badge" title="Publish 후 변경이 있습니다">
+                ⚠ 미게시 변경
+              </span>
+            )}
+            <button
+              className="toolbar-btn"
+              onClick={handleExport}
+              title="JSON 내보내기"
+              aria-label="JSON 내보내기"
+            >📥 JSON</button>
+            <button
+              className="toolbar-btn"
+              onClick={() => setHistoryOpen(h => !h)}
+              title="이전 버전 복원"
+              aria-label="이전 버전"
+            >⋯ History</button>
+            <button onClick={handlePublishClick} className="btn-publish" disabled={publishing || savingState === "saving"}>
+              {publishing ? "..." : "🚀 Publish"}
+            </button>
+            <button onClick={onExit}>Cancel</button>
+            <button onClick={onLogout} style={{ borderColor: "#ef4444", color: "#ef4444" }}>LogOut</button>
+          </div>
+          {confirmOpen && (
+            <PublishConfirmDialog
+              onConfirm={handleConfirmPublish}
+              onCancel={handleCancelPublish}
+            />
+          )}
+          {historyOpen && (
+            <HistoryDropdown
+              token={token}
+              onRestore={(restored) => {
+                onRestore(restored);
+                setHistoryOpen(false);
+                setPublishMsg("복원 완료. Undo 로 되돌릴 수 있습니다.");
+                setTimeout(() => setPublishMsg(null), 3000);
+              }}
+              onClose={() => setHistoryOpen(false)}
+            />
+          )}
+        </React.Fragment>
+      );
+    }
+
+    // --- PortfolioEditView ---
+    // --- EditableProfileSection ---
+    const STATUS_COLORS = ["yellow-300", "yellow-400", "green-400", "blue-400", "gray-300", "gray-400"];
+    function EditableProfileSection({ profile, onChange, token }) {
+      const fileRef = React.useRef(null);
+      const [uploading, setUploading] = React.useState(false);
+
+      const handleImgFile = async (file) => {
+        if (!file) return;
+        setUploading(true);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          onChange({ ...profile, imageUrl: data.url }, { immediate: true });
+        } catch (e) {
+          alert(`프로필 이미지 업로드 실패: ${e.message}`);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      // Status CRUD
+      const updateStatus = (i, patch, opts) => {
+        const next = profile.status.map((s, idx) => idx === i ? { ...s, ...patch } : s);
+        onChange({ ...profile, status: next }, opts);
+      };
+      const addStatus = () => {
+        onChange({ ...profile, status: [...profile.status, { label: "New", labelColor: "yellow-300", value: "" }] }, { immediate: true });
+      };
+      const removeStatus = (i) => {
+        onChange({ ...profile, status: profile.status.filter((_, idx) => idx !== i) }, { immediate: true });
+      };
+
+      // Inventory CRUD
+      const updateInv = (i, patch, opts) => {
+        const next = profile.inventory.map((it, idx) => idx === i ? { ...it, ...patch } : it);
+        onChange({ ...profile, inventory: next }, opts);
+      };
+      const addInv = () => {
+        onChange({ ...profile, inventory: [...profile.inventory, { icon: "link", label: "New", href: "#", target: "_self" }] }, { immediate: true });
+      };
+      const removeInv = (i) => {
+        onChange({ ...profile, inventory: profile.inventory.filter((_, idx) => idx !== i) }, { immediate: true });
+      };
+
+      return (
+        <div className="os-window">
+          <div className="os-header">
+            <span className="os-header-title">USER_PROFILE.EXE</span>
+            <div className="os-header-squares">
+              <div className="os-square y"></div>
+              <div className="os-square g"></div>
+              <div className="os-square r"></div>
+            </div>
+          </div>
+          <div className="os-body">
+            <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex-shrink-0">
+              <img
+                src={profile.imageUrl}
+                alt={profile.imageAlt || "Profile"}
+                style={{
+                  width: `${profile.imageWidth || 280}px`,
+                  height: "auto",
+                  border: "4px solid var(--win-highlight)",
+                  borderRadius: "2px",
+                }}
+              />
+              <div style={{ textAlign: "center", marginTop: 8 }}>
+                <button
+                  className="profile-image-replace"
+                  onClick={() => fileRef.current && fileRef.current.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? "업로드 중..." : "이미지 교체"}
+                </button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => handleImgFile(e.target.files && e.target.files[0])}
+                />
+              </div>
+            </div>
+            <div className="flex-1 w-full">
+              {/* Status */}
+              <h2 className="pixel-font text-xl md:text-2xl rpg-title">{profile.statusTitle || "Status"}</h2>
+              {profile.status.map((s, i) => (
+                <div key={i} className="profile-edit-row">
+                  <div className="label-col" style={{ display: "flex", gap: 4 }}>
+                    <input
+                      type="text"
+                      value={s.label || ""}
+                      onChange={(e) => updateStatus(i, { label: e.target.value })}
+                      placeholder="라벨"
+                    />
+                    <select
+                      value={s.labelColor || "yellow-300"}
+                      onChange={(e) => updateStatus(i, { labelColor: e.target.value }, { immediate: true })}
+                      title="라벨 색상"
+                    >
+                      {STATUS_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div className="value-col">
+                    <input
+                      type="text"
+                      value={s.value || ""}
+                      onChange={(e) => updateStatus(i, { value: e.target.value })}
+                      placeholder="값"
+                    />
+                  </div>
+                  <button className="remove" onClick={() => removeStatus(i)} aria-label="항목 삭제">🗑</button>
+                </div>
+              ))}
+              <button className="profile-edit-add" onClick={addStatus}>+ Status 항목 추가</button>
+
+              {/* Inventory */}
+              <div style={{ borderTop: "2px dashed var(--win-border)", marginTop: "16px", paddingTop: "16px" }}>
+                <h3 className="pixel-font text-lg text-yellow-400 mb-6">{profile.inventoryTitle || "Inventory"}</h3>
+                {profile.inventory.map((it, i) => (
+                  <div key={i} className="profile-edit-row">
+                    <div className="label-col">
+                      <select
+                        value={it.icon || "link"}
+                        onChange={(e) => updateInv(i, { icon: e.target.value }, { immediate: true })}
+                      >
+                        {Object.keys(ICON_PATHS).map(k => <option key={k} value={k}>{k}</option>)}
+                      </select>
+                    </div>
+                    <div className="value-col" style={{ display: "flex", gap: 4 }}>
+                      <input
+                        type="text"
+                        value={it.label || ""}
+                        onChange={(e) => updateInv(i, { label: e.target.value })}
+                        placeholder="라벨"
+                      />
+                      <input
+                        type="text"
+                        value={it.href || ""}
+                        onChange={(e) => updateInv(i, { href: e.target.value })}
+                        placeholder="링크"
+                      />
+                      <select
+                        value={it.target || "_self"}
+                        onChange={(e) => updateInv(i, { target: e.target.value }, { immediate: true })}
+                      >
+                        <option value="_self">_self</option>
+                        <option value="_blank">_blank</option>
+                      </select>
+                    </div>
+                    <button className="remove" onClick={() => removeInv(i)} aria-label="항목 삭제">🗑</button>
+                  </div>
+                ))}
+                <button className="profile-edit-add" onClick={addInv}>+ Inventory 항목 추가</button>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- EditableHeader ---
+    function EditableHeader({ header, onChange }) {
+      return (
+        <header className="text-center mt-10 mb-16">
+          <h1 className="pixel-font text-3xl md:text-4xl text-yellow-400 mb-4 tracking-wider">
+            <EditableInline
+              value={header.title || ""}
+              rich={false}
+              onCommit={(title) => onChange({ ...header, title })}
+            />
+          </h1>
+          <p className="pixel-font text-lg text-green-400">
+            <EditableInline
+              value={header.subtitle || ""}
+              rich={false}
+              onCommit={(subtitle) => onChange({ ...header, subtitle })}
+            />
+          </p>
+        </header>
+      );
+    }
+
+    // --- EditableFooter ---
+    function EditableFooter({ footer, onChange }) {
+      return (
+        <footer className="text-center text-gray-500 text-sm mt-12 mb-8 pixel-font">
+          <EditableInline
+            value={footer.text || ""}
+            rich={false}
+            onCommit={(text) => onChange({ ...footer, text })}
+          />
+        </footer>
+      );
+    }
+
+    function PortfolioEditView({ token, onExit, onLogout }) {
+      const {
+        content, setContent, replaceContent,
+        dirty, savedAt, savingState, flushAndWait, loadError,
+        undo, redo, canUndo, canRedo,
+        hasUnpublishedChanges, markPublished,
+        flushPending,
+      } = useEditContent(token);
+
+      const onKeyDownCapture = useEditorKeyboard({ undo, redo, canUndo, canRedo });
+
+      React.useEffect(() => {
+        if (loadError === "UNAUTHORIZED") {
+          clearAdminToken();
+          onExit();
+        }
+      }, [loadError, onExit]);
+
+      const handlePublish = React.useCallback(async () => {
+        try {
+          const result = await publishPortfolio(token);
+          markPublished();
+          return result;
+        } catch (e) {
+          if (e.message === "UNAUTHORIZED") {
+            clearAdminToken();
+            onExit();
+          }
+          throw e;
+        }
+      }, [token, onExit, markPublished]);
+
+      // --- beforeunload flush + leave-guard (Plan C Task 6) ---
+      // pending history commit + dirty 일 때 브라우저 leave-guard 대화상자 트리거.
+      // sendBeacon 은 Worker 가 Authorization: Bearer 헤더를 요구하여 사용 불가 —
+      // 토큰을 쿼리로 전달하는 건 보안 회귀이므로 본 스코프 내에서는 브라우저 경고만.
+      // dirtyRef 로 읽어서 리스너 churn 방지 (dirty 가 deps 에 있으면 매 편집 flip 마다
+      // removeEventListener + addEventListener 반복).
+      const dirtyRef = React.useRef(dirty);
+      React.useEffect(() => { dirtyRef.current = dirty; }, [dirty]);
+      React.useEffect(() => {
+        const handler = (e) => {
+          try { flushPending(); } catch (_) {}
+          if (dirtyRef.current) {
+            e.preventDefault();
+            e.returnValue = ""; // Chrome/Edge/Firefox
+            return ""; // Safari 호환 — 오래된 WebKit 이 return 값을 확인
+          }
+        };
+        window.addEventListener("beforeunload", handler);
+        return () => window.removeEventListener("beforeunload", handler);
+      }, [flushPending]);
+
+      const handleExit = () => {
+        if (dirty) {
+          if (!window.confirm("미저장 변경이 있습니다. 나갈까요?")) return;
+        }
+        onExit();
+      };
+
+      // 모든 hook 호출 후에 render guard — hook order 유지
+      if (loadError === "UNAUTHORIZED") return null;
+
+      return (
+        <div className="edit-mode-root" onKeyDownCapture={onKeyDownCapture} tabIndex={-1}>
+          <EditToolbar
+            dirty={dirty}
+            savingState={savingState}
+            savedAt={savedAt}
+            onFlushAndWait={flushAndWait}
+            onPublish={handlePublish}
+            onExit={handleExit}
+            onLogout={onLogout}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            hasUnpublishedChanges={hasUnpublishedChanges}
+            content={content}
+            token={token}
+            onRestore={replaceContent}
+          />
+          <div style={{ maxWidth: "1100px", position: "relative", zIndex: 1 }} className="mx-auto p-4 sm:p-8">
+            <EditableHeader
+              header={content.header}
+              onChange={(h, opts) => setContent(prev => ({ ...prev, header: h }), opts)}
+            />
+            <EditableProfileSection
+              profile={content.profile}
+              token={token}
+              onChange={(p, opts) => setContent(prev => ({ ...prev, profile: p }), opts)}
+            />
+            {content.sections.map((section, sIdx) => (
+              <EditableSection
+                key={section.id}
+                section={section}
+                token={token}
+                onSectionChange={(updater, opts) => setContent(prev => ({
+                  ...prev,
+                  sections: prev.sections.map((s, i) => i === sIdx ? (typeof updater === "function" ? updater(s) : updater) : s),
+                }), opts)}
+              />
+            ))}
+            <EditableFooter
+              footer={content.footer}
+              onChange={(f, opts) => setContent(prev => ({ ...prev, footer: f }), opts)}
+            />
+          </div>
+          <FloatingRichTextToolbar />
+        </div>
+      );
+    }
+
+    ReactDOM.render(<Portfolio />, document.getElementById('root'));
+  </script>
+</body>
+</html>

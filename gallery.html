@@ -1,0 +1,3079 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery | Kim Jong-il Portfolio</title>
+
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+  <!-- FOUC 방지: 포트폴리오와 동일 localStorage 키 공유 -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('portfolio-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <style>
+    /* === Base === */
+    body {
+      font-family: 'Gowun Dodum', sans-serif;
+      background-color: #111;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      font-size: 1.15rem;
+      line-height: 1.6;
+    }
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+    .pixel-font {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      line-height: 1.5;
+    }
+
+    /* === Gallery Header (OS-Retro 테마) === */
+    .gallery-header {
+      background-color: #000;
+      border-bottom: 3px solid #4a4a6a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .gallery-header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .back-link {
+      color: #ffcc00;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.7rem;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #00ffcc;
+    }
+    .gallery-title {
+      color: #ffcc00;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 1rem;
+    }
+    .cat-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .cat-tab {
+      background: transparent;
+      border: 2px solid #374151;
+      color: #9ca3af;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.85rem;
+      padding: 5px 13px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+    .cat-tab:hover {
+      border-color: #00ffcc;
+      color: #00ffcc;
+    }
+    .cat-tab.active {
+      background-color: transparent;
+      color: #00ffcc;
+      border-color: #00ffcc;
+    }
+    .header-settings-btn {
+      background: transparent;
+      border: none;
+      color: #4a4a6a;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+      border-radius: 4px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .header-settings-btn:hover {
+      color: #ffcc00;
+    }
+
+    /* === Gallery Header Light Theme === */
+    [data-theme="light"] .gallery-header {
+      background-color: #e5e7eb;
+      border-bottom-color: #9ca3af;
+    }
+    [data-theme="light"] .gallery-header::after {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+      background-size: 100% 4px;
+    }
+    [data-theme="light"] .back-link {
+      color: #b45309;
+    }
+    [data-theme="light"] .back-link:hover {
+      color: #047857;
+    }
+    [data-theme="light"] .gallery-title {
+      color: #92400e;
+    }
+    [data-theme="light"] .cat-tab {
+      border-color: #9ca3af;
+      color: #4b5563;
+    }
+    [data-theme="light"] .cat-tab:hover {
+      border-color: #047857;
+      color: #047857;
+    }
+    [data-theme="light"] .cat-tab.active {
+      color: #047857;
+      border-color: #047857;
+    }
+    [data-theme="light"] .header-settings-btn {
+      color: #6b7280;
+    }
+    [data-theme="light"] .header-settings-btn:hover {
+      color: #b45309;
+    }
+    [data-theme="light"] .header-edit-btn {
+      color: #6b7280;
+    }
+    .gallery-theme-toggle {
+      background: #b0b0b0;
+      color: #1a1a1a;
+      border: 2px solid #ffffff;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.6rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 2px;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+      transition: all 0.15s;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .gallery-theme-toggle:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px rgba(0,0,0,0.5);
+    }
+    .gallery-theme-toggle::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.4) 0px,
+        rgba(0, 0, 0, 0.4) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none;
+      z-index: 5;
+      animation: scanlineScroll 12s linear infinite;
+    }
+    @keyframes scanlineScroll {
+      from { background-position: 0 0; }
+      to { background-position: 0 100%; }
+    }
+    [data-theme="light"] .gallery-theme-toggle {
+      background: #374151;
+      color: #ffffff;
+      border-color: #374151;
+    }
+    [data-theme="light"] .gallery-theme-toggle::after {
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+    }
+
+    /* === Masonry Grid === */
+    .masonry {
+      column-count: 4;
+      column-gap: 8px;
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    @media (max-width: 1100px) {
+      .masonry { column-count: 3; }
+    }
+    @media (max-width: 750px) {
+      .masonry { column-count: 2; }
+    }
+    @media (max-width: 480px) {
+      .masonry { column-count: 1; }
+    }
+    .masonry-item {
+      break-inside: avoid;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: inline-block;
+      width: 100%;
+    }
+    .masonry-item img {
+      width: 100%;
+      display: block;
+      transition: filter 0.25s;
+      -webkit-user-drag: none;
+      user-select: none;
+      pointer-events: none;
+    }
+    .masonry-item { pointer-events: auto; }
+    .masonry-item:hover img {
+      filter: brightness(1.15);
+    }
+    .masonry-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 10px 10px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .masonry-item:hover .masonry-overlay {
+      opacity: 1;
+    }
+    .masonry-overlay-title {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      color: #f1c40f;
+      margin-bottom: 2px;
+    }
+    .masonry-overlay-project {
+      font-size: 0.75rem;
+      color: #b2bec3;
+    }
+    .masonry-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      color: #f1c40f;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      padding: 3px 7px;
+      border-radius: 3px;
+      pointer-events: none;
+    }
+
+    /* === Edit Mode (inline reorder) === */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .header-edit-btn {
+      background: transparent;
+      border: none;
+      color: #636e72;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+      border-radius: 4px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .header-edit-btn:hover {
+      color: #f1c40f;
+    }
+    @media (max-width: 750px) {
+      .header-edit-btn { display: none; }
+      .cat-tabs { display: none; }
+      .gallery-theme-toggle { display: none; }
+      .header-settings-btn { display: none; }
+    }
+
+    .edit-mode-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #1a1d23;
+      border-bottom: 2px solid #f1c40f;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      color: #f1c40f;
+    }
+    .edit-mode-bar-status { flex: 1; }
+    .edit-mode-bar-buttons { display: flex; gap: 8px; }
+    .edit-mode-bar button {
+      background: transparent;
+      border: 1px solid #f1c40f;
+      color: #f1c40f;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.55rem;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .edit-mode-bar button:hover { background: #f1c40f; color: #1a1d23; }
+    .edit-mode-bar button.primary { background: #f1c40f; color: #1a1d23; }
+    .edit-mode-bar button.primary:hover { background: #ffdb4d; }
+
+    .masonry-item.editable { cursor: grab; }
+    .masonry-item.editable:active { cursor: grabbing; }
+    .masonry-item.editable .drag-handle {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.75);
+      color: #f1c40f;
+      font-size: 0.9rem;
+      padding: 3px 6px;
+      border-radius: 3px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      letter-spacing: -1px;
+      z-index: 5;
+    }
+    .masonry-item.editable:hover .drag-handle { opacity: 1; }
+    .masonry-item.dragging {
+      transform: rotate(3deg) scale(0.98);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      opacity: 0.9;
+      transition: transform 0.1s;
+    }
+    .masonry-item.drop-target {
+      outline: 2px solid #f1c40f;
+      outline-offset: 2px;
+    }
+    .cat-tab:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* === Lightbox === */
+    .lightbox-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-carousel {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      overflow: visible;
+      align-items: center;
+    }
+    .lightbox-peek {
+      flex: 0 0 12%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.4;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .lightbox-peek img {
+      max-height: 85vh;
+      object-fit: contain;
+      width: 100%;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .lightbox-slide {
+      flex: 0 0 76%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.35s ease;
+    }
+    .lightbox-slide img {
+      width: 108%;
+      margin-left: -4%;
+      max-height: 88vh;
+      object-fit: contain;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .lightbox-info {
+      max-width: 1400px;
+      padding: 8px 16px 4px;
+      text-align: center;
+    }
+    .lightbox-info-title {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      color: #f1c40f;
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+    }
+    .lightbox-info-meta {
+      color: #b2bec3;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .lightbox-info-desc {
+      color: #888;
+      font-size: 0.85rem;
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 16px;
+      right: 24px;
+      color: white;
+      font-size: 2rem;
+      z-index: 1001;
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+    .lightbox-close:hover {
+      color: #f1c40f;
+    }
+    .lightbox-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+    .lightbox-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #555;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .lightbox-dot.active {
+      background: #f1c40f;
+    }
+
+    /* === Password Modal === */
+    .password-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .password-box {
+      background: #222;
+      border: 2px solid #f1c40f;
+      padding: 32px;
+      border-radius: 4px;
+      min-width: 300px;
+      text-align: center;
+    }
+    .password-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 16px 0;
+      background: #111;
+      border: 2px solid #636e72;
+      color: #e0e0e0;
+      font-size: 1rem;
+      border-radius: 2px;
+      box-sizing: border-box;
+    }
+    .password-box input:focus {
+      outline: none;
+      border-color: #f1c40f;
+    }
+    .password-box-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .password-box button {
+      padding: 10px 24px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 2px;
+      border: 2px solid;
+      transition: 0.15s;
+    }
+    .password-box .btn-enter {
+      background: #f1c40f;
+      color: #000;
+      border-color: #f1c40f;
+    }
+    .password-box .btn-enter:hover {
+      background: #d4ac0d;
+    }
+    .password-box .btn-cancel {
+      background: transparent;
+      color: #b2bec3;
+      border-color: #636e72;
+    }
+    .password-box .btn-cancel:hover {
+      border-color: #f1c40f;
+    }
+
+    /* === Admin Panel — Single Flow Layout === */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: #111;
+      border-bottom: 2px solid #636e72;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-layout {
+      display: flex;
+      height: calc(100vh - 46px);
+      overflow: hidden;
+    }
+
+    /* --- Left Panel (420px) --- */
+    .admin-left {
+      width: 420px;
+      flex-shrink: 0;
+      background: #1a1a1a;
+      border-right: 1px solid #636e72;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* Zone B: Upload */
+    .admin-upload-zone {
+      padding: 8px;
+      border-bottom: 1px solid #636e72;
+    }
+    .admin-upload-droparea {
+      border: 2px dashed #636e72;
+      border-radius: 6px;
+      padding: 16px 8px;
+      text-align: center;
+      color: #888;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .admin-upload-droparea.drag-over {
+      border-color: #f1c40f;
+      background: rgba(241,196,15,0.05);
+    }
+    .admin-upload-progress {
+      margin-top: 6px;
+      background: #222;
+      border-radius: 4px;
+      padding: 6px;
+      border: 1px solid #636e72;
+    }
+    .admin-upload-file {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+      font-size: 0.85rem;
+    }
+    .admin-upload-file.done { background: #1a2a1a; }
+    .admin-upload-file.uploading { background: #222; border: 1px solid #f1c40f; }
+    .admin-upload-file.queued { opacity: 0.6; }
+    .admin-upload-file.failed { background: #3a1a1a; border: 1px solid #c44; }
+    .admin-upload-file-thumb {
+      width: 28px;
+      height: 28px;
+      object-fit: cover;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .admin-progress-bar {
+      flex: 1;
+      background: #333;
+      height: 3px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .admin-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    .admin-progress-fill.gold { background: #f1c40f; }
+    .admin-progress-fill.green { background: #4CAF50; }
+
+    /* Zone C: Image Pool */
+    .admin-pool {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .admin-pool-header {
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #888;
+    }
+    .admin-pool-search {
+      margin: 0 8px 6px;
+      padding: 5px 8px;
+      background: #222;
+      border: 1px solid #636e72;
+      border-radius: 4px;
+      color: #ccc;
+      font-size: 0.95rem;
+      width: calc(100% - 16px);
+      box-sizing: border-box;
+    }
+    .admin-pool-search:focus {
+      outline: none;
+      border-color: #f1c40f;
+    }
+    .admin-pool-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      align-content: start;
+    }
+    .admin-pool-item {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: grab;
+      position: relative;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .admin-pool-item:hover {
+      transform: scale(1.05);
+      border-color: #888;
+    }
+    .admin-pool-item.dragging {
+      opacity: 0.4;
+    }
+    .admin-pool-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .admin-pool-item .pool-actions {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      display: none;
+      gap: 2px;
+    }
+    .admin-pool-item:hover .pool-actions {
+      display: flex;
+    }
+    .pool-action-btn {
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-size: 0.6rem;
+      padding: 2px 4px;
+      cursor: pointer;
+    }
+
+    /* Zone D: Group Panel (right side) */
+    .admin-groups-panel {
+      width: 320px;
+      flex-shrink: 0;
+      background: #1a1a1a;
+      border-left: 1px solid #636e72;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .admin-groups-panel-header {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #222;
+      border-bottom: 1px solid #636e72;
+      flex-shrink: 0;
+      font-size: 0.9rem;
+      color: #888;
+    }
+    .admin-groups-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      align-content: start;
+    }
+    .admin-group-card {
+      padding: 8px;
+      background: #222;
+      border: 2px solid #636e72;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .admin-group-card:hover {
+      border-color: #888;
+    }
+    .admin-group-card.selected {
+      background: #2a2a2a;
+      border-color: #f1c40f;
+    }
+    .admin-group-card.drag-over {
+      background: rgba(241,196,15,0.1);
+      border: 2px dashed #f1c40f;
+    }
+    .admin-group-card.drop-flash {
+      border-color: #4CAF50;
+      transition: border-color 0s;
+    }
+
+    /* --- Center Panel (flex) --- */
+    .admin-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #222;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .admin-right-header {
+      padding: 10px 16px;
+      background: #222;
+      border-bottom: 1px solid #636e72;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .admin-right-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .admin-right-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #636e72;
+      font-size: 0.9rem;
+    }
+
+    /* Section labels */
+    .admin-section-label {
+      font-size: 0.85rem;
+      color: #f1c40f;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    /* Save status indicator */
+    .save-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+    }
+    .save-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .save-status-dot.saved { background: #4CAF50; }
+    .save-status-dot.unsaved { background: #f1c40f; }
+    .save-status-dot.saving {
+      border: 2px solid #888;
+      border-top-color: transparent;
+      animation: spin 0.8s linear infinite;
+      background: none;
+      width: 6px;
+      height: 6px;
+    }
+
+    /* Admin input/button refinements */
+    .admin-input {
+      width: 100%;
+      padding: 6px 10px;
+      background: #111;
+      border: 1px solid #636e72;
+      color: #ccc;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1rem;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .admin-input:focus {
+      outline: none;
+      border-color: #f1c40f;
+    }
+    .admin-btn {
+      padding: 6px 14px;
+      font-family: 'Gowun Dodum', sans-serif;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      transition: 0.15s;
+    }
+    .admin-btn-gold {
+      background: #f1c40f;
+      color: #000;
+      font-weight: bold;
+    }
+    .admin-btn-gold:hover { background: #d4ac0d; }
+    .admin-btn-gold:disabled { opacity: 0.5; cursor: default; }
+    .admin-btn-ghost {
+      background: transparent;
+      color: #f1c40f;
+      border: 1px solid #636e72;
+    }
+    .admin-btn-ghost:hover { border-color: #f1c40f; }
+    .admin-btn-danger {
+      background: none;
+      color: #c44;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border: none;
+    }
+    .admin-btn-danger:hover { color: #e74c3c; }
+
+    /* Image cards in group detail */
+    .admin-image-card {
+      width: 110px;
+      flex-shrink: 0;
+      cursor: grab;
+    }
+    .admin-image-card-thumb {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid #333;
+      transition: border-color 0.15s;
+    }
+    .admin-image-card-thumb.is-thumbnail {
+      border-color: #f1c40f;
+    }
+    .admin-image-card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .admin-image-card-actions {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      display: flex;
+      gap: 3px;
+    }
+    .admin-image-card-actions button {
+      width: 22px;
+      height: 22px;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      border-radius: 3px;
+      color: #ccc;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .admin-image-card-actions button:hover {
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+    }
+    .admin-image-card-name {
+      font-size: 0.6rem;
+      color: #666;
+      margin-top: 3px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .admin-image-dropzone {
+      width: 110px;
+      flex-shrink: 0;
+      aspect-ratio: 1;
+      border: 2px dashed #444;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 0.7rem;
+      transition: border-color 0.15s;
+    }
+    .admin-image-dropzone.drag-over {
+      border-color: #f1c40f;
+      color: #f1c40f;
+    }
+
+    /* Drag insert marker */
+    .insert-marker {
+      width: 3px;
+      background: #f1c40f;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(241,196,15,0.5);
+      flex-shrink: 0;
+      align-self: stretch;
+    }
+
+    /* Inline Crop Editor */
+    .admin-crop-editor {
+      background: #1a1a1a;
+      border: 1px solid #f1c40f;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    .admin-crop-canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      cursor: crosshair;
+      background: #0a0a0a;
+      user-select: none;
+    }
+    .admin-crop-canvas-wrap img {
+      max-width: 100%;
+      display: block;
+    }
+    .crop-guide-line {
+      position: absolute;
+      background: rgba(241,196,15,0.2);
+      pointer-events: none;
+    }
+    .crop-center-h, .crop-center-v {
+      position: absolute;
+      background: rgba(255,255,255,0.15);
+      pointer-events: none;
+    }
+    .crop-selection {
+      position: absolute;
+      border: 2px solid #f1c40f;
+      background: rgba(241,196,15,0.06);
+      pointer-events: none;
+    }
+    .crop-dim-overlay {
+      position: absolute;
+      background: rgba(0,0,0,0.5);
+      pointer-events: none;
+    }
+    .crop-handle {
+      position: absolute;
+      background: #f1c40f;
+      pointer-events: auto;
+      z-index: 2;
+    }
+    .crop-handle-corner {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .crop-handle-edge-h {
+      width: 20px;
+      height: 6px;
+      border-radius: 3px;
+    }
+    .crop-handle-edge-v {
+      width: 6px;
+      height: 20px;
+      border-radius: 3px;
+    }
+    .crop-info-overlay {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      font-size: 0.65rem;
+      color: #aaa;
+      background: rgba(0,0,0,0.8);
+      padding: 2px 6px;
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .crop-controls {
+      width: 150px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .crop-preview-box {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #222;
+      border: 1px solid #636e72;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crop-ratio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+    .crop-ratio-btn {
+      padding: 4px;
+      background: #222;
+      border: 1px solid #636e72;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      color: #888;
+      cursor: pointer;
+      text-align: center;
+    }
+    .crop-ratio-btn.active {
+      background: #2a2a2a;
+      border-color: #f1c40f;
+      color: #f1c40f;
+    }
+    .crop-coords {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      font-size: 0.7rem;
+    }
+    .crop-coord-field {
+      background: #111;
+      padding: 3px 6px;
+      border-radius: 2px;
+      color: #666;
+    }
+
+    /* Admin card (section wrapper) */
+    .admin-card {
+      padding: 10px;
+    }
+
+    /* === Toast Notifications === */
+    .toast-container {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      max-width: 380px;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border-left: 4px solid;
+      font-size: 0.85rem;
+      animation: toastIn 0.3s ease;
+      position: relative;
+    }
+    .toast-success {
+      background: #1a3a1a;
+      border-color: #4CAF50;
+      color: #4CAF50;
+    }
+    .toast-error {
+      background: #3a1a1a;
+      border-color: #CC4444;
+      color: #CC4444;
+    }
+    .toast-warning {
+      background: #3a3a1a;
+      border-color: #f1c40f;
+      color: #f1c40f;
+    }
+    .toast-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .toast-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .toast-title {
+      font-weight: bold;
+      font-size: 0.8rem;
+      margin-bottom: 1px;
+    }
+    .toast-message {
+      font-size: 0.75rem;
+      opacity: 0.85;
+    }
+    .toast-close {
+      background: none;
+      border: none;
+      color: inherit;
+      opacity: 0.5;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .toast-close:hover {
+      opacity: 1;
+    }
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    /* === Loading spinner === */
+    .loading-spinner {
+      text-align: center;
+      padding: 80px 0;
+      color: #636e72;
+    }
+    .loading-spinner::after {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid #636e72;
+      border-top-color: #f1c40f;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* === Empty state === */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #636e72;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // === API Client ===
+    const API_BASE = "https://kji-gallery-api.blueitems7.workers.dev";
+
+    function api(path, opts = {}) {
+      const headers = { ...opts.headers };
+      const token = sessionStorage.getItem("admin_token");
+      if (token) headers["Authorization"] = "Bearer " + token;
+      if (opts.json) {
+        headers["Content-Type"] = "application/json";
+        opts.body = JSON.stringify(opts.json);
+        delete opts.json;
+      }
+      return fetch(API_BASE + path, { ...opts, headers }).then(r => r.json());
+    }
+
+    // === Cloudinary URL Builders ===
+    function thumbUrl(cloudName, publicId, crop, maxW) {
+      if (!maxW) maxW = 600;
+      const base = "https://res.cloudinary.com/" + cloudName + "/image/upload";
+      let transforms = "";
+      if (crop && crop.width && crop.height) {
+        transforms += "/c_crop,x_" + crop.x + ",y_" + crop.y + ",w_" + crop.width + ",h_" + crop.height;
+      }
+      transforms += "/c_fill,w_" + maxW + ",q_auto,f_auto";
+      return base + transforms + "/" + publicId;
+    }
+
+    function fullUrl(cloudName, publicId) {
+      return "https://res.cloudinary.com/" + cloudName + "/image/upload/c_limit,w_1920,q_auto,f_auto/" + publicId;
+    }
+
+    // === Components ===
+
+    function GalleryHeader({ categories, activeCategory, onCategoryChange, editMode, showEditBtn, onEnterEdit, theme, toggleTheme }) {
+      return (
+        <div className="gallery-header">
+          <a href="index.html" className="back-link">&larr; Portfolio</a>
+          <span className="gallery-title">Kim Jong-il Gallery</span>
+          <div className="cat-tabs">
+            <button
+              className={"cat-tab" + (activeCategory === "all" ? " active" : "")}
+              onClick={() => onCategoryChange("all")}
+              disabled={editMode}
+            >
+              ALL
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                className={"cat-tab" + (activeCategory === cat ? " active" : "")}
+                onClick={() => onCategoryChange(cat)}
+                disabled={editMode}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="header-actions">
+            <button
+              className="gallery-theme-toggle"
+              onClick={toggleTheme}
+              title="테마 전환"
+            >{theme === 'dark' ? 'DARK' : 'LIGHT'}</button>
+            {showEditBtn && !editMode && (
+              <button
+                className="header-edit-btn"
+                title="빠른 편집"
+                onClick={onEnterEdit}
+              >✎</button>
+            )}
+            <button
+              className="header-settings-btn"
+              title="관리자"
+              onClick={() => { const url = new URL(window.location); url.searchParams.set('admin', '1'); window.location = url.toString(); }}
+            >⚙</button>
+          </div>
+        </div>
+      );
+    }
+
+    function MasonryGrid({ groups, cloudName, onItemClick, editMode, onReorder }) {
+      const [dragIdx, setDragIdx] = React.useState(null);
+      const [dropIdx, setDropIdx] = React.useState(null);
+
+      if (!groups || groups.length === 0) {
+        return (
+          <div className="empty-state">
+            <p className="pixel-font" style={{fontSize: '0.7rem'}}>No images yet</p>
+          </div>
+        );
+      }
+
+      function handleDragStart(e, idx) {
+        if (!editMode) return;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('application/masonry-group', String(idx));
+        setDragIdx(idx);
+      }
+
+      function handleDragOver(e, idx) {
+        if (!editMode || dragIdx === null || dragIdx === idx) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        // Reshuffle only when the dragged cursor center crosses the target midpoint
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const midX = rect.left + rect.width / 2;
+        // Use vertical midpoint for column-flow masonry; fall back to horizontal for same-row
+        const crossed = Math.abs(e.clientY - midY) < rect.height / 2
+          && Math.abs(e.clientX - midX) < rect.width / 2;
+        if (crossed) setDropIdx(idx);
+      }
+
+      function handleDragLeave(e, idx) {
+        if (!editMode) return;
+        // Ignore leaves that are entering a child of this same card (prevents flicker)
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        if (dropIdx === idx) setDropIdx(null);
+      }
+
+      function handleDrop(e, idx) {
+        if (!editMode || dragIdx === null) return;
+        e.preventDefault();
+        if (dragIdx !== idx) {
+          onReorder(dragIdx, idx);
+        }
+        setDragIdx(null);
+        setDropIdx(null);
+      }
+
+      function handleDragEnd() {
+        // Always reset — guards against browser bugs where `drop` is skipped
+        setDragIdx(null);
+        setDropIdx(null);
+      }
+
+      function handleCardClick(gi) {
+        if (editMode) return; // Suppress lightbox while editing
+        onItemClick(gi, 0);
+      }
+
+      return (
+        <div className="masonry">
+          {groups.map((group, gi) => {
+            if (!group.thumbnail || !group.thumbnail.imageId) return null;
+            const src = thumbUrl(cloudName, group.thumbnail.imageId, group.thumbnail.crop);
+            const count = group.images.length;
+            const classes = ['masonry-item'];
+            if (editMode) classes.push('editable');
+            if (dragIdx === gi) classes.push('dragging');
+            if (dropIdx === gi) classes.push('drop-target');
+            return (
+              <div
+                key={group.id || gi}
+                className={classes.join(' ')}
+                draggable={editMode}
+                onDragStart={(e) => handleDragStart(e, gi)}
+                onDragOver={(e) => handleDragOver(e, gi)}
+                onDragLeave={(e) => handleDragLeave(e, gi)}
+                onDrop={(e) => handleDrop(e, gi)}
+                onDragEnd={handleDragEnd}
+                onClick={() => handleCardClick(gi)}
+              >
+                <img src={src} alt={group.title || ''} loading="lazy" draggable={false} onContextMenu={e => e.preventDefault()} />
+                {editMode && <div className="drag-handle">⋮⋮</div>}
+                <div className="masonry-overlay">
+                  <div className="masonry-overlay-title">{group.title || 'Untitled'}</div>
+                  <div className="masonry-overlay-project">{group.project || ''}</div>
+                </div>
+                {count > 1 && (
+                  <div className="masonry-badge">+{count - 1}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function Lightbox({ groups, cloudName, groupIndex, imageIndex, onClose, onNavigate }) {
+      const group = groups[groupIndex];
+      if (!group) return null;
+
+      const images = group.images;
+      const len = images.length;
+      const idx = imageIndex;
+      const current = images[idx];
+      // Circular: wrap around
+      const prevIdx = (idx - 1 + len) % len;
+      const nextIdx = (idx + 1) % len;
+      const prev = len > 1 ? images[prevIdx] : null;
+      const next = len > 1 ? images[nextIdx] : null;
+
+      function goNext() { if (len > 1) onNavigate(groupIndex, nextIdx); }
+      function goPrev() { if (len > 1) onNavigate(groupIndex, prevIdx); }
+
+      React.useEffect(() => {
+        function handleKey(e) {
+          if (e.key === 'Escape') onClose();
+          if (e.key === 'ArrowLeft') goPrev();
+          if (e.key === 'ArrowRight') goNext();
+        }
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+      }, [idx, groupIndex, len]);
+
+      function handleWheel(e) {
+        if (e.deltaY > 0 || e.deltaX > 0) {
+          goNext();
+        } else {
+          goPrev();
+        }
+      }
+
+      function handleBackdropClick(e) {
+        if (e.target === e.currentTarget) onClose();
+      }
+
+      return (
+        <div className="lightbox-backdrop" onClick={handleBackdropClick} onWheel={handleWheel}>
+          <button className="lightbox-close" onClick={onClose}>&times;</button>
+
+          <div className="lightbox-carousel">
+            <div className="lightbox-peek" onClick={goPrev}>
+              {prev && <img src={fullUrl(cloudName, prev.imageId)} alt="" draggable={false} onContextMenu={e => e.preventDefault()} />}
+            </div>
+            <div className="lightbox-slide" onClick={goNext}>
+              <img src={fullUrl(cloudName, current.imageId)} alt={group.title || ''} draggable={false} onContextMenu={e => e.preventDefault()} />
+            </div>
+            <div className="lightbox-peek" onClick={goNext}>
+              {next && <img src={fullUrl(cloudName, next.imageId)} alt="" draggable={false} onContextMenu={e => e.preventDefault()} />}
+            </div>
+          </div>
+
+          <div className="lightbox-info">
+            <div className="lightbox-info-title">{group.title || 'Untitled'}</div>
+            <div className="lightbox-info-meta">
+              {[group.project, group.category].filter(Boolean).join(' \u00b7 ')}
+            </div>
+            {group.description && (
+              <div className="lightbox-info-desc">{group.description}</div>
+            )}
+          </div>
+
+          {images.length > 1 && (
+            <div className="lightbox-dots">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  className={"lightbox-dot" + (i === idx ? " active" : "")}
+                  onClick={() => onNavigate(groupIndex, i)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function PasswordModal({ onSubmit, onCancel, error }) {
+      const inputRef = React.useRef(null);
+      const [pw, setPw] = React.useState('');
+
+      React.useEffect(() => {
+        if (inputRef.current) inputRef.current.focus();
+      }, []);
+
+      function handleKeyDown(e) {
+        if (e.key === 'Enter') onSubmit(pw);
+        if (e.key === 'Escape') onCancel();
+      }
+
+      return (
+        <div className="password-modal">
+          <div className="password-box">
+            <div className="pixel-font" style={{fontSize: '0.7rem', color: '#f1c40f', marginBottom: '8px'}}>
+              Admin Login
+            </div>
+            {error && <div style={{color: '#e74c3c', fontSize: '0.8rem', marginBottom: '8px'}}>{error}</div>}
+            <input
+              ref={inputRef}
+              type="password"
+              placeholder="Password"
+              value={pw}
+              onChange={e => setPw(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <div className="password-box-buttons">
+              <button className="btn-enter" onClick={() => onSubmit(pw)}>Enter</button>
+              <button className="btn-cancel" onClick={onCancel}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function EditModeBar({ dirty, saving, onSave, onCancel }) {
+      const statusText = saving
+        ? "저장 중..."
+        : dirty
+          ? "편집 모드 — 변경됨"
+          : "편집 모드";
+      return (
+        <div className="edit-mode-bar">
+          <div className="edit-mode-bar-status">{statusText}</div>
+          <div className="edit-mode-bar-buttons">
+            <button onClick={onCancel} disabled={saving}>취소</button>
+            <button className="primary" onClick={onSave} disabled={saving || !dirty}>저장</button>
+          </div>
+        </div>
+      );
+    }
+
+    // === Toast System ===
+    const ToastContext = React.createContext(null);
+
+    function useToast() {
+      return React.useContext(ToastContext);
+    }
+
+    function ToastProvider({ children }) {
+      const [toasts, setToasts] = React.useState([]);
+      const nextId = React.useRef(0);
+
+      function addToast(type, title, message, duration) {
+        const id = nextId.current++;
+        setToasts(prev => {
+          const updated = [...prev, { id, type, title, message }];
+          return updated.length > 3 ? updated.slice(-3) : updated;
+        });
+        if (duration !== 0) {
+          setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+          }, duration || 3000);
+        }
+      }
+
+      function removeToast(id) {
+        setToasts(prev => prev.filter(t => t.id !== id));
+      }
+
+      const toast = React.useMemo(() => ({
+        success: (title, message) => addToast('success', title, message, 3000),
+        error: (title, message) => addToast('error', title, message, 0),
+        warning: (title, message) => addToast('warning', title, message, 5000),
+      }), []);
+
+      return React.createElement(ToastContext.Provider, { value: toast },
+        children,
+        React.createElement(ToastContainer, { toasts, removeToast })
+      );
+    }
+
+    function ToastContainer({ toasts, removeToast }) {
+      if (toasts.length === 0) return null;
+      const icons = { success: '✓', error: '✗', warning: '⚠' };
+      return (
+        <div className="toast-container">
+          {toasts.map(t => (
+            <div key={t.id} className={"toast toast-" + t.type}>
+              <span className="toast-icon">{icons[t.type]}</span>
+              <div className="toast-body">
+                <div className="toast-title">{t.title}</div>
+                {t.message && <div className="toast-message">{t.message}</div>}
+              </div>
+              <button className="toast-close" onClick={() => removeToast(t.id)}>✕</button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // === Confirm Dialog (replaces confirm()) ===
+    function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel }) {
+      React.useEffect(() => {
+        function handleKey(e) {
+          if (e.key === 'Escape') onCancel();
+          if (e.key === 'Enter' && (e.target === document.body || e.target.closest('.password-modal'))) onConfirm();
+        }
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+      }, [onConfirm, onCancel]);
+
+      return (
+        <div className="password-modal">
+          <div className="password-box" style={{minWidth: '340px'}}>
+            <div style={{fontSize: '1rem', color: '#f1c40f', marginBottom: '12px'}}>⚠ {title}</div>
+            <p style={{color: '#ccc', fontSize: '0.9rem', marginBottom: '20px', lineHeight: '1.5'}}>{message}</p>
+            <div className="password-box-buttons">
+              <button className="btn-cancel" onClick={onCancel}>취소</button>
+              <button className="btn-enter" onClick={onConfirm}
+                style={{background: confirmColor || '#e74c3c', borderColor: confirmColor || '#e74c3c'}}>
+                {confirmLabel || '삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // === Admin Components (Single-Flow Layout) ===
+
+    // --- Component 1: AdminUploadZone ---
+    function AdminUploadZone({ cloudName, uploadImage, toast, folders, onAddFolder }) {
+      const [files, setFiles] = React.useState([]);
+      const [folder, setFolder] = React.useState('');
+      const [dragOver, setDragOver] = React.useState(false);
+      const [newFolderMode, setNewFolderMode] = React.useState(false);
+      const [newFolderName, setNewFolderName] = React.useState('');
+
+      // 폴더 목록이 로드되면 첫 항목을 기본 선택
+      React.useEffect(() => {
+        if (folders && folders.length > 0 && !folder) {
+          setFolder(folders[0]);
+        }
+      }, [folders]);
+      const activeUploads = React.useRef(0);
+      const queueRef = React.useRef([]);
+      const nextFileId = React.useRef(0);
+      const xhrSetRef = React.useRef(new Set());
+
+      // Abort in-flight XHRs on unmount
+      React.useEffect(() => {
+        return () => { xhrSetRef.current.forEach(x => x.abort()); };
+      }, []);
+
+      function addFiles(fileList) {
+        const newFiles = Array.from(fileList).map(f => ({
+          id: 'upload_' + (nextFileId.current++),
+          file: f,
+          name: f.name,
+          size: f.size,
+          status: 'queued',
+          progress: 0,
+          preview: null,
+          error: null,
+        }));
+        // Generate previews
+        newFiles.forEach((entry, i) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, preview: e.target.result } : f));
+          };
+          reader.readAsDataURL(entry.file);
+        });
+        setFiles(prev => [...prev, ...newFiles]);
+        newFiles.forEach(f => queueRef.current.push(f));
+        processQueue();
+      }
+
+      function processQueue() {
+        while (activeUploads.current < 2 && queueRef.current.length > 0) {
+          const entry = queueRef.current.shift();
+          activeUploads.current++;
+          uploadFile(entry);
+        }
+      }
+
+      function uploadFile(entry) {
+        setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, status: 'uploading' } : f));
+        const fd = new FormData();
+        fd.append('file', entry.file);
+        fd.append('folder', folder);
+
+        const xhr = new XMLHttpRequest();
+        xhrSetRef.current.add(xhr);
+        xhr.open('POST', API_BASE + '/api/upload');
+        const token = sessionStorage.getItem('admin_token');
+        if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, progress: pct } : f));
+          }
+        };
+
+        xhr.onload = () => {
+          xhrSetRef.current.delete(xhr);
+          activeUploads.current--;
+          try {
+            const result = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300 && !result.error) {
+              setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, status: 'done', progress: 100 } : f));
+              uploadImage(result);
+              toast.success('업로드 완료', entry.name);
+            } else {
+              setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, status: 'failed', error: result.error || 'Upload failed' } : f));
+              toast.error('업로드 실패', entry.name + ': ' + (result.error || 'Unknown error'));
+            }
+          } catch (e) {
+            setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, status: 'failed', error: 'Parse error' } : f));
+            toast.error('업로드 실패', entry.name);
+          }
+          processQueue();
+        };
+
+        xhr.onerror = () => {
+          xhrSetRef.current.delete(xhr);
+          activeUploads.current--;
+          setFiles(prev => prev.map(f => f.id === entry.id ? { ...f, status: 'failed', error: 'Network error' } : f));
+          toast.error('업로드 실패', entry.name + ': Network error');
+          processQueue();
+        };
+
+        xhr.send(fd);
+      }
+
+      function retryFile(entry) {
+        const updated = { ...entry, status: 'queued', progress: 0, error: null };
+        setFiles(prev => prev.map(f => f.id === entry.id ? updated : f));
+        queueRef.current.push(updated);
+        processQueue();
+      }
+
+      const doneCount = files.filter(f => f.status === 'done').length;
+      const totalCount = files.length;
+
+      return (
+        <div className="admin-card" style={{flexShrink: 0, borderBottom: '1px solid #636e72'}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
+            <span className="pixel-font" style={{fontSize: '1rem', color: '#f1c40f'}}>업로드</span>
+            <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
+              <span style={{fontSize: '0.85rem', color: '#888'}}>폴더:</span>
+              {newFolderMode ? (
+                <div style={{display: 'flex', gap: '4px', alignItems: 'center'}}>
+                  <input
+                    autoFocus
+                    type="text" value={newFolderName}
+                    onChange={e => setNewFolderName(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && newFolderName.trim()) {
+                        const name = newFolderName.trim();
+                        onAddFolder(name);
+                        setFolder(name);
+                        setNewFolderName('');
+                        setNewFolderMode(false);
+                      }
+                      if (e.key === 'Escape') { setNewFolderMode(false); setNewFolderName(''); }
+                    }}
+                    placeholder="폴더명 입력 후 Enter"
+                    style={{background: '#111', border: '1px solid #f1c40f', color: '#e0e0e0', padding: '3px 6px', fontSize: '0.85rem', borderRadius: '3px', width: '160px'}}
+                  />
+                  <button onClick={() => { setNewFolderMode(false); setNewFolderName(''); }}
+                    style={{background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1rem', lineHeight: 1}}>✕</button>
+                </div>
+              ) : (
+                <select
+                  value={folder}
+                  onChange={e => {
+                    if (e.target.value === '__new__') { setNewFolderMode(true); }
+                    else setFolder(e.target.value);
+                  }}
+                  style={{background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '3px 6px', fontSize: '0.85rem', borderRadius: '3px', minWidth: '140px'}}
+                >
+                  {(folders || []).map(f => <option key={f} value={f}>{f}</option>)}
+                  <option value="__new__">+ 새 폴더</option>
+                </select>
+              )}
+            </div>
+          </div>
+          <div
+            className={"upload-zone" + (dragOver ? " drag-over" : "")}
+            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={e => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
+            onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.multiple = true; input.accept = 'image/*'; input.onchange = () => addFiles(input.files); input.click(); }}
+            style={{border: '2px dashed ' + (dragOver ? '#f1c40f' : '#636e72'), borderRadius: '6px', padding: '20px', textAlign: 'center', cursor: 'pointer', background: dragOver ? 'rgba(241,196,15,0.05)' : 'transparent', transition: 'all 0.2s'}}
+          >
+            <div style={{fontSize: '1.5rem', marginBottom: '4px'}}>{dragOver ? '📂' : '📁'}</div>
+            <div style={{fontSize: '0.75rem', color: '#888'}}>클릭 또는 드래그하여 업로드</div>
+          </div>
+
+          {files.length > 0 && (
+            <div style={{marginTop: '8px'}}>
+              <div style={{fontSize: '0.7rem', color: '#888', marginBottom: '4px'}}>{doneCount}/{totalCount} 완료</div>
+              <div style={{height: '3px', background: '#333', borderRadius: '2px', overflow: 'hidden', marginBottom: '8px'}}>
+                <div style={{height: '100%', width: (totalCount > 0 ? (doneCount / totalCount * 100) : 0) + '%', background: '#f1c40f', transition: 'width 0.3s'}} />
+              </div>
+              <div style={{maxHeight: '150px', overflowY: 'auto'}}>
+                {files.map((f, i) => (
+                  <div key={i} style={{display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', borderBottom: '1px solid #222'}}>
+                    {f.preview && <img src={f.preview} style={{width: '32px', height: '32px', objectFit: 'cover', borderRadius: '3px'}} />}
+                    <div style={{flex: 1, minWidth: 0}}>
+                      <div style={{fontSize: '0.7rem', color: '#ccc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{f.name}</div>
+                      {f.status === 'uploading' && (
+                        <div style={{height: '2px', background: '#333', borderRadius: '1px', marginTop: '2px'}}>
+                          <div style={{height: '100%', width: f.progress + '%', background: '#3498db', transition: 'width 0.2s'}} />
+                        </div>
+                      )}
+                      {f.status === 'failed' && <div style={{fontSize: '0.6rem', color: '#e74c3c'}}>{f.error}</div>}
+                    </div>
+                    <div style={{fontSize: '0.65rem', flexShrink: 0}}>
+                      {f.status === 'queued' && <span style={{color: '#888'}}>대기</span>}
+                      {f.status === 'uploading' && <span style={{color: '#3498db'}}>{f.progress}%</span>}
+                      {f.status === 'done' && <span style={{color: '#2ecc71'}}>✓</span>}
+                      {f.status === 'failed' && <button onClick={(e) => { e.stopPropagation(); retryFile(f); }} style={{background: 'none', border: '1px solid #e74c3c', color: '#e74c3c', padding: '1px 6px', borderRadius: '3px', fontSize: '0.6rem', cursor: 'pointer'}}>재시도</button>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // --- Component 2: AdminImagePool ---
+    function AdminImagePool({ allImages, assignedIds, hiddenSet, cloudName, searchQuery, onSearchChange, toggleHidden, deleteImage, toast }) {
+      const [showHidden, setShowHidden] = React.useState(false);
+      const [confirmTarget, setConfirmTarget] = React.useState(null);
+
+      const poolImages = React.useMemo(() => {
+        let imgs = allImages.filter(img => !assignedIds.has(img.publicId));
+        if (!showHidden) imgs = imgs.filter(img => !hiddenSet.has(img.publicId));
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          imgs = imgs.filter(img => (img.publicId || '').toLowerCase().includes(q));
+        }
+        return imgs;
+      }, [allImages, assignedIds, hiddenSet, showHidden, searchQuery]);
+
+      function handleDragStart(e, publicId) {
+        e.dataTransfer.setData('application/pool-image', publicId);
+        e.dataTransfer.effectAllowed = 'copy';
+        e.currentTarget.classList.add('dragging');
+      }
+
+      function handleDragEnd(e) {
+        e.currentTarget.classList.remove('dragging');
+      }
+
+      return (
+        <div style={{padding: '10px'}}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
+            <span className="pixel-font" style={{fontSize: '1rem', color: '#f1c40f'}}>이미지 풀 ({poolImages.length})</span>
+            <label style={{fontSize: '0.85rem', color: '#888', cursor: 'pointer'}}>
+              <input type="checkbox" checked={showHidden} onChange={() => setShowHidden(!showHidden)} style={{marginRight: '4px'}} />
+              숨김 표시
+            </label>
+          </div>
+          <input
+            type="text" placeholder="검색..." value={searchQuery} onChange={e => onSearchChange(e.target.value)}
+            style={{width: '100%', background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '6px 8px', fontSize: '0.9rem', borderRadius: '4px', marginBottom: '8px', boxSizing: 'border-box'}}
+          />
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px'}}>
+            {poolImages.map(img => (
+              <div
+                key={img.publicId}
+                draggable
+                onDragStart={e => handleDragStart(e, img.publicId)}
+                onDragEnd={handleDragEnd}
+                style={{position: 'relative', aspectRatio: '1', borderRadius: '4px', overflow: 'hidden', border: hiddenSet.has(img.publicId) ? '2px solid #e74c3c' : '1px solid #333', cursor: 'grab', opacity: hiddenSet.has(img.publicId) ? 0.5 : 1, background: '#0a0a0a'}}
+              >
+                <img src={thumbUrl(cloudName, img.publicId, null, 200)} style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '100%', height: '100%', objectFit: 'contain'}} />
+                <div style={{position: 'absolute', bottom: 0, left: 0, right: 0, display: 'flex', gap: '2px', padding: '2px', background: 'rgba(0,0,0,0.7)'}}>
+                  <button onClick={() => toggleHidden(img.publicId)} title={hiddenSet.has(img.publicId) ? '표시' : '숨기기'}
+                    style={{flex: 1, background: 'none', border: 'none', color: hiddenSet.has(img.publicId) ? '#2ecc71' : '#888', fontSize: '0.6rem', cursor: 'pointer', padding: '2px'}}>
+                    {hiddenSet.has(img.publicId) ? '👁' : '🙈'}
+                  </button>
+                  <button onClick={() => setConfirmTarget(img.publicId)} title="삭제"
+                    style={{flex: 1, background: 'none', border: 'none', color: '#e74c3c', fontSize: '0.6rem', cursor: 'pointer', padding: '2px'}}>
+                    🗑
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {confirmTarget && (
+            <ConfirmDialog
+              title="이미지 삭제"
+              message={"Cloudinary에서 완전 삭제하시겠습니까?\n" + confirmTarget}
+              confirmLabel="삭제"
+              confirmColor="#e74c3c"
+              onConfirm={() => { deleteImage(confirmTarget); setConfirmTarget(null); }}
+              onCancel={() => setConfirmTarget(null)}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // --- Component 3: AdminGroupList ---
+    function AdminGroupList({ config, selectedGroup, setSelectedGroup, addGroup, deleteGroup, moveGroup, addImageToGroup, cloudName, toast }) {
+      const [dragOverGroup, setDragOverGroup] = React.useState(null);
+      const [flashGroup, setFlashGroup] = React.useState(null);
+      const [confirmTarget, setConfirmTarget] = React.useState(null);
+      const [dragIdx, setDragIdx] = React.useState(null);
+
+      function handleDrop(e, groupId, idx) {
+        e.preventDefault();
+        const poolImage = e.dataTransfer.getData('application/pool-image');
+        if (poolImage) {
+          addImageToGroup(groupId, poolImage);
+          setFlashGroup(groupId);
+          setTimeout(() => setFlashGroup(null), 500);
+          toast.success('이미지 추가', '게시물에 이미지를 추가했습니다');
+        } else if (dragIdx !== null && dragIdx !== idx) {
+          moveGroup(dragIdx, idx);
+        }
+        setDragOverGroup(null);
+        setDragIdx(null);
+      }
+
+      function handleDragOver(e, groupId) {
+        e.preventDefault();
+        setDragOverGroup(groupId);
+      }
+
+      return (
+        <React.Fragment>
+          <div className="admin-groups-panel-header">
+            <span className="pixel-font" style={{fontSize: '1rem', color: '#f1c40f'}}>게시물 ({(config.groups || []).length})</span>
+            <button className="admin-btn admin-btn-ghost" onClick={addGroup} style={{fontSize: '0.85rem', padding: '4px 12px'}}>+ 새 게시물</button>
+          </div>
+          <div className="admin-groups-grid">
+            {(config.groups || []).map((group, idx) => {
+              const isSelected = selectedGroup === group.id;
+              const isDragOver = dragOverGroup === group.id;
+              const isFlash = flashGroup === group.id;
+              const thumbId = group.thumbnail && group.thumbnail.imageId;
+              const thumbSrc = thumbId ? thumbUrl(cloudName, thumbId, group.thumbnail.crop, 160) : null;
+              return (
+                <div
+                  key={group.id}
+                  className={"admin-group-card" + (isSelected ? " selected" : "")}
+                  onClick={() => setSelectedGroup(group.id)}
+                  draggable
+                  onDragStart={e => { e.dataTransfer.setData('text/plain', idx); e.dataTransfer.effectAllowed = 'move'; setDragIdx(idx); }}
+                  onDragOver={e => handleDragOver(e, group.id)}
+                  onDragLeave={() => setDragOverGroup(null)}
+                  onDrop={e => handleDrop(e, group.id, idx)}
+                  style={{
+                    border: isFlash ? '2px solid #2ecc71' : isDragOver ? '2px dashed #f1c40f' : undefined,
+                    transition: 'border 0.3s',
+                  }}
+                >
+                  {thumbSrc ? (
+                    <img src={thumbSrc} alt="" style={{width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '3px'}} />
+                  ) : (
+                    <div style={{width: '100%', aspectRatio: '1', background: '#333', borderRadius: '3px'}} />
+                  )}
+                  <div style={{minWidth: 0}}>
+                    <div style={{fontSize: '0.85rem', color: '#e0e0e0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: isSelected ? 'bold' : 'normal'}}>
+                      {group.title || 'Untitled'}
+                    </div>
+                    <div style={{fontSize: '0.75rem', color: '#888', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px'}}>
+                      <span>{group.category || '미분류'}</span>
+                      <span>{(group.images || []).length}장</span>
+                    </div>
+                    {isDragOver && <div style={{fontSize: '0.75rem', color: '#f1c40f', marginTop: '2px'}}>← 놓기</div>}
+                  </div>
+                  <button
+                    className="admin-btn-danger"
+                    onClick={e => { e.stopPropagation(); setConfirmTarget(group.id); }}
+                    style={{fontSize: '0.75rem', padding: '2px 6px', alignSelf: 'flex-end'}}
+                  >삭제</button>
+                </div>
+              );
+            })}
+          </div>
+          {confirmTarget && (
+            <ConfirmDialog
+              title="게시물 삭제"
+              message="이 게시물을 삭제하시겠습니까?"
+              confirmLabel="삭제"
+              confirmColor="#e74c3c"
+              onConfirm={() => { deleteGroup(confirmTarget); setConfirmTarget(null); }}
+              onCancel={() => setConfirmTarget(null)}
+            />
+          )}
+        </React.Fragment>
+      );
+    }
+
+    // --- Component 4: AdminCropEditor ---
+    function AdminCropEditor({ group, cloudName, updateGroup, saveCrop, toast, onClose }) {
+      const thumbId = group.thumbnail && group.thumbnail.imageId;
+      const existingCrop = group.thumbnail && group.thumbnail.crop;
+
+      const imgRef = React.useRef(null);
+      const containerRef = React.useRef(null);
+      const [imgLoaded, setImgLoaded] = React.useState(false);
+      const [crop, setCrop] = React.useState(existingCrop || null);
+      const [dragging, setDragging] = React.useState(false);
+      const [dragStart, setDragStart] = React.useState(null);
+      const [ratio, setRatio] = React.useState('free');
+      const [handle, setHandle] = React.useState(null);
+
+      if (!thumbId) return <div style={{color: '#888', padding: '12px', fontSize: '0.8rem'}}>썸네일 이미지를 먼저 설정하세요.</div>;
+
+      const imgSrc = "https://res.cloudinary.com/" + cloudName + "/image/upload/q_auto,f_auto/" + thumbId;
+
+      function getScale() {
+        if (!imgRef.current) return 1;
+        return imgRef.current.naturalWidth / imgRef.current.clientWidth;
+      }
+
+      function toDisplay(c) {
+        if (!c) return null;
+        const s = getScale();
+        return { x: c.x / s, y: c.y / s, width: c.width / s, height: c.height / s };
+      }
+
+      function toNative(c) {
+        if (!c) return null;
+        const s = getScale();
+        return { x: Math.round(c.x * s), y: Math.round(c.y * s), width: Math.round(c.width * s), height: Math.round(c.height * s) };
+      }
+
+      function constrainRatio(w, h) {
+        if (ratio === '4:3') return [w, w * 3 / 4];
+        if (ratio === '1:1') return [w, w];
+        if (ratio === '16:9') return [w, w * 9 / 16];
+        return [w, h];
+      }
+
+      // 호버 위치에 따라 cursor 업데이트 (re-render 없이 DOM 직접 조작)
+      function updateCursor(x, y) {
+        if (!containerRef.current) return;
+        const dc = toDisplay(crop);
+        if (!dc) { containerRef.current.style.cursor = 'crosshair'; return; }
+        const HANDLE_HIT = 12;
+        const corners = [
+          { cx: dc.x, cy: dc.y }, { cx: dc.x + dc.width, cy: dc.y },
+          { cx: dc.x, cy: dc.y + dc.height }, { cx: dc.x + dc.width, cy: dc.y + dc.height },
+        ];
+        for (const c of corners) {
+          if (Math.abs(x - c.cx) < HANDLE_HIT && Math.abs(y - c.cy) < HANDLE_HIT) {
+            containerRef.current.style.cursor = 'nwse-resize'; return;
+          }
+        }
+        if (x >= dc.x && x <= dc.x + dc.width && y >= dc.y && y <= dc.y + dc.height) {
+          containerRef.current.style.cursor = 'grab'; return;
+        }
+        containerRef.current.style.cursor = 'crosshair';
+      }
+
+      function handleMouseDown(e) {
+        if (!imgRef.current) return;
+        const rect = imgRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const dc = toDisplay(crop);
+        if (dc) {
+          const HANDLE_HIT = 12;
+          // 1. 코너 핸들 → 리사이즈
+          const corners = [
+            { name: 'tl', cx: dc.x, cy: dc.y },
+            { name: 'tr', cx: dc.x + dc.width, cy: dc.y },
+            { name: 'bl', cx: dc.x, cy: dc.y + dc.height },
+            { name: 'br', cx: dc.x + dc.width, cy: dc.y + dc.height },
+          ];
+          for (const c of corners) {
+            if (Math.abs(x - c.cx) < HANDLE_HIT && Math.abs(y - c.cy) < HANDLE_HIT) {
+              setHandle(c.name);
+              setDragging(true);
+              setDragStart({ x, y, crop: { ...dc } });
+              return;
+            }
+          }
+          // 2. 크롭 영역 내부 → 이동
+          if (x >= dc.x && x <= dc.x + dc.width && y >= dc.y && y <= dc.y + dc.height) {
+            setHandle('move');
+            setDragging(true);
+            setDragStart({ x, y, crop: { ...dc } });
+            if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
+            return;
+          }
+        }
+        // 3. 빈 영역 → 새 크롭
+        setDragging(true);
+        setHandle(null);
+        setDragStart({ x, y, crop: null });
+        setCrop(toNative({ x, y, width: 1, height: 1 }));
+      }
+
+      function handleMouseMove(e) {
+        if (!imgRef.current) return;
+        const rect = imgRef.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+
+        if (!dragging || !dragStart) {
+          // 드래그 중 아닐 때: cursor 힌트만 업데이트
+          updateCursor(x, y);
+          return;
+        }
+
+        if (handle === 'move' && dragStart.crop) {
+          // 크롭 영역 이동
+          const dc = dragStart.crop;
+          const dx = x - dragStart.x;
+          const dy = y - dragStart.y;
+          const imgW = rect.width;
+          const imgH = rect.height;
+          const newX = Math.max(0, Math.min(dc.x + dx, imgW - dc.width));
+          const newY = Math.max(0, Math.min(dc.y + dy, imgH - dc.height));
+          setCrop(toNative({ x: newX, y: newY, width: dc.width, height: dc.height }));
+        } else if (handle && dragStart.crop) {
+          // 핸들 리사이즈
+          const dc = { ...dragStart.crop };
+          const dx = x - dragStart.x;
+          const dy = y - dragStart.y;
+          let newCrop;
+          if (handle === 'br') {
+            let [w, h] = constrainRatio(dc.width + dx, dc.height + dy);
+            newCrop = { x: dc.x, y: dc.y, width: Math.max(20, w), height: Math.max(20, h) };
+          } else if (handle === 'tl') {
+            let [w, h] = constrainRatio(dc.width - dx, dc.height - dy);
+            newCrop = { x: dc.x + dc.width - Math.max(20, w), y: dc.y + dc.height - Math.max(20, h), width: Math.max(20, w), height: Math.max(20, h) };
+          } else if (handle === 'tr') {
+            let [w, h] = constrainRatio(dc.width + dx, dc.height - dy);
+            newCrop = { x: dc.x, y: dc.y + dc.height - Math.max(20, h), width: Math.max(20, w), height: Math.max(20, h) };
+          } else if (handle === 'bl') {
+            let [w, h] = constrainRatio(dc.width - dx, dc.height + dy);
+            newCrop = { x: dc.x + dc.width - Math.max(20, w), y: dc.y, width: Math.max(20, w), height: Math.max(20, h) };
+          }
+          setCrop(toNative(newCrop));
+        } else {
+          // 새 크롭 드래그
+          const sx = dragStart.x, sy = dragStart.y;
+          let w = x - sx, h = y - sy;
+          let cx = sx, cy = sy;
+          if (w < 0) { cx = x; w = -w; }
+          if (h < 0) { cy = y; h = -h; }
+          [w, h] = constrainRatio(w, h);
+          setCrop(toNative({ x: cx, y: cy, width: Math.max(10, w), height: Math.max(10, h) }));
+        }
+      }
+
+      function handleMouseUp(e) {
+        setDragging(false);
+        setHandle(null);
+        setDragStart(null);
+        // cursor 복원
+        if (imgRef.current && containerRef.current) {
+          const rect = imgRef.current.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          updateCursor(x, y);
+        }
+      }
+
+      async function applyCrop() {
+        if (!crop) return;
+        await saveCrop(group.id, thumbId, crop);
+        onClose();
+      }
+
+      function resetCrop() {
+        setCrop(null);
+        updateGroup(group.id, { thumbnail: { imageId: thumbId, crop: null } });
+        toast.success('크롭 초기화', '크롭이 제거되었습니다');
+      }
+
+      const displayCrop = toDisplay(crop);
+      const nativeCrop = crop;
+
+      return (
+        <div style={{background: '#1a1a1a', borderRadius: '6px', padding: '12px', marginTop: '8px', border: '1px solid #f1c40f'}}>
+          {/* 상단 툴바: 비율 버튼(좌) + 액션 버튼(우) */}
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+            <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
+              <span style={{fontSize: '0.85rem', color: '#f1c40f', marginRight: '4px'}}>✂</span>
+              {['4:3', '1:1', '16:9', 'free'].map(r => (
+                <button key={r} onClick={() => setRatio(r)}
+                  style={{fontSize: '0.8rem', padding: '4px 10px', background: ratio === r ? '#f1c40f' : '#333', color: ratio === r ? '#000' : '#ccc', border: '1px solid ' + (ratio === r ? '#f1c40f' : '#636e72'), borderRadius: '3px', cursor: 'pointer'}}>
+                  {r === 'free' ? 'Free' : r}
+                </button>
+              ))}
+            </div>
+            <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
+              <button onClick={resetCrop}
+                style={{fontSize: '0.9rem', padding: '5px 14px', background: '#333', color: '#ccc', border: '1px solid #636e72', borderRadius: '3px', cursor: 'pointer'}}>
+                초기화
+              </button>
+              <button onClick={applyCrop} disabled={!crop}
+                style={{fontSize: '0.9rem', padding: '5px 16px', background: crop ? '#2ecc71' : '#333', color: crop ? '#000' : '#555', border: '1px solid ' + (crop ? '#2ecc71' : '#636e72'), borderRadius: '3px', cursor: crop ? 'pointer' : 'default', fontWeight: 'bold'}}>
+                적용
+              </button>
+              <button onClick={onClose}
+                style={{background: 'none', border: 'none', color: '#888', fontSize: '1.1rem', cursor: 'pointer', lineHeight: 1, padding: '2px 4px'}}>✕</button>
+            </div>
+          </div>
+
+          {/* 크롭 캔버스 */}
+          <div ref={containerRef}
+            style={{position: 'relative', display: 'inline-block', maxWidth: '100%', userSelect: 'none', cursor: 'crosshair'}}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={e => { handleMouseUp(e); if (containerRef.current) containerRef.current.style.cursor = 'crosshair'; }}
+          >
+            <img ref={imgRef} src={imgSrc} onLoad={() => setImgLoaded(true)}
+              style={{maxWidth: '100%', display: 'block', borderRadius: '4px'}} draggable={false} />
+            {imgLoaded && displayCrop && (
+              <React.Fragment>
+                {/* 어두운 오버레이 4방향 */}
+                <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: displayCrop.y + 'px', background: 'rgba(0,0,0,0.5)', pointerEvents: 'none'}} />
+                <div style={{position: 'absolute', top: (displayCrop.y + displayCrop.height) + 'px', left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', pointerEvents: 'none'}} />
+                <div style={{position: 'absolute', top: displayCrop.y + 'px', left: 0, width: displayCrop.x + 'px', height: displayCrop.height + 'px', background: 'rgba(0,0,0,0.5)', pointerEvents: 'none'}} />
+                <div style={{position: 'absolute', top: displayCrop.y + 'px', left: (displayCrop.x + displayCrop.width) + 'px', right: 0, height: displayCrop.height + 'px', background: 'rgba(0,0,0,0.5)', pointerEvents: 'none'}} />
+                {/* 크롭 테두리 + 3분할선 */}
+                <div style={{position: 'absolute', left: displayCrop.x + 'px', top: displayCrop.y + 'px', width: displayCrop.width + 'px', height: displayCrop.height + 'px', border: '2px solid #f1c40f', boxSizing: 'border-box', pointerEvents: 'none'}}>
+                  <div style={{position: 'absolute', left: '33.3%', top: 0, bottom: 0, borderLeft: '1px solid rgba(241,196,15,0.3)', pointerEvents: 'none'}} />
+                  <div style={{position: 'absolute', left: '66.6%', top: 0, bottom: 0, borderLeft: '1px solid rgba(241,196,15,0.3)', pointerEvents: 'none'}} />
+                  <div style={{position: 'absolute', top: '33.3%', left: 0, right: 0, borderTop: '1px solid rgba(241,196,15,0.3)', pointerEvents: 'none'}} />
+                  <div style={{position: 'absolute', top: '66.6%', left: 0, right: 0, borderTop: '1px solid rgba(241,196,15,0.3)', pointerEvents: 'none'}} />
+                  <div style={{position: 'absolute', left: '50%', top: 'calc(50% - 8px)', width: '1px', height: '16px', background: 'rgba(241,196,15,0.5)', pointerEvents: 'none'}} />
+                  <div style={{position: 'absolute', top: '50%', left: 'calc(50% - 8px)', width: '16px', height: '1px', background: 'rgba(241,196,15,0.5)', pointerEvents: 'none'}} />
+                </div>
+                {/* 코너 핸들 */}
+                {[
+                  { left: displayCrop.x - 6, top: displayCrop.y - 6 },
+                  { left: displayCrop.x + displayCrop.width - 6, top: displayCrop.y - 6 },
+                  { left: displayCrop.x - 6, top: displayCrop.y + displayCrop.height - 6 },
+                  { left: displayCrop.x + displayCrop.width - 6, top: displayCrop.y + displayCrop.height - 6 },
+                ].map((pos, i) => (
+                  <div key={i} style={{position: 'absolute', left: pos.left + 'px', top: pos.top + 'px', width: '12px', height: '12px', borderRadius: '50%', background: '#f1c40f', border: '2px solid #fff', pointerEvents: 'none'}} />
+                ))}
+              </React.Fragment>
+            )}
+          </div>
+
+          {/* 하단: 좌표 정보 + 미리보기 */}
+          {nativeCrop && (
+            <div style={{fontSize: '0.65rem', color: '#888', marginTop: '6px'}}>
+              X: {nativeCrop.x} &nbsp; Y: {nativeCrop.y} &nbsp; W: {nativeCrop.width} &nbsp; H: {nativeCrop.height}
+            </div>
+          )}
+          {imgLoaded && nativeCrop && (
+            <div style={{marginTop: '8px'}}>
+              <div style={{fontSize: '0.65rem', color: '#888', marginBottom: '4px'}}>미리보기</div>
+              <img src={thumbUrl(cloudName, thumbId, nativeCrop, 200)} style={{maxWidth: '200px', borderRadius: '4px', border: '1px solid #444'}} />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // --- Component 5: AdminGroupDetail ---
+    function AdminGroupDetail({ config, group, cloudName, updateGroup, saveCrop, removeImageFromGroup, setThumbnailImage, moveImageInGroup, addImageToGroup, toast }) {
+      const [cropOpen, setCropOpen] = React.useState(false);
+      const [dragIdx, setDragIdx] = React.useState(null);
+      const [insertIdx, setInsertIdx] = React.useState(null);
+
+      if (!group) return null;
+
+      const thumbId = group.thumbnail && group.thumbnail.imageId;
+
+      function handleImageDragStart(e, idx) {
+        e.dataTransfer.setData('application/group-image', String(idx));
+        e.dataTransfer.effectAllowed = 'move';
+        setDragIdx(idx);
+      }
+
+      function handleImageDragOver(e, idx) {
+        e.preventDefault();
+        const groupImage = e.dataTransfer.types.includes('application/group-image');
+        const poolImage = e.dataTransfer.types.includes('application/pool-image');
+        if (groupImage || poolImage) {
+          setInsertIdx(idx);
+        }
+      }
+
+      function handleImageDrop(e, idx) {
+        e.preventDefault();
+        e.stopPropagation();
+        const groupImageIdx = e.dataTransfer.getData('application/group-image');
+        const poolImageId = e.dataTransfer.getData('application/pool-image');
+        if (groupImageIdx !== '') {
+          const fromIdx = parseInt(groupImageIdx);
+          if (fromIdx !== idx) moveImageInGroup(group.id, fromIdx, idx);
+        } else if (poolImageId) {
+          addImageToGroup(group.id, poolImageId);
+          toast.success('이미지 추가', '게시물에 이미지를 추가했습니다');
+        }
+        setDragIdx(null);
+        setInsertIdx(null);
+      }
+
+      function handleEndZoneDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const poolImageId = e.dataTransfer.getData('application/pool-image');
+        if (poolImageId) {
+          addImageToGroup(group.id, poolImageId);
+          toast.success('이미지 추가', '게시물에 이미지를 추가했습니다');
+        }
+        setInsertIdx(null);
+      }
+
+      return (
+        <div style={{padding: '4px'}}>
+          {/* Metadata Section */}
+          <div style={{marginBottom: '16px'}}>
+            <div style={{fontSize: '0.85rem', color: '#f1c40f', marginBottom: '8px'}}>메타데이터</div>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px'}}>
+              <div>
+                <label style={{fontSize: '0.85rem', color: '#888', display: 'block', marginBottom: '2px'}}>제목</label>
+                <input type="text" value={group.title || ''} onChange={e => updateGroup(group.id, { title: e.target.value })}
+                  style={{width: '100%', background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '6px', fontSize: '0.9rem', borderRadius: '3px', boxSizing: 'border-box'}} />
+              </div>
+              <div>
+                <label style={{fontSize: '0.85rem', color: '#888', display: 'block', marginBottom: '2px'}}>프로젝트</label>
+                <input type="text" value={group.project || ''} onChange={e => updateGroup(group.id, { project: e.target.value })}
+                  style={{width: '100%', background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '6px', fontSize: '0.9rem', borderRadius: '3px', boxSizing: 'border-box'}} />
+              </div>
+              <div>
+                <label style={{fontSize: '0.85rem', color: '#888', display: 'block', marginBottom: '2px'}}>카테고리</label>
+                <select value={group.category || ''} onChange={e => updateGroup(group.id, { category: e.target.value })}
+                  style={{width: '100%', background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '6px', fontSize: '0.9rem', borderRadius: '3px'}}>
+                  {(config.categories || ['ETC']).map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize: '0.85rem', color: '#888', display: 'block', marginBottom: '2px'}}>colSpan</label>
+                <select value={(group.gridSize && group.gridSize.colSpan) || 1} onChange={e => updateGroup(group.id, { gridSize: { ...group.gridSize, colSpan: parseInt(e.target.value) } })}
+                  style={{width: '100%', background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '6px', fontSize: '0.9rem', borderRadius: '3px'}}>
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={3}>3</option>
+                </select>
+              </div>
+            </div>
+            <div style={{marginTop: '8px'}}>
+              <label style={{fontSize: '0.85rem', color: '#888', display: 'block', marginBottom: '2px'}}>설명</label>
+              <textarea value={group.description || ''} onChange={e => updateGroup(group.id, { description: e.target.value })}
+                rows={2} style={{width: '100%', background: '#111', border: '1px solid #636e72', color: '#e0e0e0', padding: '6px', fontSize: '0.9rem', borderRadius: '3px', resize: 'vertical', boxSizing: 'border-box'}} />
+            </div>
+          </div>
+
+          {/* Images Section */}
+          <div style={{marginBottom: '16px'}}>
+            <div style={{fontSize: '0.85rem', color: '#f1c40f', marginBottom: '8px'}}>이미지 ({(group.images || []).length})</div>
+            <div style={{display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px', alignItems: 'flex-start'}}
+              onDragOver={e => e.preventDefault()}
+              onDrop={handleEndZoneDrop}
+            >
+              {(group.images || []).map((img, idx) => {
+                const isThumb = img.imageId === thumbId;
+                return (
+                  <React.Fragment key={img.imageId}>
+                    {insertIdx === idx && <div style={{width: '3px', background: '#f1c40f', borderRadius: '2px', alignSelf: 'stretch', flexShrink: 0}} />}
+                    <div
+                      draggable
+                      onDragStart={e => handleImageDragStart(e, idx)}
+                      onDragOver={e => handleImageDragOver(e, idx)}
+                      onDrop={e => handleImageDrop(e, idx)}
+                      onDragEnd={() => { setDragIdx(null); setInsertIdx(null); }}
+                      style={{width: '110px', flexShrink: 0, border: isThumb ? '2px solid #f1c40f' : '1px solid #636e72', borderRadius: '4px', overflow: 'hidden', opacity: dragIdx === idx ? 0.4 : 1, cursor: 'grab'}}
+                    >
+                      <img
+                        src={thumbUrl(cloudName, img.imageId, null, 110)}
+                        style={{width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block', cursor: isThumb ? 'pointer' : 'default'}}
+                        onClick={isThumb ? () => setCropOpen(!cropOpen) : undefined}
+                        title={isThumb ? '클릭하여 크롭' : undefined}
+                      />
+                      <div style={{display: 'flex', justifyContent: 'center', gap: '2px', padding: '3px', background: '#222'}}>
+                        {!isThumb && (
+                          <button onClick={() => setThumbnailImage(group.id, img.imageId)} title="썸네일 지정"
+                            style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.7rem', padding: '2px 4px', color: '#888'}}>★</button>
+                        )}
+                        {isThumb && (
+                          <button onClick={() => setCropOpen(!cropOpen)} title="크롭"
+                            style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.7rem', padding: '2px 4px', color: '#f1c40f'}}>✂</button>
+                        )}
+                        <button onClick={() => removeImageFromGroup(group.id, img.imageId)} title="제거"
+                          style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.7rem', padding: '2px 4px', color: '#e74c3c'}}>✕</button>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Inline Crop Editor */}
+          {cropOpen && thumbId && (
+            <AdminCropEditor
+              group={group}
+              cloudName={cloudName}
+              updateGroup={updateGroup}
+              saveCrop={saveCrop}
+              toast={toast}
+              onClose={() => setCropOpen(false)}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // --- Component 6: AdminApp (New Single-Flow) ---
+    function AdminApp({ config, setConfig, allImages, setAllImages, onExit, cloudName }) {
+      const [selectedGroup, setSelectedGroup] = React.useState(null);
+      const [saving, setSaving] = React.useState(false);
+      const [dirty, setDirty] = React.useState(false);
+      const [searchQuery, setSearchQuery] = React.useState('');
+      const [poolDragOver, setPoolDragOver] = React.useState(false);
+      const [folders, setFolders] = React.useState([]);
+
+      // 폴더 목록 로드 (KV 캐시 경유)
+      React.useEffect(() => {
+        api('/api/folders').then(data => {
+          if (data.folders) setFolders(data.folders);
+        }).catch(() => {});
+      }, []);
+
+      function handleAddFolder(name) {
+        setFolders(prev => prev.includes(name) ? prev : [...prev, name]);
+      }
+      const toast = useToast();
+      const initialConfigRef = React.useRef(JSON.stringify(config));
+
+      // Track dirty state
+      React.useEffect(() => {
+        const current = JSON.stringify(config);
+        setDirty(current !== initialConfigRef.current);
+      }, [config]);
+
+      // Beforeunload warning
+      React.useEffect(() => {
+        function handleBeforeUnload(e) {
+          if (dirty) { e.preventDefault(); e.returnValue = ''; }
+        }
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+      }, [dirty]);
+
+      // Computed sets
+      const assignedIds = React.useMemo(() => {
+        const s = new Set();
+        (config.groups || []).forEach(g => (g.images || []).forEach(img => s.add(img.imageId)));
+        return s;
+      }, [config]);
+
+      const hiddenSet = React.useMemo(() => new Set(config.hiddenImages || []), [config]);
+
+      // --- Admin functions ---
+      async function saveConfig() {
+        setSaving(true);
+        try {
+          await api('/api/config', { method: 'PUT', json: config });
+          initialConfigRef.current = JSON.stringify(config);
+          setDirty(false);
+          toast.success('저장 완료', '설정이 저장되었습니다');
+        } catch (e) {
+          toast.error('저장 실패', e.message || '서버 오류');
+        }
+        setSaving(false);
+      }
+
+      function addGroup() {
+        const id = 'grp_' + Date.now();
+        const newGroup = {
+          id, title: '새 게시물', project: '', category: (config.categories && config.categories[0]) || 'ETC',
+          description: '', gridPosition: config.groups.length,
+          gridSize: { colSpan: 1, rowSpan: 1 },
+          thumbnail: { imageId: '', crop: null },
+          images: [],
+        };
+        setConfig({ ...config, groups: [...config.groups, newGroup] });
+        setSelectedGroup(id);
+      }
+
+      function deleteGroup(groupId) {
+        setConfig({ ...config, groups: config.groups.filter(g => g.id !== groupId) });
+        if (selectedGroup === groupId) setSelectedGroup(null);
+      }
+
+      function updateGroup(groupId, updates) {
+        setConfig({
+          ...config,
+          groups: config.groups.map(g => g.id === groupId ? { ...g, ...updates } : g),
+        });
+      }
+
+      async function saveCrop(groupId, imageId, crop) {
+        const newConfig = {
+          ...config,
+          groups: config.groups.map(g =>
+            g.id === groupId ? { ...g, thumbnail: { imageId, crop } } : g
+          ),
+        };
+        setConfig(newConfig);
+        setSaving(true);
+        try {
+          await api('/api/config', { method: 'PUT', json: newConfig });
+          initialConfigRef.current = JSON.stringify(newConfig);
+          setDirty(false);
+          toast.success('크롭 저장 완료', '썸네일 크롭이 서버에 저장되었습니다');
+        } catch (e) {
+          toast.error('크롭 저장 실패', e.message || '서버 오류');
+        }
+        setSaving(false);
+      }
+
+      function addImageToGroup(groupId, publicId) {
+        setConfig({
+          ...config,
+          groups: config.groups.map(g => {
+            if (g.id !== groupId) return g;
+            if (g.images.some(img => img.imageId === publicId)) return g;
+            const newImages = [...g.images, { imageId: publicId, visible: true }];
+            const thumb = g.thumbnail.imageId ? g.thumbnail : { imageId: publicId, crop: null };
+            return { ...g, images: newImages, thumbnail: thumb };
+          }),
+        });
+      }
+
+      function removeImageFromGroup(groupId, publicId) {
+        setConfig({
+          ...config,
+          groups: config.groups.map(g => {
+            if (g.id !== groupId) return g;
+            const newImages = g.images.filter(img => img.imageId !== publicId);
+            const thumb = g.thumbnail.imageId === publicId
+              ? { imageId: (newImages[0] && newImages[0].imageId) || '', crop: null } : g.thumbnail;
+            return { ...g, images: newImages, thumbnail: thumb };
+          }),
+        });
+      }
+
+      function toggleHidden(publicId) {
+        const hidden = new Set(config.hiddenImages || []);
+        if (hidden.has(publicId)) hidden.delete(publicId); else hidden.add(publicId);
+        setConfig({ ...config, hiddenImages: Array.from(hidden) });
+      }
+
+      function setThumbnailImage(groupId, publicId) {
+        updateGroup(groupId, { thumbnail: { imageId: publicId, crop: null } });
+      }
+
+      function moveGroup(fromIdx, toIdx) {
+        const groups = [...config.groups];
+        const moved = groups.splice(fromIdx, 1)[0];
+        groups.splice(toIdx, 0, moved);
+        groups.forEach((g, i) => g.gridPosition = i);
+        setConfig({ ...config, groups });
+      }
+
+      function moveImageInGroup(groupId, fromIdx, toIdx) {
+        setConfig({
+          ...config,
+          groups: config.groups.map(g => {
+            if (g.id !== groupId) return g;
+            const imgs = [...g.images];
+            const moved = imgs.splice(fromIdx, 1)[0];
+            imgs.splice(toIdx, 0, moved);
+            return { ...g, images: imgs };
+          }),
+        });
+      }
+
+      function handleUploadComplete(result) {
+        setAllImages(prev => [result, ...prev]);
+      }
+
+      async function deleteImage(publicId) {
+        try {
+          await api('/api/images/' + encodeURIComponent(publicId), { method: 'DELETE' });
+          setAllImages(prev => prev.filter(img => img.publicId !== publicId));
+          setConfig({
+            ...config,
+            groups: config.groups.map(g => ({
+              ...g,
+              images: g.images.filter(img => img.imageId !== publicId),
+              thumbnail: g.thumbnail.imageId === publicId
+                ? { imageId: (g.images.find(img => img.imageId !== publicId) || {}).imageId || '', crop: null }
+                : g.thumbnail,
+            })),
+            hiddenImages: (config.hiddenImages || []).filter(id => id !== publicId),
+          });
+          toast.success('삭제 완료', publicId + ' 삭제됨');
+        } catch (e) {
+          toast.error('삭제 실패', e.message || '서버 오류');
+        }
+      }
+
+      const selectedGroupObj = selectedGroup ? (config.groups || []).find(g => g.id === selectedGroup) : null;
+
+      // Save status
+      let saveStatusDot, saveStatusText;
+      if (saving) {
+        saveStatusDot = '#3498db';
+        saveStatusText = '저장 중...';
+      } else if (dirty) {
+        saveStatusDot = '#f1c40f';
+        saveStatusText = '변경사항 있음';
+      } else {
+        saveStatusDot = '#2ecc71';
+        saveStatusText = '저장됨';
+      }
+
+      return (
+        <div>
+          <div className="admin-header">
+            <button className="admin-btn" onClick={onExit} style={{background: 'transparent', color: '#f1c40f', border: '1px solid #636e72'}}>
+              ◀ Exit
+            </button>
+            <span className="pixel-font" style={{color: '#f1c40f', fontSize: '1.1rem'}}>Admin Mode</span>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <span style={{display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: saveStatusDot}} />
+              <span style={{fontSize: '0.95rem', color: '#888'}}>{saveStatusText}</span>
+              <button className="admin-btn success" onClick={saveConfig} disabled={saving}>
+                {saving ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-layout">
+            <div className="admin-left">
+              <AdminUploadZone cloudName={cloudName} uploadImage={handleUploadComplete} toast={toast} folders={folders} onAddFolder={handleAddFolder} />
+              <AdminImagePool
+                allImages={allImages} assignedIds={assignedIds} hiddenSet={hiddenSet} cloudName={cloudName}
+                searchQuery={searchQuery} onSearchChange={setSearchQuery}
+                toggleHidden={toggleHidden} deleteImage={deleteImage} toast={toast}
+              />
+            </div>
+            <div
+              className="admin-right"
+              onDragOver={e => {
+                if (e.dataTransfer.types.includes('application/pool-image')) {
+                  e.preventDefault();
+                  setPoolDragOver(true);
+                }
+              }}
+              onDragLeave={e => {
+                if (!e.currentTarget.contains(e.relatedTarget)) setPoolDragOver(false);
+              }}
+              onDrop={e => {
+                const poolImageId = e.dataTransfer.getData('application/pool-image');
+                if (poolImageId && selectedGroup) {
+                  e.preventDefault();
+                  addImageToGroup(selectedGroup, poolImageId);
+                  toast.success('이미지 추가', '게시물에 이미지를 추가했습니다');
+                }
+                setPoolDragOver(false);
+              }}
+              style={poolDragOver ? {outline: '2px dashed #f1c40f', outlineOffset: '-4px'} : undefined}
+            >
+              {selectedGroupObj ? (
+                <React.Fragment>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid #636e72'}}>
+                    <div>
+                      <span style={{fontSize: '1rem', color: '#e0e0e0', fontWeight: 'bold'}}>{selectedGroupObj.title || 'Untitled'}</span>
+                      <span style={{fontSize: '0.8rem', color: '#888', marginLeft: '8px', background: '#333', padding: '2px 8px', borderRadius: '10px'}}>{selectedGroupObj.category || ''}</span>
+                    </div>
+                  </div>
+                  <div style={{padding: '16px', overflowY: 'auto', maxHeight: 'calc(100vh - 180px)'}}>
+                    <AdminGroupDetail
+                      config={config} group={selectedGroupObj} cloudName={cloudName}
+                      updateGroup={updateGroup} saveCrop={saveCrop} removeImageFromGroup={removeImageFromGroup}
+                      setThumbnailImage={setThumbnailImage} moveImageInGroup={moveImageInGroup}
+                      addImageToGroup={addImageToGroup} toast={toast}
+                    />
+                  </div>
+                </React.Fragment>
+              ) : (
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#636e72', fontSize: '1rem'}}>
+                  오른쪽에서 게시물을 선택하세요
+                </div>
+              )}
+            </div>
+            <div className="admin-groups-panel">
+              <AdminGroupList
+                config={config} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup}
+                addGroup={addGroup} deleteGroup={deleteGroup} moveGroup={moveGroup}
+                addImageToGroup={addImageToGroup} cloudName={cloudName} toast={toast}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function EditBarWithToast({ dirty, saving, onSave, onCancel }) {
+      const toast = useToast();
+      return (
+        <EditModeBar
+          dirty={dirty}
+          saving={saving}
+          onSave={() => onSave(toast)}
+          onCancel={() => onCancel(toast)}
+        />
+      );
+    }
+
+    // === Main App ===
+    function App() {
+      const [galleryData, setGalleryData] = React.useState(null);
+      const [loading, setLoading] = React.useState(true);
+      const [category, setCategory] = React.useState('all');
+
+      // === Theme (포트폴리오와 localStorage 공유) ===
+      const [theme, setTheme] = React.useState(
+        () => localStorage.getItem('portfolio-theme') || 'light'
+      );
+      React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('portfolio-theme', theme);
+      }, [theme]);
+      const [lightbox, setLightbox] = React.useState(null); // { groupIndex, imageIndex }
+      const [adminMode, setAdminMode] = React.useState(false);
+      const [showPasswordModal, setShowPasswordModal] = React.useState(false);
+      const [adminConfig, setAdminConfig] = React.useState(null);
+      const [allImages, setAllImages] = React.useState([]);
+      const [authError, setAuthError] = React.useState('');
+
+      // === Edit Mode (inline reorder) ===
+      const [editMode, setEditMode] = React.useState(false);
+      const [editConfig, setEditConfig] = React.useState(null);
+      const [editDirty, setEditDirty] = React.useState(false);
+      const [editSaving, setEditSaving] = React.useState(false);
+      const [showEditPasswordModal, setShowEditPasswordModal] = React.useState(false);
+      const [editAuthError, setEditAuthError] = React.useState('');
+      const [confirmCancel, setConfirmCancel] = React.useState(false);
+      const editInitialSnapRef = React.useRef(null);
+
+      function loadGallery() {
+        setLoading(true);
+        api('/api/gallery')
+          .then(data => {
+            setGalleryData(data);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Failed to fetch gallery:', err);
+            setLoading(false);
+          });
+      }
+
+      React.useEffect(() => {
+        // Check for admin mode
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('admin') === '1') {
+          const token = sessionStorage.getItem('admin_token');
+          if (token) {
+            // Auto-login with stored token
+            api('/api/config').then(cfg => {
+              if (cfg.error) {
+                sessionStorage.removeItem('admin_token');
+                setShowPasswordModal(true);
+              } else {
+                api('/api/images').then(imgs => {
+                  setAdminConfig(cfg);
+                  setAllImages(imgs.images || []);
+                  setAdminMode(true);
+                });
+              }
+            }).catch(() => {
+              sessionStorage.removeItem('admin_token');
+              setShowPasswordModal(true);
+            });
+          } else {
+            setShowPasswordModal(true);
+          }
+        }
+
+        // Fetch gallery data
+        loadGallery();
+      }, []);
+
+      // Warn on page unload if edit mode is dirty
+      React.useEffect(() => {
+        if (!editDirty) return;
+        function handler(e) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+        window.addEventListener('beforeunload', handler);
+        return () => window.removeEventListener('beforeunload', handler);
+      }, [editDirty]);
+
+      async function handlePasswordSubmit(pw) {
+        setAuthError('');
+        sessionStorage.setItem('admin_token', pw);
+        try {
+          const config = await api('/api/config');
+          if (config.error) {
+            setAuthError('인증 실패');
+            sessionStorage.removeItem('admin_token');
+            return;
+          }
+          const imgs = await api('/api/images');
+          setAdminConfig(config);
+          setAllImages(imgs.images || []);
+          setAdminMode(true);
+          setShowPasswordModal(false);
+        } catch (e) {
+          setAuthError('서버 연결 실패');
+          sessionStorage.removeItem('admin_token');
+        }
+      }
+
+      function handlePasswordCancel() {
+        setShowPasswordModal(false);
+        // Remove ?admin=1 from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('admin');
+        window.history.replaceState({}, '', url);
+      }
+
+      // Admin mode
+      if (adminMode && adminConfig) {
+        return <ToastProvider><AdminApp
+          config={adminConfig}
+          setConfig={setAdminConfig}
+          allImages={allImages}
+          setAllImages={setAllImages}
+          onExit={() => { setAdminMode(false); loadGallery(); }}
+          cloudName={galleryData && galleryData.cloudName ? galleryData.cloudName : 'duwi0pqm2'}
+        /></ToastProvider>;
+      }
+
+      // Derive cloud name and groups from API response
+      const cloudName = galleryData && galleryData.cloudName ? galleryData.cloudName : '';
+      const allGroups = galleryData && galleryData.groups ? galleryData.groups : [];
+
+      // Derive categories
+      const categories = [];
+      const catSet = {};
+      allGroups.forEach(g => {
+        if (g.category && !catSet[g.category]) {
+          catSet[g.category] = true;
+          categories.push(g.category);
+        }
+      });
+
+      // In edit mode, use full editConfig.groups (category is forced to 'all')
+      const sourceGroups = editMode && editConfig
+        ? editConfig.groups
+        : allGroups;
+      const filteredGroups = category === 'all'
+        ? sourceGroups
+        : sourceGroups.filter(g => g.category === category);
+
+      // Edit button visibility: hide when URL has ?admin=1 (admin mode owns it)
+      const urlParams = new URLSearchParams(window.location.search);
+      const showEditBtn = urlParams.get('admin') !== '1';
+
+      async function loadEditConfig() {
+        const cfg = await api('/api/config');
+        if (cfg && cfg.error) {
+          // Token invalid/missing
+          sessionStorage.removeItem('admin_token');
+          return null;
+        }
+        return cfg;
+      }
+
+      async function enterEditMode() {
+        const token = sessionStorage.getItem('admin_token');
+        if (token) {
+          // Try with existing token
+          try {
+            const cfg = await loadEditConfig();
+            if (cfg) {
+              beginEditSession(cfg);
+              return;
+            }
+          } catch (e) {
+            console.error('[edit] config load failed:', e);
+          }
+        }
+        // No token or token expired — prompt
+        setEditAuthError('');
+        setShowEditPasswordModal(true);
+      }
+
+      function beginEditSession(cfg) {
+        const snap = JSON.stringify(cfg);
+        editInitialSnapRef.current = snap;
+        setEditConfig(cfg);
+        setEditDirty(false);
+        setCategory('all');
+        setEditMode(true);
+      }
+
+      async function handleEditPasswordSubmit(pw) {
+        setEditAuthError('');
+        sessionStorage.setItem('admin_token', pw);
+        try {
+          const cfg = await loadEditConfig();
+          if (!cfg) {
+            setEditAuthError('인증 실패');
+            return;
+          }
+          beginEditSession(cfg);
+          setShowEditPasswordModal(false);
+        } catch (e) {
+          setEditAuthError('서버 연결 실패');
+          sessionStorage.removeItem('admin_token');
+        }
+      }
+
+      function handleEditPasswordCancel() {
+        setShowEditPasswordModal(false);
+        setEditAuthError('');
+      }
+
+      function handleReorder(fromIdx, toIdx) {
+        if (!editConfig) return;
+        if (fromIdx === toIdx) return;
+        if (fromIdx < 0 || toIdx < 0) return;
+        if (fromIdx >= editConfig.groups.length || toIdx >= editConfig.groups.length) return;
+
+        const newGroups = editConfig.groups.slice();
+        const [moved] = newGroups.splice(fromIdx, 1);
+        newGroups.splice(toIdx, 0, moved);
+        // Recalculate gridPosition to match array order (mirrors AdminApp.moveGroup)
+        const renumbered = newGroups.map((g, i) => ({ ...g, gridPosition: i }));
+        const newConfig = { ...editConfig, groups: renumbered };
+
+        setEditConfig(newConfig);
+        setEditDirty(JSON.stringify(newConfig) !== editInitialSnapRef.current);
+      }
+
+      function handleEditCancel(toast) {
+        if (editDirty) {
+          setConfirmCancel(true);
+        } else {
+          exitEditMode();
+        }
+      }
+
+      function exitEditMode() {
+        setEditMode(false);
+        setEditConfig(null);
+        setEditDirty(false);
+        editInitialSnapRef.current = null;
+        setConfirmCancel(false);
+      }
+
+      async function handleEditSave(toast) {
+        if (!editConfig || editSaving) return;
+        setEditSaving(true);
+        try {
+          const res = await api('/api/config', { method: 'PUT', json: editConfig });
+          if (res && res.error) {
+            if (/unauthorized/i.test(res.error)) {
+              sessionStorage.removeItem('admin_token');
+              toast.error('인증 만료', '다시 로그인해주세요');
+              setEditMode(false);
+              setEditConfig(null);
+              setEditDirty(false);
+              editInitialSnapRef.current = null;
+              setShowEditPasswordModal(true);
+            } else {
+              toast.error('저장 실패', res.error);
+            }
+            return;
+          }
+          // Success: reload public gallery, exit edit mode
+          await new Promise((resolve) => {
+            api('/api/gallery').then(data => {
+              setGalleryData(data);
+              resolve();
+            }).catch(resolve);
+          });
+          setEditMode(false);
+          setEditConfig(null);
+          setEditDirty(false);
+          editInitialSnapRef.current = null;
+          toast.success('저장됨', '');
+        } catch (e) {
+          toast.error('저장 실패', e.message || '네트워크 오류');
+        } finally {
+          setEditSaving(false);
+        }
+      }
+
+      function openLightbox(groupIndex, imageIndex) {
+        setLightbox({ groupIndex, imageIndex });
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        setLightbox(null);
+        document.body.style.overflow = '';
+      }
+
+      function navigateLightbox(groupIndex, imageIndex) {
+        setLightbox({ groupIndex, imageIndex });
+      }
+
+      return (
+        <ToastProvider>
+        <div>
+          <GalleryHeader
+            categories={categories}
+            activeCategory={category}
+            onCategoryChange={setCategory}
+            editMode={editMode}
+            showEditBtn={showEditBtn}
+            onEnterEdit={enterEditMode}
+            theme={theme}
+            toggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+          />
+
+          {editMode && (
+            <EditBarWithToast
+              dirty={editDirty}
+              saving={editSaving}
+              onSave={handleEditSave}
+              onCancel={handleEditCancel}
+            />
+          )}
+          {confirmCancel && (
+            <ConfirmDialog
+              title="변경사항을 버릴까요?"
+              message="저장하지 않은 변경사항이 사라집니다."
+              confirmLabel="버리기"
+              onConfirm={exitEditMode}
+              onCancel={() => setConfirmCancel(false)}
+            />
+          )}
+
+          {loading ? (
+            <div className="loading-spinner">
+              <div></div>
+              <p className="pixel-font" style={{fontSize: '0.6rem', marginTop: '16px'}}>Loading...</p>
+            </div>
+          ) : (
+            <MasonryGrid
+              groups={filteredGroups}
+              cloudName={cloudName}
+              onItemClick={openLightbox}
+              editMode={editMode}
+              onReorder={handleReorder}
+            />
+          )}
+
+          {lightbox && (
+            <Lightbox
+              groups={filteredGroups}
+              cloudName={cloudName}
+              groupIndex={lightbox.groupIndex}
+              imageIndex={lightbox.imageIndex}
+              onClose={closeLightbox}
+              onNavigate={navigateLightbox}
+            />
+          )}
+
+          {showPasswordModal && (
+            <PasswordModal
+              onSubmit={handlePasswordSubmit}
+              onCancel={handlePasswordCancel}
+              error={authError}
+            />
+          )}
+          {showEditPasswordModal && (
+            <PasswordModal
+              onSubmit={handleEditPasswordSubmit}
+              onCancel={handleEditPasswordCancel}
+              error={editAuthError}
+            />
+          )}
+        </div>
+        </ToastProvider>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

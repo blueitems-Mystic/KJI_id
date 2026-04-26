@@ -1,0 +1,16 @@
+name = "kji-gallery-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+CLOUDINARY_CLOUD_NAME = "duwi0pqm2"
+ALLOWED_ORIGIN = "https://blueitems-mystic.github.io"
+
+# Secrets (set via `wrangler secret put`):
+# CLOUDINARY_API_KEY
+# CLOUDINARY_API_SECRET
+# ADMIN_TOKEN
+
+[[kv_namespaces]]
+binding = "GALLERY_KV"
+id = "a47f220e89464e7484fc53bddbe1cf85"

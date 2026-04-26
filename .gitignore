@@ -1,0 +1,10 @@
+# TEMS 런타임 DB (qmd_rules/*.md 가 정규 소스)
+memory/error_logs.db
+memory/error_logs.db-journal
+memory/error_logs.db-wal
+memory/error_logs.db-shm
+memory/__pycache__/
+
+# 비밀/로컬 설정
+.env
+.superpowers/
