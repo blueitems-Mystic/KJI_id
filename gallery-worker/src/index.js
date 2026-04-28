@@ -106,7 +106,7 @@ export default {
 };
 
 // 로컬 개발 + 프로덕션 오리진 화이트리스트 — request origin 기반 동적 매칭.
-// env.ALLOWED_ORIGIN (wrangler.toml) 은 프로덕션 기본값으로 유지.
+// env.ALLOWED_ORIGIN (wrangler.toml) 은 화이트리스트 미스 시 폴백 기본값.
 const DEV_ORIGINS = new Set([
   "http://127.0.0.1:8000",
   "http://localhost:8000",
@@ -114,13 +114,18 @@ const DEV_ORIGINS = new Set([
   "http://localhost:3000",
 ]);
 
+const PROD_ORIGINS = new Set([
+  "https://blueitems-mystic.github.io",
+  "https://kji.blueitems.net",
+]);
+
 function corsResponse(env, request, response) {
   const headers = new Headers(response.headers);
   const reqOrigin = request.headers.get("Origin") || "";
-  const allowOrigin = (reqOrigin === env.ALLOWED_ORIGIN || DEV_ORIGINS.has(reqOrigin))
-    ? reqOrigin
-    : env.ALLOWED_ORIGIN;
+  const allowed = PROD_ORIGINS.has(reqOrigin) || DEV_ORIGINS.has(reqOrigin) || reqOrigin === env.ALLOWED_ORIGIN;
+  const allowOrigin = allowed ? reqOrigin : env.ALLOWED_ORIGIN;
   headers.set("Access-Control-Allow-Origin", allowOrigin);
+  headers.set("Vary", "Origin");
   headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return new Response(response.body, {
