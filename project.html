@@ -2137,8 +2137,10 @@
         }
       };
 
+      // setSaving은 비동기 반영이라 빠른 더블클릭 시 중복 POST 가능 — ref로 동기 가드
+      const savingRef = React.useRef(false);
       const doSave = (publish) => {
-        if (saving) return;
+        if (savingRef.current) return;
         if (!post.title || !post.title.trim()) {
           toast.warning("저장 불가", "제목을 입력하세요.");
           return;
@@ -2154,11 +2156,13 @@
           featured: status === "published" ? featured : false,
           blocks: post.blocks,
         };
+        savingRef.current = true;
         setSaving(true);
         const req = savedId
           ? api("/api/posts/" + encodeURIComponent(savedId), { method: "PUT", json: body })
           : api("/api/posts", { method: "POST", json: body });
         req.then(({ ok, status: code, data }) => {
+          savingRef.current = false;
           setSaving(false);
           if (!ok) {
             toast.error(
@@ -2172,6 +2176,7 @@
           setDirty(false);
           toast.success("저장 완료", "반영까지 최대 1분 소요 (KV 캐시 전파)");
         }).catch(() => {
+          savingRef.current = false;
           setSaving(false);
           toast.error("저장 실패", "서버 연결 실패");
         });
