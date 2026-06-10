@@ -615,8 +615,9 @@ async function handleGetPost(id, request, env) {
   } catch {
     return postsJson({ error: "Corrupted post" }, 500);
   }
-  if (post.status !== "published" && checkAuth(request, env)) {
-    return postsJson({ error: "Post not found" }, 404);
+  if (post.status !== "published") {
+    const authErr = checkAuth(request, env);
+    if (authErr) return postsJson({ error: "Post not found" }, 404);
   }
   return postsJson(post);
 }
@@ -715,10 +716,11 @@ async function handleUpdatePost(id, request, env) {
 
 // DELETE /api/posts/{id}
 async function handleDeletePost(id, env) {
-  await env.GALLERY_KV.delete(postKey(id));
+  // 인덱스 먼저 갱신 — 중간 실패 시 "목록에 남는 유령 포스트"보다 "인덱스 밖 고아 키"가 안전
   const index = await readPostsIndex(env);
   index.posts = index.posts.filter((p) => p.id !== id);
   if (index.featuredId === id) index.featuredId = null;
   await writePostsIndex(env, index);
+  await env.GALLERY_KV.delete(postKey(id));
   return postsJson({ ok: true });
 }
