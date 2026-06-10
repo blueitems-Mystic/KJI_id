@@ -333,6 +333,245 @@
       font-size: 0.6rem;
       color: var(--text-muted);
     }
+
+    /* === Admin: 목록 카드 액션 / DRAFT 배지 === */
+    .draft-badge {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      color: #ef4444;
+      border: 2px solid #ef4444;
+      padding: 4px 8px;
+      display: inline-block;
+      vertical-align: middle;
+      box-shadow: 2px 2px 0px var(--shadow-color);
+      white-space: nowrap;
+    }
+    .admin-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--win-border);
+      cursor: default;
+    }
+    .admin-card-actions button {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      background: var(--bg-dark-accent);
+      color: var(--gold);
+      border: 2px solid var(--gold);
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .admin-card-actions button:hover:not(:disabled) { background: var(--gold); color: var(--text-on-dark); }
+    .admin-card-actions button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .admin-card-actions button.danger { color: #ef4444; border-color: #ef4444; }
+    .admin-card-actions button.danger:hover:not(:disabled) { background: #ef4444; color: #fff; }
+    .admin-new-post-row { margin-bottom: 32px; text-align: right; }
+
+    /* === Admin: Password Modal (gallery.html 패턴) === */
+    .password-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 11000;
+    }
+    .password-box {
+      background: #222;
+      border: 2px solid #f1c40f;
+      padding: 32px;
+      border-radius: 4px;
+      min-width: 300px;
+      text-align: center;
+    }
+    .password-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 16px 0;
+      background: #111;
+      border: 2px solid #636e72;
+      color: #e0e0e0;
+      font-size: 1rem;
+      border-radius: 2px;
+    }
+    .password-box input:focus { outline: none; border-color: #f1c40f; }
+    .password-box-buttons { display: flex; gap: 12px; justify-content: center; }
+    .password-box button {
+      padding: 10px 24px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 2px;
+      border: 2px solid;
+      transition: 0.15s;
+    }
+    .password-box .btn-enter { background: #f1c40f; color: #000; border-color: #f1c40f; }
+    .password-box .btn-enter:hover { background: #d4ac0d; }
+    .password-box .btn-cancel { background: transparent; color: #b2bec3; border-color: #636e72; }
+    .password-box .btn-cancel:hover { border-color: #f1c40f; }
+
+    /* === Toast (gallery.html 패턴) === */
+    .toast-container {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 10500;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      max-width: 380px;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border-left: 4px solid;
+      font-size: 0.85rem;
+      animation: toastIn 0.3s ease;
+      position: relative;
+    }
+    .toast-success { background: #1a3a1a; border-color: #4CAF50; color: #4CAF50; }
+    .toast-error { background: #3a1a1a; border-color: #CC4444; color: #CC4444; }
+    .toast-warning { background: #3a3a1a; border-color: #f1c40f; color: #f1c40f; }
+    .toast-icon { font-size: 1rem; flex-shrink: 0; }
+    .toast-body { flex: 1; min-width: 0; }
+    .toast-title { font-weight: bold; font-size: 0.8rem; margin-bottom: 1px; }
+    .toast-message { font-size: 0.75rem; opacity: 0.85; }
+    .toast-close { background: none; border: none; color: inherit; opacity: 0.5; cursor: pointer; font-size: 1rem; padding: 0 4px; flex-shrink: 0; }
+    .toast-close:hover { opacity: 1; }
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* === Editor toolbar (sticky) === */
+    .editor-toolbar {
+      position: sticky;
+      top: 56px;
+      z-index: 1100;
+      background: var(--bg-surface);
+      border: 3px solid var(--gold);
+      box-shadow: 4px 4px 0 var(--shadow-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      margin-bottom: 24px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.65rem;
+      color: var(--text-primary);
+    }
+    .editor-toolbar .status { flex: 1; color: var(--text-secondary); font-size: 0.55rem; }
+    .editor-toolbar .status.dirty { color: var(--gold); }
+    .editor-toolbar button {
+      background: var(--bg-dark-accent);
+      color: var(--gold);
+      border: 2px solid var(--gold);
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 0.6rem;
+      cursor: pointer;
+    }
+    .editor-toolbar button:hover:not(:disabled) { background: var(--gold); color: var(--text-on-dark); }
+    .editor-toolbar button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .editor-toolbar button.exit { color: var(--text-secondary); border-color: var(--win-border); }
+    .editor-toolbar .featured-toggle { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); cursor: pointer; font-size: 0.55rem; white-space: nowrap; }
+    .editor-toolbar .featured-toggle.disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* === Editor meta panel inputs (테마 변수 기반 레트로 입력) === */
+    .editor-meta label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin: 12px 0 4px; font-weight: bold; }
+    .editor-meta input, .editor-meta textarea {
+      width: 100%;
+      background: var(--bg-deep);
+      border: 2px solid var(--win-border);
+      color: var(--text-primary);
+      padding: 8px 10px;
+      border-radius: 2px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .editor-meta input:focus, .editor-meta textarea:focus { border-color: var(--gold); }
+    .editor-meta textarea { resize: vertical; }
+    .editor-meta .cover-upload-btn {
+      margin-top: 8px;
+      width: 100%;
+      background: transparent;
+      border: 2px dashed var(--win-border);
+      color: var(--text-secondary);
+      padding: 8px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .editor-meta .cover-upload-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
+    .editor-meta .cover-upload-btn:disabled { opacity: 0.5; cursor: wait; }
+
+    /* === Block editor (index.html 에디터 CSS — 드래그 제외) === */
+    .block-edit-wrap { position: relative; padding: 4px; border: 1px dashed transparent; transition: border-color 0.15s; }
+    .block-edit-wrap:hover { border-color: rgba(241, 196, 15, 0.5); }
+    .block-mini-toolbar { position: absolute; top: -14px; right: 8px; display: none; gap: 2px; background: var(--bg-surface); border: 1px solid var(--win-border); border-radius: 2px; padding: 2px; z-index: 10; }
+    .block-edit-wrap:hover .block-mini-toolbar { display: flex; }
+    .block-mini-toolbar button { background: transparent; border: none; color: var(--text-primary); font-size: 0.85rem; width: 22px; height: 22px; cursor: pointer; padding: 0; }
+    .block-mini-toolbar button:hover { color: var(--gold); }
+    .block-mini-toolbar button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .block-mini-toolbar .separator { width: 1px; background: var(--win-border); margin: 2px 2px; }
+
+    .block-insert-gap { position: relative; height: 12px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s, height 0.15s; }
+    .block-insert-gap:hover { opacity: 1; height: 24px; }
+    .block-insert-gap::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(241, 196, 15, 0.5); }
+    .block-insert-gap button { position: relative; background: var(--bg-surface); border: 1px solid var(--gold); color: var(--gold); width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; z-index: 1; }
+    .block-insert-gap button:hover { background: var(--gold); color: var(--text-on-dark); }
+
+    .block-type-picker-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998; display: flex; align-items: center; justify-content: center; }
+    .block-type-picker { background: var(--win-bg); border: 3px solid var(--win-border); border-radius: 4px; padding: 20px; min-width: 360px; }
+    .block-type-picker .title { font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.8rem; color: var(--gold); margin-bottom: 12px; text-align: center; }
+    .block-type-picker .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .block-type-picker .grid button { background: var(--bg-deep); border: 2px solid var(--win-border); color: var(--text-primary); padding: 14px 6px; border-radius: 2px; cursor: pointer; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.55rem; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .block-type-picker .grid button .emoji { font-size: 1.2rem; }
+    .block-type-picker .grid button:hover { border-color: var(--gold); color: var(--gold); }
+    .block-type-picker .cancel { margin-top: 12px; background: transparent; border: 2px solid var(--win-border); color: var(--text-secondary); padding: 6px 12px; border-radius: 2px; cursor: pointer; width: 100%; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.7rem; }
+    .block-type-picker .cancel:hover { color: var(--gold); border-color: var(--gold); }
+
+    .block-edit-wrap [contenteditable="true"] { outline: 1px dashed rgba(241,196,15,0.8); outline-offset: 2px; cursor: text; min-height: 1em; }
+    .block-edit-wrap [contenteditable="true"]:focus { outline-color: var(--gold); }
+
+    .floating-rich-toolbar { position: fixed; z-index: 1500; background: var(--bg-surface); border: 2px solid var(--gold); border-radius: 2px; padding: 4px; display: flex; gap: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .floating-rich-toolbar button { background: transparent; border: none; color: var(--text-primary); width: 28px; height: 28px; cursor: pointer; font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.75rem; padding: 0; }
+    .floating-rich-toolbar button:hover { color: var(--gold); }
+    .floating-rich-toolbar .link-input { display: flex; gap: 4px; padding: 2px 4px; }
+    .floating-rich-toolbar input {
+      background: var(--win-bg);
+      border: 1px solid var(--win-border);
+      color: var(--text-primary);
+      padding: 3px 6px;
+      border-radius: 2px;
+      outline: none;
+      font-size: 0.85rem;
+      width: 180px;
+    }
+    .floating-rich-toolbar input:focus { border-color: var(--gold); }
+
+    .settings-panel-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1200; }
+    .settings-panel { position: fixed; top: 48px; right: 0; bottom: 0; width: 380px; max-width: 90vw; background: var(--win-bg); border-left: 3px solid var(--win-border); z-index: 1201; padding: 20px; overflow-y: auto; color: var(--text-primary); }
+    .settings-panel .title { font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif; font-size: 0.75rem; color: var(--gold); margin-bottom: 16px; }
+    .settings-panel label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; margin-top: 12px; font-weight: bold; }
+    .settings-panel input[type="text"], .settings-panel input[type="url"], .settings-panel input[type="number"], .settings-panel select, .settings-panel textarea { width: 100%; background: var(--bg-deep); border: 2px solid var(--win-border); color: var(--text-primary); padding: 8px 10px; border-radius: 2px; font-size: 0.9rem; font-family: inherit; outline: none; }
+    .settings-panel input:focus, .settings-panel select:focus, .settings-panel textarea:focus { border-color: var(--gold); }
+    .settings-panel textarea { min-height: 80px; resize: vertical; }
+    .settings-panel .close-btn { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem; }
+    .settings-panel .close-btn:hover { color: var(--gold); }
+
+    .image-dropzone { border: 2px dashed var(--win-border); border-radius: 2px; padding: 20px; text-align: center; color: var(--text-secondary); margin-top: 8px; cursor: pointer; }
+    .image-dropzone.over { border-color: var(--gold); color: var(--gold); }
+    .image-dropzone.busy { opacity: 0.6; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -355,6 +594,21 @@
       return fetch(API_BASE + path, { ...opts, headers }).then(r =>
         r.json().catch(() => ({})).then(data => ({ ok: r.ok, status: r.status, data }))
       );
+    }
+
+    // 이미지 업로드 — Worker 경유 (index.html uploadPortfolioImage와 동일 계약)
+    // Cloudinary 직접 호출 금지 (API Secret 노출 방지)
+    async function uploadPortfolioImage(token, file) {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`${API_BASE}/api/portfolio/upload`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: fd,
+      });
+      if (res.status === 401) throw new Error("UNAUTHORIZED");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json(); // { url, publicId, width, height }
     }
 
     // === Hash Router ===
@@ -693,6 +947,1385 @@
       }
     }
 
+    // =====================================================================
+    // === Admin / Editor (Task 3) — gallery.html + index.html 패턴 이식 ===
+    // =====================================================================
+
+    // --- Toast System (gallery.html 패턴) ---
+    const ToastContext = React.createContext(null);
+
+    function useToast() {
+      return React.useContext(ToastContext);
+    }
+
+    function ToastProvider({ children }) {
+      const [toasts, setToasts] = React.useState([]);
+      const nextId = React.useRef(0);
+
+      function addToast(type, title, message, duration) {
+        const id = nextId.current++;
+        setToasts(prev => {
+          const updated = [...prev, { id, type, title, message }];
+          return updated.length > 3 ? updated.slice(-3) : updated;
+        });
+        if (duration !== 0) {
+          setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+          }, duration || 3000);
+        }
+      }
+
+      function removeToast(id) {
+        setToasts(prev => prev.filter(t => t.id !== id));
+      }
+
+      const toast = React.useMemo(() => ({
+        success: (title, message) => addToast('success', title, message, 3000),
+        error: (title, message) => addToast('error', title, message, 0),
+        warning: (title, message) => addToast('warning', title, message, 5000),
+      }), []);
+
+      return (
+        <ToastContext.Provider value={toast}>
+          {children}
+          <ToastContainer toasts={toasts} removeToast={removeToast} />
+        </ToastContext.Provider>
+      );
+    }
+
+    function ToastContainer({ toasts, removeToast }) {
+      if (toasts.length === 0) return null;
+      const icons = { success: '✓', error: '✗', warning: '⚠' };
+      return (
+        <div className="toast-container">
+          {toasts.map(t => (
+            <div key={t.id} className={"toast toast-" + t.type}>
+              <span className="toast-icon">{icons[t.type]}</span>
+              <div className="toast-body">
+                <div className="toast-title">{t.title}</div>
+                {t.message && <div className="toast-message">{t.message}</div>}
+              </div>
+              <button className="toast-close" onClick={() => removeToast(t.id)}>✕</button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // --- PasswordModal (gallery.html 패턴) ---
+    function PasswordModal({ onSubmit, onCancel, error }) {
+      const inputRef = React.useRef(null);
+      const [pw, setPw] = React.useState('');
+
+      React.useEffect(() => {
+        if (inputRef.current) inputRef.current.focus();
+      }, []);
+
+      function handleKeyDown(e) {
+        if (e.key === 'Enter') onSubmit(pw);
+        if (e.key === 'Escape') onCancel();
+      }
+
+      return (
+        <div className="password-modal">
+          <div className="password-box">
+            <div className="pixel-font" style={{fontSize: '0.7rem', color: '#f1c40f', marginBottom: '8px'}}>
+              Admin Login
+            </div>
+            {error && <div style={{color: '#e74c3c', fontSize: '0.8rem', marginBottom: '8px'}}>{error}</div>}
+            <input
+              ref={inputRef}
+              type="password"
+              placeholder="Password"
+              value={pw}
+              onChange={e => setPw(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <div className="password-box-buttons">
+              <button className="btn-enter" onClick={() => onSubmit(pw)}>Enter</button>
+              <button className="btn-cancel" onClick={onCancel}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- Block factory (index.html과 동일 — 스키마 100% 호환) ---
+    function newBlockId() {
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        try {
+          return "b_" + crypto.randomUUID();
+        } catch (_) {
+          // insecure context fallback
+        }
+      }
+      return "b_" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    }
+    function createEmptyBlock(type) {
+      const id = newBlockId();
+      switch (type) {
+        case "text":
+          return { id, type: "text", html: "새 문단을 입력하세요." };
+        case "heading":
+          return { id, type: "heading", level: 3, text: "새 제목", emoji: null };
+        case "list":
+          return { id, type: "list", style: "disc", items: [{ strong: "", text: "새 항목" }] };
+        case "image":
+          return { id, type: "image", url: "", alt: "", caption: "", width: null };
+        case "youtube":
+          return {
+            id, type: "youtube",
+            mediaKind: "video",
+            videoId: "", start: null, title: "",
+            imageUrl: "", imageAlt: "", imageCaption: "",
+          };
+        case "button":
+          return { id, type: "button", icon: "link", label: "New Button", href: "#", target: "_self" };
+        case "cardgrid":
+          return {
+            id, type: "cardgrid", cols: 2, variant: "text",
+            cards: [
+              { title: "Card 1", titleColor: "yellow-400", description: "설명" },
+              { title: "Card 2", titleColor: "yellow-400", description: "설명" },
+            ],
+          };
+        default:
+          return { id, type: "text", html: "" };
+      }
+    }
+
+    // --- BlockTypePicker (index.html 패턴) ---
+    const BLOCK_TYPES = [
+      { type: "text",     label: "Text",     emoji: "📝" },
+      { type: "heading",  label: "Heading",  emoji: "🔤" },
+      { type: "list",     label: "List",     emoji: "📋" },
+      { type: "image",    label: "Image",    emoji: "🖼" },
+      { type: "youtube",  label: "Media",    emoji: "🎞" },
+      { type: "button",   label: "Button",   emoji: "🔘" },
+      { type: "cardgrid", label: "Card Grid", emoji: "▦" },
+    ];
+    function BlockTypePicker({ onPick, onCancel }) {
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === "Escape") onCancel(); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [onCancel]);
+      return (
+        <div className="block-type-picker-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+          <div className="block-type-picker">
+            <div className="title">블록 타입 선택</div>
+            <div className="grid">
+              {BLOCK_TYPES.map(bt => (
+                <button key={bt.type} onClick={() => onPick(bt.type)}>
+                  <span className="emoji">{bt.emoji}</span>
+                  <span>{bt.label}</span>
+                </button>
+              ))}
+            </div>
+            <button className="cancel" onClick={onCancel}>취소</button>
+          </div>
+        </div>
+      );
+    }
+
+    // --- BlockInsertGap ---
+    function BlockInsertGap({ onInsert }) {
+      return (
+        <div className="block-insert-gap">
+          <button onClick={onInsert} title="블록 추가">+</button>
+        </div>
+      );
+    }
+
+    // --- BlockEditWrapper (index.html 단순화판 — 드래그 대신 ↑/↓ 버튼) ---
+    function BlockEditWrapper({ index, lastIndex, onMoveUp, onMoveDown, onDelete, onSettings, children }) {
+      const handleDelete = () => {
+        if (window.confirm("이 블록을 삭제할까요?")) onDelete();
+      };
+      return (
+        <div className="block-edit-wrap">
+          <div className="block-mini-toolbar">
+            <button onClick={onMoveUp} disabled={index === 0} title="위로">↑</button>
+            <button onClick={onMoveDown} disabled={index === lastIndex} title="아래로">↓</button>
+            <span className="separator" />
+            <button onClick={onSettings} title="설정">⚙</button>
+            <button onClick={handleDelete} title="삭제">🗑</button>
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    // --- Inline contentEditable block editors (index.html과 동일) ---
+
+    function EditableTextBlock({ block, onChange }) {
+      const ref = React.useRef(null);
+
+      React.useEffect(() => {
+        if (ref.current && ref.current.innerHTML !== block.html) {
+          ref.current.innerHTML = block.html || "";
+        }
+      }, [block.html]);
+
+      const handleBlur = () => {
+        const raw = ref.current.innerHTML;
+        const clean = sanitizeRichHtml(raw);
+        if (clean !== block.html) {
+          onChange({ ...block, html: clean });
+        }
+      };
+
+      return (
+        <p
+          ref={ref}
+          className="text-lg leading-relaxed text-gray-300 mb-4"
+          contentEditable="true"
+          suppressContentEditableWarning
+          onBlur={handleBlur}
+        />
+      );
+    }
+
+    function EditableHeadingBlock({ block, onChange }) {
+      const ref = React.useRef(null);
+      React.useEffect(() => {
+        if (ref.current && ref.current.textContent !== block.text) {
+          ref.current.textContent = block.text || "";
+        }
+      }, [block.text]);
+
+      const handleBlur = () => {
+        const text = ref.current.textContent || "";
+        if (text !== block.text) onChange({ ...block, text });
+      };
+
+      const Tag = block.level === 2 ? "h2" : "h3";
+      const cls = block.level === 2
+        ? "pixel-font rpg-title text-2xl mb-4"
+        : "pixel-font text-yellow-300 text-xl mb-3";
+      return (
+        <Tag className={cls}>
+          {block.emoji && <span className="mr-2">{block.emoji}</span>}
+          <span
+            ref={ref}
+            contentEditable="true"
+            suppressContentEditableWarning
+            onBlur={handleBlur}
+          />
+        </Tag>
+      );
+    }
+
+    function EditableInline({ value, rich, onCommit, onEnter, onBackspaceEmpty }) {
+      const ref = React.useRef(null);
+      React.useEffect(() => {
+        if (!ref.current) return;
+        const current = rich ? ref.current.innerHTML : ref.current.textContent;
+        if (current !== value) {
+          if (rich) ref.current.innerHTML = value || "";
+          else ref.current.textContent = value || "";
+        }
+      }, [value, rich]);
+
+      const handleBlur = () => {
+        const raw = rich ? ref.current.innerHTML : ref.current.textContent;
+        const next = rich ? sanitizeRichHtml(raw) : (raw || "");
+        if (next !== value) onCommit(next);
+      };
+      const handleKey = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          ref.current.blur();
+          if (onEnter) onEnter();
+        }
+        if (e.key === "Backspace") {
+          const raw = rich ? ref.current.innerHTML : ref.current.textContent;
+          const isEmpty = rich
+            ? (!raw || raw.replace(/<br\s*\/?>/gi, "").replace(/&nbsp;/g, "").trim() === "")
+            : !raw;
+          if (isEmpty && onBackspaceEmpty) {
+            e.preventDefault();
+            onBackspaceEmpty();
+          }
+        }
+      };
+
+      return (
+        <span
+          ref={ref}
+          contentEditable="true"
+          suppressContentEditableWarning
+          onBlur={handleBlur}
+          onKeyDown={handleKey}
+        />
+      );
+    }
+
+    function EditableListBlock({ block, onChange }) {
+      const updateItem = (i, patch) => {
+        const next = block.items.map((it, idx) => idx === i ? { ...it, ...patch } : it);
+        onChange({ ...block, items: next });
+      };
+      const addItem = (afterIdx) => {
+        const next = block.items.slice();
+        next.splice(afterIdx + 1, 0, { strong: "", text: "" });
+        onChange({ ...block, items: next });
+      };
+      const removeItem = (i) => {
+        if (block.items.length <= 1) return;
+        const next = block.items.filter((_, idx) => idx !== i);
+        onChange({ ...block, items: next });
+      };
+
+      const ListTag = block.style === "decimal" ? "ol" : "ul";
+      const listCls = block.style === "decimal" ? "list-decimal" : "list-disc";
+      const spaceY = block.spaceY || "space-y-2";
+      const mb = block.marginBottom || "mb-4";
+
+      return (
+        <ListTag className={`${listCls} pl-5 ${spaceY} ${mb} text-gray-300`}>
+          {block.items.map((item, i) => {
+            if (item.note) {
+              return (
+                <li key={i} className="list-none text-sm text-gray-500 italic mt-1">
+                  <EditableInline
+                    value={item.text || ""}
+                    rich={false}
+                    onCommit={(text) => updateItem(i, { text })}
+                    onEnter={() => addItem(i)}
+                    onBackspaceEmpty={() => removeItem(i)}
+                  />
+                </li>
+              );
+            }
+            return (
+              <li key={i}>
+                <strong>
+                  <EditableInline
+                    value={item.strong || ""}
+                    rich={false}
+                    onCommit={(strong) => updateItem(i, { strong })}
+                  />
+                </strong>
+                <span>{" "}</span>
+                <EditableInline
+                  value={item.text || ""}
+                  rich={true}
+                  onCommit={(text) => updateItem(i, { text })}
+                  onEnter={() => addItem(i)}
+                  onBackspaceEmpty={() => removeItem(i)}
+                />
+              </li>
+            );
+          })}
+        </ListTag>
+      );
+    }
+
+    // dispatcher — text/heading/list → 인라인 편집, 나머지 → 읽기 렌더 (설정 패널로 편집)
+    function EditableBlockContent({ block, onChange }) {
+      switch (block.type) {
+        case "text":    return <EditableTextBlock block={block} onChange={onChange} />;
+        case "heading": return <EditableHeadingBlock block={block} onChange={onChange} />;
+        case "list":    return <EditableListBlock block={block} onChange={onChange} />;
+        default:        return <Block block={block} />;
+      }
+    }
+
+    // --- SettingsPanel shell ---
+    function SettingsPanel({ title, onClose, children }) {
+      React.useEffect(() => {
+        const onKey = (e) => { if (e.key === "Escape") onClose(); };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [onClose]);
+      return (
+        <React.Fragment>
+          <div className="settings-panel-backdrop" onClick={onClose} />
+          <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={onClose} aria-label="닫기">×</button>
+            <div className="title">{title}</div>
+            {children}
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    // --- ImageBlockEdit ---
+    function ImageBlockEdit({ block, onChange, token, onClose }) {
+      const [uploading, setUploading] = React.useState(false);
+      const [uploadError, setUploadError] = React.useState(null);
+      const [dragOver, setDragOver] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+
+      const handleFile = async (file) => {
+        if (!file) return;
+        setUploading(true);
+        setUploadError(null);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          onChange({
+            ...block,
+            url: data.url,
+            width: data.width || block.width,
+          });
+        } catch (e) {
+          setUploadError(e.message);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      return (
+        <SettingsPanel title="Image Block" onClose={onClose}>
+          <label>URL</label>
+          <input
+            type="url"
+            value={block.url || ""}
+            onChange={(e) => onChange({ ...block, url: e.target.value })}
+          />
+
+          <label>대체 텍스트 (alt)</label>
+          <input
+            type="text"
+            value={block.alt || ""}
+            onChange={(e) => onChange({ ...block, alt: e.target.value })}
+          />
+
+          <label>캡션</label>
+          <input
+            type="text"
+            value={block.caption || ""}
+            onChange={(e) => onChange({ ...block, caption: e.target.value })}
+          />
+
+          <label>너비 (px, 비우면 100%)</label>
+          <input
+            type="number"
+            value={block.width || ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              onChange({ ...block, width: v ? parseInt(v, 10) : null });
+            }}
+          />
+
+          <label>업로드</label>
+          <div
+            className={`image-dropzone${dragOver ? " over" : ""}${uploading ? " busy" : ""}`}
+            onClick={() => fileInputRef.current && fileInputRef.current.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const file = e.dataTransfer.files && e.dataTransfer.files[0];
+              if (file) handleFile(file);
+            }}
+          >
+            {uploading ? "업로드 중..." : "클릭 또는 드롭하여 업로드"}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => handleFile(e.target.files && e.target.files[0])}
+          />
+          {uploadError && (
+            <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 8 }}>
+              업로드 실패: {uploadError}
+            </div>
+          )}
+          {block.url && (
+            <div style={{ marginTop: 12 }}>
+              <img src={block.url} alt={block.alt || ""} style={{ maxWidth: "100%", borderRadius: 2 }} />
+            </div>
+          )}
+        </SettingsPanel>
+      );
+    }
+
+    // --- YoutubeBlockEdit ---
+    function normalizeYoutubeId(input) {
+      if (!input) return "";
+      const m = input.match(/(?:youtu\.be\/|v=)([A-Za-z0-9_-]{6,})/);
+      return m ? m[1] : input.trim();
+    }
+    function YoutubeBlockEdit({ block, onChange, token, onClose }) {
+      const [uploading, setUploading] = React.useState(false);
+      const [uploadError, setUploadError] = React.useState(null);
+      const [dragOver, setDragOver] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+      const mediaKind = block.mediaKind || "video";
+
+      const handleFile = async (file) => {
+        if (!file || uploading) return;
+        setUploading(true);
+        setUploadError(null);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          onChange({ ...block, mediaKind: "image", imageUrl: data.url });
+        } catch (e) {
+          setUploadError(e.message);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      return (
+        <SettingsPanel title="Media Block" onClose={onClose}>
+          <label>미디어 타입</label>
+          <select
+            value={mediaKind}
+            onChange={(e) => onChange({ ...block, mediaKind: e.target.value })}
+          >
+            <option value="video">🎬 YouTube 임베드</option>
+            <option value="image">🖼 이미지 / GIF</option>
+          </select>
+
+          {mediaKind === "video" && (
+            <React.Fragment>
+              <label>Video ID 또는 URL</label>
+              <input
+                type="text"
+                value={block.videoId || ""}
+                onChange={(e) => onChange({ ...block, videoId: normalizeYoutubeId(e.target.value) })}
+                placeholder="oE25G0tBFSM 또는 https://youtu.be/..."
+              />
+              <label>시작 초 (선택)</label>
+              <input
+                type="number"
+                value={block.start || ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  onChange({ ...block, start: v ? parseInt(v, 10) : null });
+                }}
+              />
+              <label>제목</label>
+              <input
+                type="text"
+                value={block.title || ""}
+                onChange={(e) => onChange({ ...block, title: e.target.value })}
+              />
+              {block.videoId && (
+                <div style={{ marginTop: 12, fontSize: "0.8rem", color: "#a2a2a2" }}>
+                  미리보기는 블록 본문에서 확인
+                </div>
+              )}
+            </React.Fragment>
+          )}
+
+          {mediaKind === "image" && (
+            <React.Fragment>
+              <label>이미지 URL</label>
+              <input
+                type="url"
+                value={block.imageUrl || ""}
+                onChange={(e) => onChange({ ...block, imageUrl: e.target.value })}
+                placeholder="Cloudinary URL 또는 아래 업로드"
+              />
+              <label>대체 텍스트 (alt)</label>
+              <input
+                type="text"
+                value={block.imageAlt || ""}
+                onChange={(e) => onChange({ ...block, imageAlt: e.target.value })}
+              />
+              <label>캡션</label>
+              <input
+                type="text"
+                value={block.imageCaption || ""}
+                onChange={(e) => onChange({ ...block, imageCaption: e.target.value })}
+              />
+              <label>파일 업로드 (GIF / JPG / PNG)</label>
+              <div
+                className={`image-dropzone${dragOver ? " over" : ""}${uploading ? " busy" : ""}`}
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                  if (file) handleFile(file);
+                }}
+              >
+                {uploading ? "업로드 중..." : "클릭 또는 드롭하여 업로드"}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleFile(e.target.files && e.target.files[0])}
+              />
+              {uploadError && (
+                <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 8 }}>
+                  업로드 실패: {uploadError}
+                </div>
+              )}
+              {block.imageUrl && (
+                <div style={{ marginTop: 12 }}>
+                  <img src={block.imageUrl} alt={block.imageAlt || ""} style={{ maxWidth: "100%", borderRadius: 2 }} />
+                </div>
+              )}
+            </React.Fragment>
+          )}
+        </SettingsPanel>
+      );
+    }
+
+    // --- ButtonBlockEdit ---
+    const ICON_OPTIONS = Object.keys(ICON_PATHS);
+    function ButtonBlockEdit({ block, onChange, onClose }) {
+      return (
+        <SettingsPanel title="Button Block" onClose={onClose}>
+          <label>아이콘</label>
+          <select
+            value={block.icon || "link"}
+            onChange={(e) => onChange({ ...block, icon: e.target.value })}
+          >
+            {ICON_OPTIONS.map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+          <label>라벨</label>
+          <input
+            type="text"
+            value={block.label || ""}
+            onChange={(e) => onChange({ ...block, label: e.target.value })}
+          />
+          <label>링크 (href)</label>
+          <input
+            type="url"
+            value={block.href || ""}
+            onChange={(e) => onChange({ ...block, href: e.target.value })}
+          />
+          <label>새 창 열기</label>
+          <select
+            value={block.target || "_self"}
+            onChange={(e) => onChange({ ...block, target: e.target.value })}
+          >
+            <option value="_self">같은 창 (_self)</option>
+            <option value="_blank">새 창 (_blank)</option>
+          </select>
+        </SettingsPanel>
+      );
+    }
+
+    // --- CardgridBlockEdit ---
+    const CARD_COLORS = ["yellow-300", "yellow-400", "green-400", "blue-400", "gray-300", "gray-400"];
+
+    function createEmptyCard(kind) {
+      if (kind === "video") return { kind: "video", videoId: "", title: "" };
+      if (kind === "image") return { kind: "image", url: "", alt: "", caption: "" };
+      return { kind: "text", title: "New", titleColor: "yellow-400", description: "" };
+    }
+
+    function CardgridCardEditor({ card, index, token, blockVariant, onUpdate, onRemove }) {
+      const kind = card.kind || blockVariant || "text";
+      const [uploading, setUploading] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+
+      const handleFile = async (file) => {
+        if (!file || uploading) return;
+        setUploading(true);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          onUpdate({ ...card, kind: "image", url: data.url });
+        } catch (e) {
+          alert(`업로드 실패: ${e.message}`);
+        } finally {
+          setUploading(false);
+        }
+      };
+
+      const handleKindChange = (nextKind) => {
+        onUpdate({ ...card, kind: nextKind });
+      };
+
+      return (
+        <div style={{ border: "1px solid #6c6c6c", padding: 8, marginBottom: 8, borderRadius: 2 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, gap: 6 }}>
+            <span style={{ fontSize: "0.75rem", color: "#a2a2a2", flex: "0 0 auto" }}>#{index + 1}</span>
+            <select
+              value={kind}
+              onChange={(e) => handleKindChange(e.target.value)}
+              style={{ flex: 1 }}
+            >
+              <option value="text">📝 Text</option>
+              <option value="video">🎬 Video</option>
+              <option value="image">🖼 Image / GIF</option>
+            </select>
+            <button
+              onClick={onRemove}
+              style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", padding: "0 4px", fontSize: "1rem" }}
+              aria-label="카드 삭제"
+              title="카드 삭제"
+            >🗑</button>
+          </div>
+
+          {kind === "text" && (
+            <React.Fragment>
+              <input type="text" placeholder="제목" value={card.title || ""} onChange={(e) => onUpdate({ ...card, title: e.target.value })} />
+              <select
+                value={card.titleColor || "yellow-400"}
+                onChange={(e) => onUpdate({ ...card, titleColor: e.target.value })}
+                style={{ marginTop: 4 }}
+              >
+                {CARD_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <textarea placeholder="설명" value={card.description || ""} onChange={(e) => onUpdate({ ...card, description: e.target.value })} style={{ marginTop: 4 }} />
+            </React.Fragment>
+          )}
+
+          {kind === "video" && (
+            <React.Fragment>
+              <input type="text" placeholder="Video ID 또는 URL" value={card.videoId || ""} onChange={(e) => onUpdate({ ...card, videoId: normalizeYoutubeId(e.target.value) })} />
+              <input type="text" placeholder="제목" value={card.title || ""} onChange={(e) => onUpdate({ ...card, title: e.target.value })} style={{ marginTop: 4 }} />
+            </React.Fragment>
+          )}
+
+          {kind === "image" && (
+            <React.Fragment>
+              <input type="url" placeholder="이미지 URL" value={card.url || ""} onChange={(e) => onUpdate({ ...card, url: e.target.value })} />
+              <input type="text" placeholder="alt (대체 텍스트)" value={card.alt || ""} onChange={(e) => onUpdate({ ...card, alt: e.target.value })} style={{ marginTop: 4 }} />
+              <input type="text" placeholder="캡션" value={card.caption || ""} onChange={(e) => onUpdate({ ...card, caption: e.target.value })} style={{ marginTop: 4 }} />
+              <button
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                disabled={uploading}
+                style={{
+                  width: "100%",
+                  marginTop: 6,
+                  background: "transparent",
+                  border: "2px dashed #6c6c6c",
+                  color: uploading ? "#737373" : "#a2a2a2",
+                  padding: 6,
+                  borderRadius: 2,
+                  cursor: uploading ? "wait" : "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "0.8rem",
+                }}
+              >
+                {uploading ? "업로드 중..." : "📤 파일 업로드 (GIF / JPG / PNG)"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleFile(e.target.files && e.target.files[0])}
+              />
+              {card.url && (
+                <div style={{ marginTop: 6 }}>
+                  <img src={card.url} alt={card.alt || ""} style={{ maxWidth: "100%", borderRadius: 2, display: "block" }} />
+                </div>
+              )}
+            </React.Fragment>
+          )}
+        </div>
+      );
+    }
+
+    function CardgridBlockEdit({ block, onChange, token, onClose }) {
+      const updateCard = (i, nextCard) => {
+        const cards = block.cards.map((c, idx) => idx === i ? nextCard : c);
+        onChange({ ...block, cards });
+      };
+      const addCard = () => {
+        const defaultKind = block.variant || "text";
+        onChange({ ...block, cards: [...block.cards, createEmptyCard(defaultKind)] });
+      };
+      const removeCard = (i) => {
+        onChange({ ...block, cards: block.cards.filter((_, idx) => idx !== i) });
+      };
+
+      return (
+        <SettingsPanel title="Card Grid Block" onClose={onClose}>
+          <label>컬럼 수</label>
+          <select
+            value={block.cols || 2}
+            onChange={(e) => onChange({ ...block, cols: parseInt(e.target.value, 10) })}
+          >
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+          </select>
+
+          <label>새 카드 기본 타입</label>
+          <select
+            value={block.variant || "text"}
+            onChange={(e) => {
+              const nextVariant = e.target.value;
+              const currentImplicitKind = block.variant || "text";
+              const migratedCards = block.cards.map(c =>
+                c.kind ? c : { ...c, kind: currentImplicitKind }
+              );
+              onChange({ ...block, cards: migratedCards, variant: nextVariant });
+            }}
+          >
+            <option value="text">📝 Text</option>
+            <option value="video">🎬 Video</option>
+            <option value="image">🖼 Image / GIF</option>
+          </select>
+          <div style={{ fontSize: "0.72rem", color: "#a2a2a2", marginTop: 4, lineHeight: 1.4 }}>
+            ※ 이 값은 "+ 카드 추가" 시 기본값으로만 쓰입니다. 각 카드의 타입은 아래에서 개별적으로 변경 가능.
+          </div>
+
+          <label>카드 목록</label>
+          {block.cards.map((card, i) => (
+            <CardgridCardEditor
+              key={i}
+              card={card}
+              index={i}
+              token={token}
+              blockVariant={block.variant}
+              onUpdate={(next) => updateCard(i, next)}
+              onRemove={() => removeCard(i)}
+            />
+          ))}
+          <button
+            onClick={addCard}
+            style={{ width: "100%", background: "transparent", border: "2px dashed #6c6c6c", color: "#a2a2a2", padding: 8, borderRadius: 2, cursor: "pointer", fontFamily: "inherit" }}
+          >+ 카드 추가</button>
+        </SettingsPanel>
+      );
+    }
+
+    // --- HeadingBlockEdit (emoji + level — 텍스트는 인라인 편집) ---
+    function HeadingBlockEdit({ block, onChange, onClose }) {
+      return (
+        <SettingsPanel title="Heading Block" onClose={onClose}>
+          <label>이모지 (선택, 비우면 없음)</label>
+          <input
+            type="text"
+            value={block.emoji || ""}
+            onChange={(e) => onChange({ ...block, emoji: e.target.value || null })}
+            placeholder="🏝️"
+          />
+          <label>레벨</label>
+          <select
+            value={block.level || 3}
+            onChange={(e) => onChange({ ...block, level: parseInt(e.target.value, 10) })}
+          >
+            <option value={2}>H2 — 큰 제목</option>
+            <option value={3}>H3 — 소제목</option>
+          </select>
+          <div style={{ fontSize: "0.78rem", color: "#a2a2a2", marginTop: 12, lineHeight: 1.4 }}>
+            제목 텍스트는 본문에서 직접 클릭하여 편집합니다.
+          </div>
+        </SettingsPanel>
+      );
+    }
+
+    // --- ListBlockEdit (style + 항목별 note 토글 — 내용은 인라인 편집) ---
+    function ListBlockEdit({ block, onChange, onClose }) {
+      const updateItem = (i, patch) => {
+        const next = block.items.map((it, idx) => idx === i ? { ...it, ...patch } : it);
+        onChange({ ...block, items: next });
+      };
+      const stripTags = (s) => String(s || "").replace(/<[^>]*>/g, "");
+      return (
+        <SettingsPanel title="List Block" onClose={onClose}>
+          <label>리스트 스타일</label>
+          <select
+            value={block.style || "disc"}
+            onChange={(e) => onChange({ ...block, style: e.target.value })}
+          >
+            <option value="disc">● 불릿 (disc)</option>
+            <option value="decimal">1. 번호 (decimal)</option>
+          </select>
+          <label>항목 (note = 보조 설명 행)</label>
+          {block.items.map((item, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "0.85rem" }}>
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                #{i + 1} {stripTags(item.strong || item.text).slice(0, 28) || "(빈 항목)"}
+              </span>
+              <label style={{ display: "flex", alignItems: "center", gap: 4, margin: 0, fontWeight: "normal" }}>
+                <input
+                  type="checkbox"
+                  checked={!!item.note}
+                  onChange={(e) => updateItem(i, { note: e.target.checked })}
+                  style={{ width: "auto" }}
+                />
+                note
+              </label>
+            </div>
+          ))}
+          <div style={{ fontSize: "0.78rem", color: "#a2a2a2", marginTop: 12, lineHeight: 1.4 }}>
+            항목 내용은 본문에서 직접 클릭하여 편집합니다.
+            Enter = 항목 추가, 빈 항목에서 Backspace = 삭제.
+          </div>
+        </SettingsPanel>
+      );
+    }
+
+    // --- FloatingRichTextToolbar (index.html과 동일 — 에디터에서만 마운트) ---
+    function FloatingRichTextToolbar() {
+      const [state, setState] = React.useState({ visible: false, top: 0, left: 0 });
+      const [linkMode, setLinkMode] = React.useState(false);
+      const [linkUrl, setLinkUrl] = React.useState("");
+      const savedRangeRef = React.useRef(null);
+
+      React.useEffect(() => {
+        const onSelectionChange = () => {
+          const sel = document.getSelection();
+          if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+            setState(prev => prev.visible ? { visible: false, top: 0, left: 0 } : prev);
+            setLinkMode(false);
+            return;
+          }
+          const range = sel.getRangeAt(0);
+          const anchor = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+          if (!anchor || !anchor.closest("[contenteditable='true']")) {
+            setState(prev => prev.visible ? { visible: false, top: 0, left: 0 } : prev);
+            return;
+          }
+          const rect = range.getBoundingClientRect();
+          if (rect.width === 0 && rect.height === 0) return;
+          savedRangeRef.current = range.cloneRange();
+          setState({
+            visible: true,
+            top: rect.top - 40,
+            left: rect.left + rect.width / 2 - 60,
+          });
+        };
+        document.addEventListener("selectionchange", onSelectionChange);
+        return () => document.removeEventListener("selectionchange", onSelectionChange);
+      }, []);
+
+      React.useEffect(() => {
+        const onKey = (e) => {
+          if (!state.visible && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("[contenteditable='true']"))) return;
+          if (!(e.ctrlKey || e.metaKey)) return;
+          if (e.key.toLowerCase() === "b") { e.preventDefault(); captureCurrentRange(); document.execCommand("bold"); }
+          if (e.key.toLowerCase() === "i") { e.preventDefault(); captureCurrentRange(); document.execCommand("italic"); }
+          if (e.key.toLowerCase() === "k") { e.preventDefault(); captureCurrentRange(); openLinkMode(); }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, [state.visible]);
+
+      const restoreSelection = () => {
+        const sel = document.getSelection();
+        if (savedRangeRef.current && sel) {
+          sel.removeAllRanges();
+          sel.addRange(savedRangeRef.current);
+        }
+      };
+
+      const captureCurrentRange = () => {
+        const sel = document.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          savedRangeRef.current = sel.getRangeAt(0).cloneRange();
+        }
+      };
+
+      const openLinkMode = () => {
+        setLinkMode(true);
+        setLinkUrl("");
+      };
+      const applyLink = () => {
+        restoreSelection();
+        if (linkUrl) {
+          document.execCommand("createLink", false, linkUrl);
+          const sel = document.getSelection();
+          if (sel && sel.anchorNode) {
+            const a = sel.anchorNode.parentElement && sel.anchorNode.parentElement.closest("a");
+            if (a && linkUrl.match(/^https?:/)) {
+              a.setAttribute("target", "_blank");
+              a.setAttribute("rel", "noopener noreferrer");
+            }
+          }
+        }
+        setLinkMode(false);
+        const active = document.activeElement;
+        if (active && typeof active.blur === "function") active.blur();
+      };
+
+      if (!state.visible) return null;
+
+      return (
+        <div
+          className="floating-rich-toolbar"
+          style={{ top: state.top, left: state.left }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {linkMode ? (
+            <div className="link-input">
+              <input
+                autoFocus
+                type="url"
+                placeholder="https://..."
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); applyLink(); }
+                  if (e.key === "Escape") { e.preventDefault(); setLinkMode(false); }
+                }}
+              />
+              <button onClick={applyLink}>OK</button>
+            </div>
+          ) : (
+            <React.Fragment>
+              <button onClick={() => { captureCurrentRange(); document.execCommand("bold"); }} title="Bold (Ctrl+B)">B</button>
+              <button onClick={() => { captureCurrentRange(); document.execCommand("italic"); }} title="Italic (Ctrl+I)"><i>I</i></button>
+              <button onClick={() => { captureCurrentRange(); openLinkMode(); }} title="Link (Ctrl+K)">🔗</button>
+            </React.Fragment>
+          )}
+        </div>
+      );
+    }
+
+    // --- PostBlocksEditor (index.html EditableSection의 blocks 전용 적응판) ---
+    // onBlocksChange(fn): fn(blocks) => nextBlocks — 부모가 dirty 마킹 담당
+    function PostBlocksEditor({ blocks, onBlocksChange, token }) {
+      const [pickerAt, setPickerAt] = React.useState(null);
+      const [settingsIdx, setSettingsIdx] = React.useState(null);
+
+      const moveBlock = (idx, delta) => {
+        onBlocksChange(prev => {
+          const j = idx + delta;
+          if (j < 0 || j >= prev.length) return prev;
+          const next = prev.slice();
+          [next[idx], next[j]] = [next[j], next[idx]];
+          return next;
+        });
+      };
+      const deleteBlock = (idx) => {
+        onBlocksChange(prev => prev.filter((_, i) => i !== idx));
+        setSettingsIdx(null);
+      };
+      const updateBlockAt = (idx, updated) => {
+        onBlocksChange(prev => prev.map((b, i) => i === idx ? updated : b));
+      };
+      const insertBlockAt = (idx, type) => {
+        const newBlock = createEmptyBlock(type);
+        onBlocksChange(prev => [...prev.slice(0, idx), newBlock, ...prev.slice(idx)]);
+        setPickerAt(null);
+      };
+
+      const closePicker = React.useCallback(() => setPickerAt(null), []);
+      const closeSettings = React.useCallback(() => setSettingsIdx(null), []);
+
+      const renderSettingsPanel = () => {
+        if (settingsIdx === null) return null;
+        const block = blocks[settingsIdx];
+        if (!block) return null;
+        const onBlockChange = (updated) => updateBlockAt(settingsIdx, updated);
+        switch (block.type) {
+          case "image":    return <ImageBlockEdit    block={block} onChange={onBlockChange} token={token} onClose={closeSettings} />;
+          case "youtube":  return <YoutubeBlockEdit  block={block} onChange={onBlockChange} token={token} onClose={closeSettings} />;
+          case "button":   return <ButtonBlockEdit   block={block} onChange={onBlockChange}               onClose={closeSettings} />;
+          case "cardgrid": return <CardgridBlockEdit block={block} onChange={onBlockChange} token={token} onClose={closeSettings} />;
+          case "heading":  return <HeadingBlockEdit  block={block} onChange={onBlockChange}               onClose={closeSettings} />;
+          case "list":     return <ListBlockEdit     block={block} onChange={onBlockChange}               onClose={closeSettings} />;
+          default:
+            return (
+              <SettingsPanel title={`${block.type} Block`} onClose={closeSettings}>
+                <div style={{ fontSize: "0.85rem", color: "#a2a2a2" }}>
+                  text 블록은 본문 직접 클릭으로 편집합니다. (드래그 선택 시 B / I / 링크 툴바)
+                </div>
+              </SettingsPanel>
+            );
+        }
+      };
+
+      return (
+        <React.Fragment>
+          <BlockInsertGap onInsert={() => setPickerAt(0)} />
+          {blocks.map((block, idx) => (
+            <React.Fragment key={block.id}>
+              <BlockEditWrapper
+                index={idx}
+                lastIndex={blocks.length - 1}
+                onMoveUp={() => moveBlock(idx, -1)}
+                onMoveDown={() => moveBlock(idx, +1)}
+                onDelete={() => deleteBlock(idx)}
+                onSettings={() => setSettingsIdx(idx)}
+              >
+                <EditableBlockContent
+                  block={block}
+                  onChange={(updated) => updateBlockAt(idx, updated)}
+                />
+              </BlockEditWrapper>
+              <BlockInsertGap onInsert={() => setPickerAt(idx + 1)} />
+            </React.Fragment>
+          ))}
+          {blocks.length === 0 && (
+            <div className="text-center text-gray-400 py-8" style={{ fontSize: "0.9rem" }}>
+              블록이 없습니다 — 위 + 버튼으로 추가하세요.
+            </div>
+          )}
+          {pickerAt !== null && (
+            <BlockTypePicker
+              onPick={(type) => insertBlockAt(pickerAt, type)}
+              onCancel={closePicker}
+            />
+          )}
+          {renderSettingsPanel()}
+        </React.Fragment>
+      );
+    }
+
+    // --- PostEditorView (state 기반 — 라우트 아님) ---
+    // postId: null = 신규. 자동저장 없음 — SAVE / SAVE & PUBLISH 명시 버튼만.
+    function PostEditorView({ postId, onExit }) {
+      const toast = useToast();
+      const token = sessionStorage.getItem("admin_token");
+
+      const EMPTY_POST = {
+        title: "", titleEmoji: null, subtitle: "", excerpt: "",
+        coverImage: null, status: "draft", blocks: [],
+      };
+
+      const [post, setPost] = React.useState(postId ? null : EMPTY_POST);
+      const [savedId, setSavedId] = React.useState(postId || null);
+      const [featured, setFeatured] = React.useState(false);
+      const [dirty, setDirty] = React.useState(false);
+      const [saving, setSaving] = React.useState(false);
+      const [loadError, setLoadError] = React.useState(false);
+      const [coverUploading, setCoverUploading] = React.useState(false);
+      const coverFileRef = React.useRef(null);
+
+      // 기존 포스트 로드 + featuredId 확인 (인덱스에서)
+      React.useEffect(() => {
+        if (!postId) return;
+        let cancelled = false;
+        Promise.all([
+          api("/api/posts/" + encodeURIComponent(postId)),
+          api("/api/admin/posts"),
+        ]).then(([postRes, indexRes]) => {
+          if (cancelled) return;
+          if (!postRes.ok || !Array.isArray(postRes.data.blocks)) {
+            setLoadError(true);
+            return;
+          }
+          setPost(postRes.data);
+          if (indexRes.ok && indexRes.data.featuredId === postId) {
+            setFeatured(true);
+          }
+        }).catch(() => {
+          if (!cancelled) setLoadError(true);
+        });
+        return () => { cancelled = true; };
+      }, [postId]);
+
+      // dirty 시 이탈 가드
+      React.useEffect(() => {
+        if (!dirty) return;
+        const handler = (e) => {
+          e.preventDefault();
+          e.returnValue = '';
+        };
+        window.addEventListener("beforeunload", handler);
+        return () => window.removeEventListener("beforeunload", handler);
+      }, [dirty]);
+
+      const mutate = (updater) => {
+        setPost(prev => updater(prev));
+        setDirty(true);
+      };
+      const setMeta = (patch) => mutate(prev => ({ ...prev, ...patch }));
+
+      const handleCoverFile = async (file) => {
+        if (!file || coverUploading) return;
+        setCoverUploading(true);
+        try {
+          const data = await uploadPortfolioImage(token, file);
+          setMeta({ coverImage: data.url });
+        } catch (e) {
+          toast.error("커버 업로드 실패", e.message);
+        } finally {
+          setCoverUploading(false);
+        }
+      };
+
+      const doSave = (publish) => {
+        if (saving) return;
+        if (!post.title || !post.title.trim()) {
+          toast.warning("저장 불가", "제목을 입력하세요.");
+          return;
+        }
+        const status = publish ? "published" : (post.status || "draft");
+        const body = {
+          title: post.title,
+          titleEmoji: post.titleEmoji || null,
+          subtitle: post.subtitle || "",
+          excerpt: post.excerpt || "",
+          coverImage: post.coverImage || null,
+          status,
+          featured: status === "published" ? featured : false,
+          blocks: post.blocks,
+        };
+        setSaving(true);
+        const req = savedId
+          ? api("/api/posts/" + encodeURIComponent(savedId), { method: "PUT", json: body })
+          : api("/api/posts", { method: "POST", json: body });
+        req.then(({ ok, status: code, data }) => {
+          setSaving(false);
+          if (!ok) {
+            toast.error(
+              "저장 실패",
+              code === 401 ? "인증 실패 — 다시 로그인하세요 (?admin=1 재진입)" : (data.error || `HTTP ${code}`)
+            );
+            return;
+          }
+          setSavedId(data.id);
+          setPost(prev => ({ ...prev, status: data.status, publishedAt: data.publishedAt }));
+          setDirty(false);
+          toast.success("저장 완료", "반영까지 최대 1분 소요 (KV 캐시 전파)");
+        }).catch(() => {
+          setSaving(false);
+          toast.error("저장 실패", "서버 연결 실패");
+        });
+      };
+
+      const handleExit = () => {
+        if (dirty && !window.confirm("저장하지 않은 변경이 있습니다. 나갈까요?")) return;
+        onExit();
+      };
+
+      if (loadError) {
+        return (
+          <div className="os-window">
+            <div className="os-header">
+              <span className="os-header-title">ERROR.SYS</span>
+              <div className="os-header-squares">
+                <div className="os-square y"></div>
+                <div className="os-square g"></div>
+                <div className="os-square r"></div>
+              </div>
+            </div>
+            <div className="os-body text-center py-16">
+              <p className="pixel-font text-gray-400 mb-8">POST LOAD FAILED</p>
+              <button className="btn-pixel" onClick={onExit}>
+                <span className="btn-pixel-text">&larr; BACK</span>
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (!post) {
+        return (
+          <div className="text-center py-20">
+            <span className="pixel-font text-gray-400">LOADING...</span>
+          </div>
+        );
+      }
+
+      const isPublished = post.status === "published";
+
+      return (
+        <React.Fragment>
+          <div className="editor-toolbar">
+            <button className="exit" onClick={handleExit}>EXIT</button>
+            <span className={"status" + (dirty ? " dirty" : "")}>
+              {saving ? "SAVING..." : dirty ? "● UNSAVED" : savedId ? `[${post.status.toUpperCase()}] ${savedId}` : "[NEW]"}
+            </span>
+            <label
+              className={"featured-toggle" + (isPublished ? "" : " disabled")}
+              title={isPublished ? "메인 페이지 노출 지정" : "published 상태에서만 지정 가능"}
+            >
+              <input
+                type="checkbox"
+                checked={featured}
+                disabled={!isPublished}
+                onChange={(e) => { setFeatured(e.target.checked); setDirty(true); }}
+              />
+              FEATURED
+            </label>
+            <button onClick={() => doSave(false)} disabled={saving}>SAVE</button>
+            <button onClick={() => doSave(true)} disabled={saving}>SAVE &amp; PUBLISH</button>
+          </div>
+
+          <div className="os-window editor-meta">
+            <div className="os-header">
+              <span className="os-header-title">POST_META.SYS</span>
+              <div className="os-header-squares">
+                <div className="os-square y"></div>
+                <div className="os-square g"></div>
+                <div className="os-square r"></div>
+              </div>
+            </div>
+            <div className="os-body">
+              <label>제목 *</label>
+              <input
+                type="text"
+                value={post.title || ""}
+                onChange={(e) => setMeta({ title: e.target.value })}
+                placeholder="포스트 제목"
+              />
+              <label>제목 이모지 (선택)</label>
+              <input
+                type="text"
+                value={post.titleEmoji || ""}
+                onChange={(e) => setMeta({ titleEmoji: e.target.value || null })}
+                placeholder="🏝️"
+              />
+              <label>부제 (선택)</label>
+              <input
+                type="text"
+                value={post.subtitle || ""}
+                onChange={(e) => setMeta({ subtitle: e.target.value })}
+                placeholder="한 줄 부제"
+              />
+              <label>요약 (목록 카드에 표시)</label>
+              <textarea
+                rows={2}
+                value={post.excerpt || ""}
+                onChange={(e) => setMeta({ excerpt: e.target.value })}
+                placeholder="목록에서 보이는 짧은 요약"
+              />
+              <label>커버 이미지 (선택 — 목록 카드 상단)</label>
+              <input
+                type="text"
+                value={post.coverImage || ""}
+                onChange={(e) => setMeta({ coverImage: e.target.value || null })}
+                placeholder="Cloudinary URL 또는 아래 업로드"
+              />
+              <button
+                className="cover-upload-btn"
+                disabled={coverUploading}
+                onClick={() => coverFileRef.current && coverFileRef.current.click()}
+              >
+                {coverUploading ? "업로드 중..." : "📤 커버 이미지 업로드"}
+              </button>
+              <input
+                ref={coverFileRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleCoverFile(e.target.files && e.target.files[0])}
+              />
+              {post.coverImage && (
+                <div style={{ marginTop: 12 }}>
+                  <img src={post.coverImage} alt="" style={{ maxWidth: "100%", maxHeight: 180, borderRadius: 2 }} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="os-window">
+            <div className="os-header">
+              <span className="os-header-title">POST_BODY.SYS</span>
+              <div className="os-header-squares">
+                <div className="os-square y"></div>
+                <div className="os-square g"></div>
+                <div className="os-square r"></div>
+              </div>
+            </div>
+            <div className="os-body">
+              <PostBlocksEditor
+                blocks={post.blocks}
+                onBlocksChange={(fn) => mutate(prev => ({ ...prev, blocks: fn(prev.blocks) }))}
+                token={token}
+              />
+            </div>
+          </div>
+
+          <FloatingRichTextToolbar />
+        </React.Fragment>
+      );
+    }
+
     // === Status Bar (index.html StatusBar 축소판) ===
     function ProjectStatusBar({ theme, toggleTheme, isCrt, toggleCrt }) {
       return (
@@ -720,9 +2353,10 @@
       );
     }
 
-    // === Post Card (목록 항목) ===
-    function PostCard({ meta, isFeatured }) {
+    // === Post Card (목록 항목 — adminMode 시 액션 버튼 노출) ===
+    function PostCard({ meta, isFeatured, adminMode, onEdit, onDelete, onSetFeatured, busy }) {
       const date = fmtDate(meta.publishedAt || meta.createdAt);
+      const isDraft = meta.status === "draft";
       const open = () => { window.location.hash = "#/post/" + encodeURIComponent(meta.id); };
       return (
         <div
@@ -748,6 +2382,7 @@
               {meta.titleEmoji && <span>{meta.titleEmoji}</span>}
               <span>{meta.title}</span>
               {isFeatured && <span className="featured-badge">&#9733; FEATURED</span>}
+              {adminMode && isDraft && <span className="draft-badge">DRAFT</span>}
             </h2>
             {meta.subtitle && (
               <p className="text-lg mb-4 text-blue-200 font-bold">{meta.subtitle}</p>
@@ -755,18 +2390,35 @@
             {meta.excerpt && (
               <p className="text-gray-400 text-base">{meta.excerpt}</p>
             )}
+            {adminMode && (
+              <div
+                className="admin-card-actions"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
+                <button onClick={onEdit} disabled={busy}>EDIT</button>
+                <button className="danger" onClick={onDelete} disabled={busy}>DELETE</button>
+                {!isDraft && !isFeatured && (
+                  <button onClick={onSetFeatured} disabled={busy}>SET FEATURED</button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       );
     }
 
-    // === 목록 뷰 ===
-    function PostListView() {
+    // === 목록 뷰 (adminMode 시 /api/admin/posts — draft 포함 + 관리 액션) ===
+    function PostListView({ adminMode, onEdit, onNew }) {
+      const toast = useToast();
       const [state, setState] = React.useState({ loading: true, error: false, featuredId: null, posts: [] });
+      const [reloadTick, setReloadTick] = React.useState(0);
+      const [busy, setBusy] = React.useState(false);
+      const reload = () => setReloadTick(n => n + 1);
 
       React.useEffect(() => {
         let cancelled = false;
-        api("/api/posts")
+        api(adminMode ? "/api/admin/posts" : "/api/posts")
           .then(({ ok, data }) => {
             if (cancelled) return;
             if (!ok || !Array.isArray(data.posts)) {
@@ -779,7 +2431,57 @@
             if (!cancelled) setState({ loading: false, error: true, featuredId: null, posts: [] });
           });
         return () => { cancelled = true; };
-      }, []);
+      }, [adminMode, reloadTick]);
+
+      const handleDelete = (meta) => {
+        if (busy) return;
+        if (!window.confirm(`"${meta.title}" 포스트를 삭제할까요?\n되돌릴 수 없습니다.`)) return;
+        setBusy(true);
+        api("/api/posts/" + encodeURIComponent(meta.id), { method: "DELETE" })
+          .then(({ ok, status, data }) => {
+            setBusy(false);
+            if (!ok) {
+              toast.error("삭제 실패", status === 401 ? "인증 실패 — 다시 로그인하세요" : (data.error || `HTTP ${status}`));
+              return;
+            }
+            toast.success("삭제 완료", "반영까지 최대 1분 소요 (KV 캐시 전파)");
+            reload();
+          })
+          .catch(() => { setBusy(false); toast.error("삭제 실패", "서버 연결 실패"); });
+      };
+
+      // SET FEATURED: 포스트 전문 GET → featured:true 로 PUT → 목록 재로드
+      const handleSetFeatured = (meta) => {
+        if (busy) return;
+        setBusy(true);
+        api("/api/posts/" + encodeURIComponent(meta.id))
+          .then(({ ok, status, data }) => {
+            if (!ok || !Array.isArray(data.blocks)) {
+              throw new Error(status === 401 ? "인증 실패" : (data.error || `HTTP ${status}`));
+            }
+            const body = {
+              title: data.title,
+              titleEmoji: data.titleEmoji || null,
+              subtitle: data.subtitle || "",
+              excerpt: data.excerpt || "",
+              coverImage: data.coverImage || null,
+              status: data.status,
+              featured: true,
+              blocks: data.blocks,
+            };
+            return api("/api/posts/" + encodeURIComponent(meta.id), { method: "PUT", json: body });
+          })
+          .then((res) => {
+            setBusy(false);
+            if (!res.ok) {
+              toast.error("FEATURED 지정 실패", res.data.error || `HTTP ${res.status}`);
+              return;
+            }
+            toast.success("FEATURED 지정 완료", "반영까지 최대 1분 소요 (KV 캐시 전파)");
+            reload();
+          })
+          .catch((e) => { setBusy(false); toast.error("FEATURED 지정 실패", e.message || "서버 연결 실패"); });
+      };
 
       if (state.loading) {
         return (
@@ -789,35 +2491,56 @@
         );
       }
 
+      const newPostRow = adminMode && (
+        <div className="admin-new-post-row">
+          <button className="btn-pixel" onClick={onNew}>
+            <span className="btn-pixel-text">+ NEW POST</span>
+          </button>
+        </div>
+      );
+
       if (state.error || state.posts.length === 0) {
         return (
-          <div className="os-window">
-            <div className="os-header">
-              <span className="os-header-title">PROJECT_LOG.SYS</span>
-              <div className="os-header-squares">
-                <div className="os-square y"></div>
-                <div className="os-square g"></div>
-                <div className="os-square r"></div>
+          <React.Fragment>
+            {newPostRow}
+            <div className="os-window">
+              <div className="os-header">
+                <span className="os-header-title">PROJECT_LOG.SYS</span>
+                <div className="os-header-squares">
+                  <div className="os-square y"></div>
+                  <div className="os-square g"></div>
+                  <div className="os-square r"></div>
+                </div>
+              </div>
+              <div className="os-body text-center py-16">
+                <p className="pixel-font text-gray-400">{state.error ? "SYSTEM ERROR — RETRY LATER" : "NO LOGS FOUND"}</p>
               </div>
             </div>
-            <div className="os-body text-center py-16">
-              <p className="pixel-font text-gray-400">{state.error ? "SYSTEM ERROR — RETRY LATER" : "NO LOGS FOUND"}</p>
-            </div>
-          </div>
+          </React.Fragment>
         );
       }
 
       return (
         <React.Fragment>
+          {newPostRow}
           {state.posts.map((meta) => (
-            <PostCard key={meta.id} meta={meta} isFeatured={meta.id === state.featuredId} />
+            <PostCard
+              key={meta.id}
+              meta={meta}
+              isFeatured={meta.id === state.featuredId}
+              adminMode={adminMode}
+              busy={busy}
+              onEdit={() => onEdit(meta.id)}
+              onDelete={() => handleDelete(meta)}
+              onSetFeatured={() => handleSetFeatured(meta)}
+            />
           ))}
         </React.Fragment>
       );
     }
 
-    // === 상세 뷰 ===
-    function PostDetailView({ id }) {
+    // === 상세 뷰 (adminMode 시 EDIT 버튼 — draft도 Bearer로 열람 가능) ===
+    function PostDetailView({ id, adminMode, onEdit }) {
       const [state, setState] = React.useState({ loading: true, error: false, post: null });
 
       React.useEffect(() => {
@@ -884,6 +2607,7 @@
               <h2 className={post.subtitle ? "pixel-font text-xl md:text-2xl rpg-title flex items-center gap-3 flex-wrap" : "pixel-font text-xl md:text-2xl rpg-title"}>
                 {post.titleEmoji && <span>{post.titleEmoji}</span>}
                 <span>{post.title}</span>
+                {adminMode && post.status === "draft" && <span className="draft-badge">DRAFT</span>}
               </h2>
               {post.subtitle && (
                 <p className="text-xl mb-2 text-blue-200 font-bold">{post.subtitle}</p>
@@ -892,10 +2616,15 @@
               {post.blocks.map((b) => <Block key={b.id} block={b} />)}
             </div>
           </div>
-          <div className="mb-10">
+          <div className="mb-10 flex flex-wrap gap-4">
             <a href="#/" className="btn-pixel">
               <span className="btn-pixel-text">&larr; ALL POSTS</span>
             </a>
+            {adminMode && onEdit && (
+              <button className="btn-pixel" onClick={() => onEdit(post.id)}>
+                <span className="btn-pixel-text">EDIT</span>
+              </button>
+            )}
           </div>
         </React.Fragment>
       );
@@ -921,6 +2650,76 @@
         if (crt) crt.style.display = isCrt ? 'block' : 'none';
       }, [isCrt]);
 
+      // === Admin (gallery.html ?admin=1 패턴 — sessionStorage admin_token 공유) ===
+      const [adminMode, setAdminMode] = React.useState(false);
+      const [showPasswordModal, setShowPasswordModal] = React.useState(false);
+      const [authError, setAuthError] = React.useState('');
+      // editor: null = 뷰어 / { id: string|null } = 에디터 (id null = 신규)
+      const [editor, setEditor] = React.useState(null);
+      const [listRefresh, setListRefresh] = React.useState(0);
+
+      React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('admin') !== '1') return;
+        const token = sessionStorage.getItem('admin_token');
+        if (!token) {
+          setShowPasswordModal(true);
+          return;
+        }
+        // 저장된 토큰 검증 (GET /api/admin/posts = 로그인 검증 겸용)
+        api('/api/admin/posts')
+          .then(({ ok }) => {
+            if (ok) {
+              setAdminMode(true);
+            } else {
+              sessionStorage.removeItem('admin_token');
+              setShowPasswordModal(true);
+            }
+          })
+          .catch(() => {
+            sessionStorage.removeItem('admin_token');
+            setShowPasswordModal(true);
+          });
+      }, []);
+
+      async function handlePasswordSubmit(pw) {
+        setAuthError('');
+        sessionStorage.setItem('admin_token', pw);
+        try {
+          const { ok } = await api('/api/admin/posts');
+          if (!ok) {
+            setAuthError('인증 실패');
+            sessionStorage.removeItem('admin_token');
+            return;
+          }
+          setAdminMode(true);
+          setShowPasswordModal(false);
+        } catch (e) {
+          setAuthError('서버 연결 실패');
+          sessionStorage.removeItem('admin_token');
+        }
+      }
+
+      function handlePasswordCancel() {
+        setShowPasswordModal(false);
+        const url = new URL(window.location);
+        url.searchParams.delete('admin');
+        window.history.replaceState({}, '', url);
+      }
+
+      // 에디터 진입 — 1024px 미만 차단 (index.html 패턴)
+      function openEditor(id) {
+        if (window.innerWidth < 1024) {
+          alert("편집은 1024px 이상 뷰포트에서만 가능합니다.\n데스크톱 브라우저에서 접속해 주세요.");
+          return;
+        }
+        setEditor({ id });
+      }
+      function closeEditor() {
+        setEditor(null);
+        setListRefresh(n => n + 1); // 목록 재로드 (저장 결과 반영)
+      }
+
       // 라우트 전환 시 스크롤 최상단
       React.useEffect(() => {
         window.scrollTo(0, 0);
@@ -935,18 +2734,43 @@
             toggleCrt={() => setIsCrt(v => !v)}
           />
           <div style={{ maxWidth: "900px", position: "relative", zIndex: 10 }} className="mx-auto p-4 sm:p-8 pt-8 sm:pt-10">
-            {route.view === "post"
-              ? <PostDetailView id={route.id} />
-              : <PostListView />}
+            {adminMode && editor ? (
+              <PostEditorView
+                key={editor.id || "new"}
+                postId={editor.id}
+                onExit={closeEditor}
+              />
+            ) : route.view === "post" ? (
+              <PostDetailView id={route.id} adminMode={adminMode} onEdit={openEditor} />
+            ) : (
+              <PostListView
+                key={listRefresh}
+                adminMode={adminMode}
+                onEdit={openEditor}
+                onNew={() => openEditor(null)}
+              />
+            )}
             <footer className="text-center text-gray-500 text-sm mt-12 mb-8 pixel-font">
               &copy; 2026 Kim Jong-il. All rights reserved.
             </footer>
           </div>
+          {showPasswordModal && (
+            <PasswordModal
+              onSubmit={handlePasswordSubmit}
+              onCancel={handlePasswordCancel}
+              error={authError}
+            />
+          )}
         </React.Fragment>
       );
     }
 
-    ReactDOM.render(<ProjectApp />, document.getElementById('root'));
+    ReactDOM.render(
+      <ToastProvider>
+        <ProjectApp />
+      </ToastProvider>,
+      document.getElementById('root')
+    );
   </script>
 </body>
 </html>
