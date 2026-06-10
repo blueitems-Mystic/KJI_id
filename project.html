@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PROJECT_LOG — Kim Jong-il</title>
+
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+  <script>
+    (function(){
+      var t = localStorage.getItem('portfolio-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <style>
+    /* === Theme Variables (index.html과 동일 체계 — 다크/라이트 공유) === */
+    :root {
+      /* backgrounds */
+      --bg-main: #6b7280;
+      --bg-deep: #f3f4f6;
+      --bg-surface: #e5e7eb;
+      --bg-overlay: #d1d5db;
+      --bg-dark-accent: #f3f4f6;
+      --stat-gauge-bg: #9ca3af;
+
+      /* window */
+      --win-bg: #ffffff;
+      --win-border: #374151;
+      --win-highlight: #111827;
+
+      /* text */
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --text-on-dark: #ffffff;
+
+      /* accents */
+      --gold: #d97706;
+      --neo-mint: #059669;
+      --cyber-pink: #ff00ff;
+
+      /* terminal buttons */
+      --terminal-bg: #1f2937;
+      --terminal-green: #39ff14;
+      --terminal-green-glow: rgba(57, 255, 20, 0.5);
+      --terminal-green-bright: #66ff4d;
+
+      /* effects */
+      --shadow-color: rgba(0,0,0,0.2);
+      --grid-line: rgba(0, 0, 0, 0.05);
+      --scanline-bar-opacity: 0.1;
+      --scanline-btn-opacity: 0.15;
+      --border-strong: #111827;
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0d0d0d;
+      --bg-deep: #0f0f0f;
+      --bg-surface: #0a0a0a;
+      --bg-overlay: #000000;
+      --bg-dark-accent: #222222;
+      --stat-gauge-bg: #333333;
+
+      --win-bg: #2a2a2a;
+      --win-border: #4a4a4a;
+      --win-highlight: #636363;
+
+      --text-primary: #e0e0e0;
+      --text-secondary: #a2a2a2;
+      --text-muted: #737373;
+      --text-on-dark: #ffffff;
+
+      --gold: #ffcc00;
+      --neo-mint: #00ffcc;
+      --cyber-pink: #ff00ff;
+
+      --terminal-bg: #000000;
+      --terminal-green: #a2a2a2;
+      --terminal-green-glow: transparent;
+      --terminal-green-bright: #00ffcc;
+
+      --shadow-color: rgba(0,0,0,0.8);
+      --grid-line: rgba(0, 255, 204, 0.03);
+      --scanline-bar-opacity: 0.35;
+      --scanline-btn-opacity: 0.4;
+      --border-strong: #ffffff;
+    }
+
+    /* 읽기 전용 페이지 — 모바일 허용 (index.html의 min-width:1100px 미적용이 의도) */
+    body {
+      font-family: 'Gowun Dodum', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 30px 30px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      padding-top: 48px;
+    }
+
+    .pixel-font {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      line-height: 1.5;
+    }
+
+    /* === Top Status Bar (RPG Style — index.html과 동일) === */
+    .status-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: var(--bg-overlay);
+      color: var(--text-primary);
+      border-bottom: 3px solid var(--win-border);
+      z-index: 10000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 0.7rem;
+    }
+    .status-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, var(--scanline-bar-opacity)) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .statusbar-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--gold);
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    .pwr-btn-top {
+      background: #dc2626;
+      color: #fff;
+      border: 2px solid var(--border-strong);
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+      padding: 4px 8px;
+      font-size: 0.6rem;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: 0.1s;
+      position: relative;
+      z-index: 2;
+    }
+    .pwr-btn-top:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px rgba(0,0,0,0.5); }
+    .pwr-btn-top.off { background: var(--text-muted); color: var(--text-secondary); }
+    .pwr-btn-top.theme-toggle { background: var(--win-border); color: #ffffff; }
+    [data-theme="dark"] .pwr-btn-top.theme-toggle { background: #b0b0b0; color: #1a1a1a; }
+
+    /* === OS Window Style === */
+    .os-window {
+      background-color: var(--win-bg);
+      border: 4px solid var(--win-border);
+      border-radius: 2px;
+      box-shadow: 8px 8px 0px var(--shadow-color);
+      transition: all 0.3s ease;
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .os-window:hover {
+      border-color: var(--win-highlight);
+    }
+    .os-header {
+      background: var(--win-border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #000;
+      transition: background 0.3s ease;
+    }
+    .os-window:hover .os-header {
+      background: var(--win-highlight);
+    }
+    .os-header-title {
+      font-family: 'Press Start 2P', sans-serif;
+      font-size: 0.75rem;
+      color: #ffffff;
+      text-shadow: 1px 1px 0px #000;
+      transition: color 0.3s ease;
+    }
+    [data-theme="dark"] .os-header-title {
+      color: #b8b8b8;
+    }
+    .os-window:hover .os-header-title {
+      color: #ffffff;
+    }
+
+    .os-header-squares { display: flex; gap: 4px; }
+    .os-square { width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.4); }
+    .os-square.y { background: #eab308; }
+    .os-square.g { background: #22c55e; }
+    .os-square.r { background: #ef4444; }
+
+    .os-body { padding: 24px; }
+    @media (max-width: 640px) { .os-body { padding: 16px; } }
+
+    .rpg-title {
+      border-bottom: 2px dashed var(--win-border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      color: var(--gold);
+      text-shadow: 1px 1px 0px var(--shadow-color);
+    }
+
+    /* === Terminal Style Buttons === */
+    .btn-pixel {
+      background-color: var(--terminal-bg);
+      color: var(--terminal-green);
+      text-shadow: 0 0 5px var(--terminal-green-glow);
+      border: 2px solid var(--border-strong);
+      padding: 12px 20px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      box-shadow: 4px 4px 0px var(--shadow-color);
+      position: relative;
+      transition: all 0.15s ease;
+      overflow: hidden;
+    }
+    .btn-pixel::after {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, var(--scanline-btn-opacity)) 0px,
+        rgba(0, 0, 0, var(--scanline-btn-opacity)) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      pointer-events: none; z-index: 5;
+      animation: scanlineScroll 12s linear infinite;
+    }
+    @keyframes scanlineScroll {
+      from { background-position: 0 0; }
+      to { background-position: 0 100%; }
+    }
+    .btn-pixel > svg {
+      width: 18px; height: 18px; fill: currentColor; flex-shrink: 0;
+      margin-right: 12px; position: relative; z-index: 4;
+      filter: drop-shadow(0 0 3px var(--terminal-green-glow));
+    }
+    .btn-pixel-text { position: relative; z-index: 4; display: inline-flex; align-items: center; }
+    .btn-pixel-text::before { content: ">"; color: var(--terminal-green-bright); margin-right: 8px; animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .btn-pixel:hover { color: var(--terminal-green-bright); box-shadow: 2px 2px 0px var(--shadow-color); transform: translate(2px, 2px); }
+    .btn-pixel:active { box-shadow: 0px 0px 0px rgba(0,0,0,1); transform: translate(4px, 4px); background-color: #111; }
+
+    .yt-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+    .yt-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .video-card { background-color: var(--win-bg); border: 3px solid var(--win-border); box-shadow: 4px 4px 0 var(--shadow-color); overflow: hidden; transition: border-color 0.3s; }
+    .video-card:hover { border-color: var(--win-highlight); }
+
+    /* === Tailwind 색상 오버라이드 (index.html과 동일 — 테마 가독성) === */
+    .text-yellow-400 { color: var(--gold) !important; font-weight: 700; }
+    .text-yellow-300 { color: var(--gold) !important; font-weight: 700; }
+    .text-green-400 { color: var(--neo-mint) !important; font-weight: 700; }
+    .text-blue-400 { color: #1d4ed8 !important; font-weight: 700; }
+    .text-blue-200 { color: #2563eb !important; font-weight: 700; }
+    [data-theme="dark"] .text-yellow-300 { color: #facc15 !important; }
+    [data-theme="dark"] .text-blue-400 { color: #7a8898 !important; font-weight: normal; }
+    [data-theme="dark"] .text-blue-200 { color: var(--neo-mint) !important; opacity: 0.8; font-weight: normal; }
+    [data-theme="dark"] .text-green-400 { font-weight: normal; }
+    [data-theme="dark"] .text-yellow-400 { font-weight: normal; }
+
+    .text-gray-300 { color: #1f2937 !important; }
+    .text-gray-400 { color: #4b5563 !important; }
+    .text-gray-500 { color: #374151 !important; }
+    .text-white { color: #111827 !important; }
+    [data-theme="dark"] .text-gray-300 { color: #d1d5db !important; }
+    [data-theme="dark"] .text-gray-400 { color: #9ca3af !important; }
+    [data-theme="dark"] .text-gray-500 { color: #6b7280 !important; }
+    [data-theme="dark"] .text-white { color: #ffffff !important; }
+
+    /* === CRT Overlay Effect === */
+    .crt-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+      background-size: 100% 3px, 3px 100%;
+      z-index: 9997;
+      pointer-events: none;
+    }
+    [data-theme="dark"] .crt-overlay {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 3px 100%;
+    }
+
+    /* === Project Log 페이지 전용 === */
+    .post-card { cursor: pointer; }
+    .post-cover {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 320px;
+      object-fit: cover;
+      border-bottom: 3px solid var(--win-border);
+    }
+    .featured-badge {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      color: var(--gold);
+      border: 2px solid var(--gold);
+      padding: 4px 8px;
+      display: inline-block;
+      vertical-align: middle;
+      box-shadow: 2px 2px 0px var(--shadow-color);
+      white-space: nowrap;
+    }
+    .post-date-line {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="crt-overlay" class="crt-overlay"></div>
+
+  <script type="text/babel">
+    // === API Client (gallery.html 패턴 + ok/status 동반 반환) ===
+    const API_BASE = "https://kji-gallery-api.blueitems7.workers.dev";
+
+    function api(path, opts = {}) {
+      const headers = { ...opts.headers };
+      const token = sessionStorage.getItem("admin_token");
+      if (token) headers["Authorization"] = "Bearer " + token;
+      if (opts.json) {
+        headers["Content-Type"] = "application/json";
+        opts.body = JSON.stringify(opts.json);
+        delete opts.json;
+      }
+      return fetch(API_BASE + path, { ...opts, headers }).then(r =>
+        r.json().catch(() => ({})).then(data => ({ ok: r.ok, status: r.status, data }))
+      );
+    }
+
+    // === Hash Router ===
+    function useHashRoute() {
+      const parse = () => {
+        const h = window.location.hash || "#/";
+        const m = h.match(/^#\/post\/(.+)$/);
+        return m ? { view: "post", id: decodeURIComponent(m[1]) } : { view: "list", id: null };
+      };
+      const [route, setRoute] = React.useState(parse);
+      React.useEffect(() => {
+        const onHash = () => setRoute(parse());
+        window.addEventListener("hashchange", onHash);
+        return () => window.removeEventListener("hashchange", onHash);
+      }, []);
+      return route;
+    }
+
+    // === 날짜 포맷 (YYYY.MM.DD) ===
+    function fmtDate(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      const p = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
+    }
+
+    // --- HTML sanitizer (index.html과 동일 — 리치 텍스트 블록용) ---
+    // 허용 태그: b, strong, i, em, a (href/target/rel)
+    function sanitizeRichHtml(html) {
+      if (!html) return "";
+      const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+      const root = doc.body.firstChild;
+      const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "A"]);
+      const ALLOWED_ATTRS = {
+        A: new Set(["href", "target", "rel"]),
+      };
+
+      function walk(node) {
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+          if (child.nodeType === Node.TEXT_NODE) continue;
+          if (child.nodeType !== Node.ELEMENT_NODE) {
+            child.remove();
+            continue;
+          }
+          const tag = child.tagName;
+          if (!ALLOWED_TAGS.has(tag)) {
+            const textContent = document.createTextNode(child.textContent);
+            child.replaceWith(textContent);
+            continue;
+          }
+          const allowedAttrs = ALLOWED_ATTRS[tag] || new Set();
+          for (const attr of Array.from(child.attributes)) {
+            if (!allowedAttrs.has(attr.name.toLowerCase())) {
+              child.removeAttribute(attr.name);
+            }
+          }
+          if (tag === "A") {
+            const rawHref = child.getAttribute("href") || "";
+            const cleaned = rawHref.replace(/[\u0000-\u001F\u007F\s]/g, "");
+            let safe = false;
+            if (cleaned.startsWith("#")) {
+              safe = true;
+            } else if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(cleaned)) {
+              const scheme = cleaned.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/)[1].toLowerCase();
+              safe = ["http", "https", "mailto", "tel"].includes(scheme);
+            } else if (!cleaned.startsWith("//")) {
+              safe = true;
+            }
+            if (!safe) {
+              child.removeAttribute("href");
+            }
+            if (child.getAttribute("target") === "_blank") {
+              child.setAttribute("rel", "noopener noreferrer");
+            }
+          }
+          walk(child);
+        }
+      }
+
+      walk(root);
+      return root.innerHTML;
+    }
+
+    // href 스킴 화이트리스트 (index.html과 동일)
+    function safeHref(raw) {
+      if (!raw) return "#";
+      const cleaned = String(raw).replace(/[\u0000-\u001F\u007F\s]/g, "");
+      if (!cleaned) return "#";
+      if (cleaned.startsWith("#")) return cleaned;
+      const schemeMatch = cleaned.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+      if (schemeMatch) {
+        const scheme = schemeMatch[1].toLowerCase();
+        return ["http", "https", "mailto", "tel"].includes(scheme) ? cleaned : "#";
+      }
+      if (cleaned.startsWith("//")) return "#";
+      return cleaned;
+    }
+
+    // --- SVG 아이콘 프리셋 (index.html과 동일 — path 문자열 화이트리스트) ---
+    const ICON_PATHS = {
+      artstation: "M0 17.723l2.027 3.505h.001a2.424 2.424 0 0 0 2.164 1.333h13.457l-2.792-4.838H0zm24 .025c0-.484-.143-.935-.388-1.314L15.728 2.728a2.424 2.424 0 0 0-2.142-1.289H9.419L21.598 22.54l1.92-3.325c.378-.637.482-.919.482-1.467zm-11.129-3.462L7.428 4.858l-5.444 9.428h10.887z",
+      gallery: "M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z",
+      youtube: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
+      github: "M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12",
+      mail: "M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",
+      phone: "M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z",
+      instagram: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z",
+      link: "M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z",
+    };
+
+    function IconSvg({ name }) {
+      const d = ICON_PATHS[name];
+      if (!d) return null;
+      return (
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d={d} />
+        </svg>
+      );
+    }
+
+    // --- Block renderers (index.html과 동일 — 7 types, read-only) ---
+
+    function TextBlock({ block }) {
+      const safeHtml = sanitizeRichHtml(block.html);
+      return (
+        <p
+          className="mb-6 text-lg leading-relaxed text-gray-300"
+          dangerouslySetInnerHTML={{ __html: safeHtml }}
+        />
+      );
+    }
+
+    function HeadingBlock({ block }) {
+      const sizeClass = block.level === 2
+        ? "pixel-font text-xl md:text-2xl rpg-title"
+        : "pixel-font text-lg text-yellow-300 mt-6 mb-2";
+      const Tag = block.level === 2 ? "h2" : "h3";
+      return (
+        <Tag className={sizeClass}>
+          {block.emoji && <span>{block.emoji} </span>}
+          {block.text}
+        </Tag>
+      );
+    }
+
+    function ListBlock({ block }) {
+      const listClass = block.style === "decimal" ? "list-decimal" : "list-disc";
+      const mb = block.marginBottom || "mb-6";
+      const spaceY = block.spaceY !== undefined ? block.spaceY : "space-y-2";
+      const ulClass = `${listClass} pl-6 ${mb} ${spaceY} text-lg text-gray-300`.replace(/\s+/g, " ").trim();
+      return (
+        <ul className={ulClass}>
+          {block.items.map((item, i) => {
+            if (item.note) {
+              const noteHtml = sanitizeRichHtml(item.text || "");
+              return (
+                <li
+                  key={i}
+                  className="text-gray-400 text-base mt-2 list-none"
+                  dangerouslySetInnerHTML={{ __html: noteHtml }}
+                />
+              );
+            }
+            const strongHtml = sanitizeRichHtml(item.strong || "");
+            const textHtml = sanitizeRichHtml(item.text || "");
+            return (
+              <li key={i}>
+                {item.strong && (
+                  <strong
+                    className="text-white"
+                    dangerouslySetInnerHTML={{ __html: strongHtml }}
+                  />
+                )}
+                <span dangerouslySetInnerHTML={{ __html: textHtml }} />
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+
+    function ImageBlock({ block }) {
+      return (
+        <figure className="mb-6">
+          <img
+            src={block.url}
+            alt={block.alt || ""}
+            style={{
+              width: block.width ? `${block.width}px` : "100%",
+              maxWidth: "100%",
+              height: "auto",
+              border: "3px solid #6c6c6c",
+              boxShadow: "4px 4px 0px #000",
+            }}
+          />
+          {block.caption && (
+            <figcaption className="pixel-font text-center py-3 px-2" style={{ fontSize: "0.6rem", color: "#f1c40f" }}>
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    }
+
+    function YoutubeBlock({ block }) {
+      // mediaKind === "image": Cloudinary 호스팅 이미지/GIF 렌더
+      // mediaKind === "video" 또는 미지정(하위호환): YouTube iframe
+      if (block.mediaKind === "image" && block.imageUrl) {
+        return (
+          <div className="mb-8" style={{ border: "3px solid #6c6c6c", boxShadow: "4px 4px 0px #000" }}>
+            <img
+              src={block.imageUrl}
+              alt={block.imageAlt || block.title || ""}
+              style={{ display: "block", width: "100%", height: "auto" }}
+              loading="lazy"
+            />
+            {block.imageCaption && (
+              <div className="text-center text-sm text-gray-400 mt-2 mb-2 pixel-font">
+                {block.imageCaption}
+              </div>
+            )}
+          </div>
+        );
+      }
+      const src = `https://www.youtube.com/embed/${block.videoId || ""}${block.start ? `?start=${block.start}` : ""}`;
+      return (
+        <div className="yt-container mb-8" style={{ border: "3px solid #6c6c6c", boxShadow: "4px 4px 0px #000" }}>
+          <iframe
+            src={src}
+            title={block.title || ""}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      );
+    }
+
+    function ButtonBlock({ block }) {
+      return (
+        <a
+          href={safeHref(block.href)}
+          target={block.target || "_self"}
+          rel={block.target === "_blank" ? "noopener noreferrer" : undefined}
+          className="btn-pixel"
+        >
+          <IconSvg name={block.icon} />
+          <span className="btn-pixel-text">{block.label}</span>
+        </a>
+      );
+    }
+
+    function CardGridBlock({ block }) {
+      const colsClass = block.cols === 2
+        ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
+        : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
+
+      // per-card kind 폴백: card.kind → block.variant → "text"
+      const resolveKind = (c) => c.kind || block.variant || "text";
+
+      function renderCard(c, i) {
+        const kind = resolveKind(c);
+        if (kind === "video") {
+          return (
+            <div key={i} className="video-card">
+              <div className="yt-container">
+                <iframe
+                  src={`https://www.youtube.com/embed/${c.videoId || ""}`}
+                  title={c.title || ""}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <p className="pixel-font text-center py-3 px-2" style={{ fontSize: "0.6rem", color: "var(--gold)" }}>
+                {c.title}
+              </p>
+            </div>
+          );
+        }
+        if (kind === "image") {
+          return (
+            <figure key={i} className="video-card">
+              <img
+                src={c.url || ""}
+                alt={c.alt || ""}
+                loading="lazy"
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+              {c.caption && (
+                <p className="pixel-font text-center py-3 px-2" style={{ fontSize: "0.6rem", color: "var(--gold)" }}>
+                  {c.caption}
+                </p>
+              )}
+            </figure>
+          );
+        }
+        // text (Experiences 스타일)
+        return (
+          <div key={i}>
+            <span className={`text-${c.titleColor || "yellow-400"} font-bold text-lg`}>{c.title}</span>
+            <br />
+            <span className="text-gray-300">{c.description}</span>
+          </div>
+        );
+      }
+
+      return (
+        <div className={colsClass}>
+          {block.cards.map(renderCard)}
+        </div>
+      );
+    }
+
+    // --- Block dispatcher ---
+    function Block({ block }) {
+      switch (block.type) {
+        case "text":     return <TextBlock block={block} />;
+        case "heading":  return <HeadingBlock block={block} />;
+        case "list":     return <ListBlock block={block} />;
+        case "image":    return <ImageBlock block={block} />;
+        case "youtube":  return <YoutubeBlock block={block} />;
+        case "button":   return <ButtonBlock block={block} />;
+        case "cardgrid": return <CardGridBlock block={block} />;
+        default:
+          console.warn("Unknown block type:", block.type);
+          return null;
+      }
+    }
+
+    // === Status Bar (index.html StatusBar 축소판) ===
+    function ProjectStatusBar({ theme, toggleTheme, isCrt, toggleCrt }) {
+      return (
+        <div className="status-bar pixel-font w-full">
+          <div className="flex items-center" style={{ position: "relative", zIndex: 2 }}>
+            <nav className="flex gap-3 sm:gap-4 text-[9px] sm:text-[10px]">
+              <a href="index.html" className="hover:text-yellow-400">&larr; PORTFOLIO</a>
+              <a href="gallery.html" className="hover:text-yellow-400">GALLERY</a>
+            </nav>
+          </div>
+          <span className="statusbar-title hidden sm:block text-[10px]">PROJECT_LOG</span>
+          <div className="flex items-center">
+            <button
+              className="pwr-btn-top theme-toggle pixel-font"
+              onClick={toggleTheme}
+              title="Theme Toggle"
+            >{theme === 'dark' ? 'DARK' : 'LIGHT'}</button>
+            <button
+              className={`pwr-btn-top pixel-font${isCrt ? '' : ' off'}`}
+              onClick={toggleCrt}
+              title="Scanline Toggle"
+            >SCN</button>
+          </div>
+        </div>
+      );
+    }
+
+    // === Post Card (목록 항목) ===
+    function PostCard({ meta, isFeatured }) {
+      const date = fmtDate(meta.publishedAt || meta.createdAt);
+      const open = () => { window.location.hash = "#/post/" + encodeURIComponent(meta.id); };
+      return (
+        <div
+          className="os-window post-card"
+          onClick={open}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
+        >
+          <div className="os-header">
+            <span className="os-header-title">{date ? `${date}.LOG` : "LOG"}</span>
+            <div className="os-header-squares">
+              <div className="os-square y"></div>
+              <div className="os-square g"></div>
+              <div className="os-square r"></div>
+            </div>
+          </div>
+          {meta.coverImage && (
+            <img className="post-cover" src={meta.coverImage} alt={meta.title || ""} loading="lazy" />
+          )}
+          <div className="os-body">
+            <h2 className="pixel-font text-lg md:text-xl rpg-title flex items-center gap-3 flex-wrap">
+              {meta.titleEmoji && <span>{meta.titleEmoji}</span>}
+              <span>{meta.title}</span>
+              {isFeatured && <span className="featured-badge">&#9733; FEATURED</span>}
+            </h2>
+            {meta.subtitle && (
+              <p className="text-lg mb-4 text-blue-200 font-bold">{meta.subtitle}</p>
+            )}
+            {meta.excerpt && (
+              <p className="text-gray-400 text-base">{meta.excerpt}</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // === 목록 뷰 ===
+    function PostListView() {
+      const [state, setState] = React.useState({ loading: true, error: false, featuredId: null, posts: [] });
+
+      React.useEffect(() => {
+        let cancelled = false;
+        api("/api/posts")
+          .then(({ ok, data }) => {
+            if (cancelled) return;
+            if (!ok || !Array.isArray(data.posts)) {
+              setState({ loading: false, error: true, featuredId: null, posts: [] });
+              return;
+            }
+            setState({ loading: false, error: false, featuredId: data.featuredId || null, posts: data.posts });
+          })
+          .catch(() => {
+            if (!cancelled) setState({ loading: false, error: true, featuredId: null, posts: [] });
+          });
+        return () => { cancelled = true; };
+      }, []);
+
+      if (state.loading) {
+        return (
+          <div className="text-center py-20">
+            <span className="pixel-font text-gray-400">LOADING...</span>
+          </div>
+        );
+      }
+
+      if (state.error || state.posts.length === 0) {
+        return (
+          <div className="os-window">
+            <div className="os-header">
+              <span className="os-header-title">PROJECT_LOG.SYS</span>
+              <div className="os-header-squares">
+                <div className="os-square y"></div>
+                <div className="os-square g"></div>
+                <div className="os-square r"></div>
+              </div>
+            </div>
+            <div className="os-body text-center py-16">
+              <p className="pixel-font text-gray-400">NO LOGS FOUND</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <React.Fragment>
+          {state.posts.map((meta) => (
+            <PostCard key={meta.id} meta={meta} isFeatured={meta.id === state.featuredId} />
+          ))}
+        </React.Fragment>
+      );
+    }
+
+    // === 상세 뷰 ===
+    function PostDetailView({ id }) {
+      const [state, setState] = React.useState({ loading: true, error: false, post: null });
+
+      React.useEffect(() => {
+        let cancelled = false;
+        setState({ loading: true, error: false, post: null });
+        api("/api/posts/" + encodeURIComponent(id))
+          .then(({ ok, data }) => {
+            if (cancelled) return;
+            if (!ok || !data || !Array.isArray(data.blocks)) {
+              setState({ loading: false, error: true, post: null });
+              return;
+            }
+            setState({ loading: false, error: false, post: data });
+          })
+          .catch(() => {
+            if (!cancelled) setState({ loading: false, error: true, post: null });
+          });
+        return () => { cancelled = true; };
+      }, [id]);
+
+      if (state.loading) {
+        return (
+          <div className="text-center py-20">
+            <span className="pixel-font text-gray-400">LOADING...</span>
+          </div>
+        );
+      }
+
+      if (state.error) {
+        return (
+          <div className="os-window">
+            <div className="os-header">
+              <span className="os-header-title">ERROR.SYS</span>
+              <div className="os-header-squares">
+                <div className="os-square y"></div>
+                <div className="os-square g"></div>
+                <div className="os-square r"></div>
+              </div>
+            </div>
+            <div className="os-body text-center py-16">
+              <p className="pixel-font text-gray-400 mb-8">LOG NOT FOUND</p>
+              <a href="#/" className="btn-pixel">
+                <span className="btn-pixel-text">&larr; ALL POSTS</span>
+              </a>
+            </div>
+          </div>
+        );
+      }
+
+      const post = state.post;
+      const date = fmtDate(post.publishedAt || post.createdAt);
+      return (
+        <React.Fragment>
+          <div className="os-window">
+            <div className="os-header">
+              <span className="os-header-title">{date ? `${date}.LOG` : "LOG"}</span>
+              <div className="os-header-squares">
+                <div className="os-square y"></div>
+                <div className="os-square g"></div>
+                <div className="os-square r"></div>
+              </div>
+            </div>
+            <div className="os-body">
+              <h2 className={post.subtitle ? "pixel-font text-xl md:text-2xl rpg-title flex items-center gap-3 flex-wrap" : "pixel-font text-xl md:text-2xl rpg-title"}>
+                {post.titleEmoji && <span>{post.titleEmoji}</span>}
+                <span>{post.title}</span>
+              </h2>
+              {post.subtitle && (
+                <p className="text-xl mb-2 text-blue-200 font-bold">{post.subtitle}</p>
+              )}
+              {date && <p className="post-date-line mb-6">LOGGED: {date}</p>}
+              {post.blocks.map((b) => <Block key={b.id} block={b} />)}
+            </div>
+          </div>
+          <div className="mb-10">
+            <a href="#/" className="btn-pixel">
+              <span className="btn-pixel-text">&larr; ALL POSTS</span>
+            </a>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    // === App ===
+    function ProjectApp() {
+      const route = useHashRoute();
+
+      // Theme (포트폴리오와 localStorage 공유)
+      const [theme, setTheme] = React.useState(
+        () => localStorage.getItem('portfolio-theme') || 'light'
+      );
+      React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('portfolio-theme', theme);
+      }, [theme]);
+
+      // CRT toggle (index.html과 동일 — 기본 on, 세션 내 in-memory)
+      const [isCrt, setIsCrt] = React.useState(true);
+      React.useEffect(() => {
+        const crt = document.getElementById('crt-overlay');
+        if (crt) crt.style.display = isCrt ? 'block' : 'none';
+      }, [isCrt]);
+
+      // 라우트 전환 시 스크롤 최상단
+      React.useEffect(() => {
+        window.scrollTo(0, 0);
+      }, [route.view, route.id]);
+
+      return (
+        <React.Fragment>
+          <ProjectStatusBar
+            theme={theme}
+            toggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            isCrt={isCrt}
+            toggleCrt={() => setIsCrt(v => !v)}
+          />
+          <div style={{ maxWidth: "900px", position: "relative", zIndex: 10 }} className="mx-auto p-4 sm:p-8 pt-8 sm:pt-10">
+            {route.view === "post"
+              ? <PostDetailView id={route.id} />
+              : <PostListView />}
+            <footer className="text-center text-gray-500 text-sm mt-12 mb-8 pixel-font">
+              &copy; 2026 Kim Jong-il. All rights reserved.
+            </footer>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.render(<ProjectApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
