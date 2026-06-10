@@ -625,6 +625,7 @@
         inventory: [
           { icon: "artstation", label: "ArtStation", href: "https://www.artstation.com/blueitems", target: "_blank" },
           { icon: "gallery", label: "Gallery", href: "gallery.html", target: "_self" },
+          { icon: "link", label: "Project Log", href: "project.html", target: "_self" },
           { icon: "youtube", label: "YouTube", href: "https://www.youtube.com/@blueitems", target: "_blank" },
         ],
       },
@@ -712,6 +713,9 @@
       for (const key of Object.keys(obj)) deepFreeze(obj[key]);
       Object.freeze(obj);
     })(DEFAULT_CONTENT);
+
+    // featured 포스트 fetch 실패 시 정적 폴백 (게시판 마이그레이션 이전의 mysticisland 섹션)
+    const FALLBACK_PROJECT_SECTION = DEFAULT_CONTENT.sections.find((s) => s.id === "mysticisland");
 
     // --- Auth + Draft API client (Plan B) ---
     const ADMIN_TOKEN_KEY = "admin_token";
@@ -2142,6 +2146,7 @@
               <a href="#about" className="hover:text-yellow-400">ABOUT</a>
               <a href="#mysticisland" className="hover:text-yellow-400">SYSTEM</a>
               <a href="#experiences" className="hover:text-yellow-400">LOGS</a>
+              <a href="project.html" className="hover:text-yellow-400">PROJECT</a>
             </nav>
             <button
               className="pwr-btn-top theme-toggle pixel-font"
@@ -2207,7 +2212,7 @@
       );
     }
 
-    function Section({ section }) {
+    function Section({ section, footerExtra }) {
       const headerTitle = (section.id || "SYSTEM").toUpperCase() + ".SYS";
       return (
         <div id={section.id} className="os-window">
@@ -2228,9 +2233,40 @@
               <p className="text-xl mb-6 text-blue-200 font-bold">{section.subtitle}</p>
             )}
             {section.blocks.map(b => <Block key={b.id} block={b} />)}
+            {footerExtra}
           </div>
         </div>
       );
+    }
+
+    // featured 포스트 기반 프로젝트 섹션 — post 없으면 정적 폴백(FALLBACK_PROJECT_SECTION) 렌더.
+    // id="mysticisland" 유지 필수 (StatusBar #mysticisland 앵커).
+    function FeaturedPostSection({ post }) {
+      const section = post
+        ? { id: "mysticisland", title: post.title, titleEmoji: post.titleEmoji, subtitle: post.subtitle, blocks: post.blocks }
+        : FALLBACK_PROJECT_SECTION;
+      if (!section) return null;
+
+      let dateLabel = null;
+      if (post) {
+        const raw = post.publishedAt || post.createdAt;
+        const d = raw ? new Date(raw) : null;
+        if (d && !isNaN(d.getTime())) {
+          const pad = (n) => String(n).padStart(2, "0");
+          dateLabel = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}.LOG`;
+        }
+      }
+
+      const footer = (
+        <div className="flex items-center justify-between mt-8" style={{ flexWrap: "wrap", gap: "12px" }}>
+          <span className="pixel-font text-[10px] text-gray-500">{dateLabel}</span>
+          <a href="project.html" className="btn-pixel">
+            <span className="btn-pixel-text">VIEW ALL POSTS →</span>
+          </a>
+        </div>
+      );
+
+      return <Section section={section} footerExtra={footer} />;
     }
 
     function Footer({ footer, onEditClick }) {
@@ -2268,6 +2304,20 @@
       );
       // CRT toggle
       const [isCrt, setIsCrt] = React.useState(true);
+      // featured 포스트 (프로젝트 섹션) — 실패 시 null 유지 → FALLBACK 렌더
+      const [featuredPost, setFeaturedPost] = React.useState(null);
+
+      React.useEffect(() => {
+        let cancelled = false;
+        fetch(API_BASE + "/api/posts/featured")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((p) => {
+            if (cancelled) return;
+            if (p && Array.isArray(p.blocks)) setFeaturedPost(p);
+          })
+          .catch(() => {});
+        return () => { cancelled = true; };
+      }, []);
 
       React.useEffect(() => {
         let cancelled = false;
@@ -2351,7 +2401,8 @@
           <div style={{ maxWidth: "1100px", position: "relative", zIndex: 10 }} className="mx-auto p-4 sm:p-8">
             <Header header={content.header} />
             <ProfileSection profile={content.profile} />
-            {content.sections.map(s => <Section key={s.id} section={s} />)}
+            {content.sections.filter((s) => s.id !== "mysticisland").map(s => <Section key={s.id} section={s} />)}
+            <FeaturedPostSection post={featuredPost} />
             <Footer footer={content.footer} onEditClick={handleEditClick} />
           </div>
           <HeroTweaksPanel />
@@ -4022,6 +4073,15 @@
                 }), opts)}
               />
             ))}
+            <div className="os-window" style={{ opacity: 0.85, marginTop: "24px" }}>
+              <div className="os-body" style={{ textAlign: "center", padding: "24px" }}>
+                <p className="pixel-font" style={{ fontSize: "11px", marginBottom: "12px" }}>PROJECT SECTION</p>
+                <p style={{ marginBottom: "16px" }}>프로젝트 섹션은 게시판에서 관리됩니다.</p>
+                <a href="project.html?admin=1" target="_blank" rel="noopener noreferrer" className="btn-pixel">
+                  <span className="btn-pixel-text">OPEN PROJECT ADMIN</span>
+                </a>
+              </div>
+            </div>
             <EditableFooter
               footer={content.footer}
               onChange={(f, opts) => setContent(prev => ({ ...prev, footer: f }), opts)}
