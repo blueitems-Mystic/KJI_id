@@ -2259,6 +2259,7 @@
 
       const footer = (
         <div className="flex items-center justify-between mt-8" style={{ flexWrap: "wrap", gap: "12px" }}>
+          {/* dateLabel이 null이어도 빈 span 유지 — justify-between에서 버튼 우측 정렬 보존 */}
           <span className="pixel-font text-[10px] text-gray-500">{dateLabel}</span>
           <a href="project.html" className="btn-pixel">
             <span className="btn-pixel-text">VIEW ALL POSTS →</span>
