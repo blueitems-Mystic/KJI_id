@@ -95,6 +95,40 @@ export default {
         return corsResponse(env, request, await handlePortfolioUpload(request, env));
       }
 
+      // ───────────── Posts (프로젝트 게시판) ─────────────
+      if (path === "/api/posts" && method === "GET") {
+        return corsResponse(env, request, await handleListPosts(env));
+      }
+      if (path === "/api/posts/featured" && method === "GET") {
+        return corsResponse(env, request, await handleGetFeaturedPost(env));
+      }
+      if (path === "/api/admin/posts" && method === "GET") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        return corsResponse(env, request, await handleAdminListPosts(env));
+      }
+      if (path === "/api/posts" && method === "POST") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        return corsResponse(env, request, await handleCreatePost(request, env));
+      }
+      if (path.startsWith("/api/posts/") && method === "GET") {
+        const id = decodeURIComponent(path.slice("/api/posts/".length));
+        return corsResponse(env, request, await handleGetPost(id, request, env));
+      }
+      if (path.startsWith("/api/posts/") && method === "PUT") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        const id = decodeURIComponent(path.slice("/api/posts/".length));
+        return corsResponse(env, request, await handleUpdatePost(id, request, env));
+      }
+      if (path.startsWith("/api/posts/") && method === "DELETE") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        const id = decodeURIComponent(path.slice("/api/posts/".length));
+        return corsResponse(env, request, await handleDeletePost(id, env));
+      }
+
       return corsResponse(env, request, new Response("Not Found", { status: 404 }));
     } catch (err) {
       return corsResponse(env, request, new Response(JSON.stringify({ error: err.message }), {
@@ -493,4 +527,198 @@ async function handlePortfolioUpload(request, env) {
     height: result.height,
     format: result.format,
   }), { headers: { "Content-Type": "application/json" } });
+}
+
+// ───────────────────────── Posts (프로젝트 게시판) ─────────────────────────
+
+const POSTS_INDEX_KEY = "posts:index";
+
+function postsJson(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+function postKey(id) {
+  return `post:${id}`;
+}
+
+function postMeta(post) {
+  return {
+    id: post.id,
+    title: post.title,
+    titleEmoji: post.titleEmoji ?? null,
+    subtitle: post.subtitle ?? null,
+    excerpt: post.excerpt ?? "",
+    coverImage: post.coverImage ?? null,
+    status: post.status,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    publishedAt: post.publishedAt ?? null,
+  };
+}
+
+async function readPostsIndex(env) {
+  const raw = await env.GALLERY_KV.get(POSTS_INDEX_KEY);
+  if (!raw) return { updatedAt: null, featuredId: null, posts: [] };
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { updatedAt: null, featuredId: null, posts: [] };
+  }
+}
+
+async function writePostsIndex(env, index) {
+  index.updatedAt = new Date().toISOString();
+  index.posts.sort((a, b) =>
+    String(b.publishedAt || b.createdAt).localeCompare(String(a.publishedAt || a.createdAt))
+  );
+  await env.GALLERY_KV.put(POSTS_INDEX_KEY, JSON.stringify(index));
+}
+
+function validatePostBody(body) {
+  if (!body || typeof body.title !== "string" || !body.title.trim()) {
+    return "title (non-empty string) is required";
+  }
+  if (!Array.isArray(body.blocks)) {
+    return "blocks (array) is required";
+  }
+  return null;
+}
+
+// GET /api/posts — 공개 목록 (published만)
+async function handleListPosts(env) {
+  const index = await readPostsIndex(env);
+  const posts = index.posts.filter((p) => p.status === "published");
+  return postsJson({ featuredId: index.featuredId, posts });
+}
+
+// GET /api/posts/featured — featured(없으면 최신 published) 포스트 전문
+async function handleGetFeaturedPost(env) {
+  const index = await readPostsIndex(env);
+  const published = index.posts.filter((p) => p.status === "published");
+  const meta = published.find((p) => p.id === index.featuredId) || published[0];
+  if (!meta) return postsJson({ error: "No published posts" }, 404);
+  const raw = await env.GALLERY_KV.get(postKey(meta.id));
+  if (!raw) return postsJson({ error: "Post not found" }, 404);
+  return new Response(raw, { headers: { "Content-Type": "application/json" } });
+}
+
+// GET /api/posts/{id} — 단건 (draft는 관리자 토큰 있을 때만)
+async function handleGetPost(id, request, env) {
+  const raw = await env.GALLERY_KV.get(postKey(id));
+  if (!raw) return postsJson({ error: "Post not found" }, 404);
+  let post;
+  try {
+    post = JSON.parse(raw);
+  } catch {
+    return postsJson({ error: "Corrupted post" }, 500);
+  }
+  if (post.status !== "published" && checkAuth(request, env)) {
+    return postsJson({ error: "Post not found" }, 404);
+  }
+  return postsJson(post);
+}
+
+// GET /api/admin/posts — draft 포함 인덱스 (로그인 검증 겸용)
+async function handleAdminListPosts(env) {
+  const index = await readPostsIndex(env);
+  return postsJson(index);
+}
+
+// POST /api/posts — 생성
+async function handleCreatePost(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return postsJson({ error: "Invalid JSON" }, 400);
+  }
+  const invalid = validatePostBody(body);
+  if (invalid) return postsJson({ error: invalid }, 400);
+
+  const now = new Date().toISOString();
+  const datePart = now.slice(0, 10).replace(/-/g, "");
+  const rand = Math.random().toString(36).slice(2, 6);
+  const status = body.status === "published" ? "published" : "draft";
+  const post = {
+    id: `p_${datePart}_${rand}`,
+    title: body.title,
+    titleEmoji: body.titleEmoji ?? null,
+    subtitle: body.subtitle ?? null,
+    status,
+    excerpt: body.excerpt ?? "",
+    coverImage: body.coverImage ?? null,
+    createdAt: now,
+    updatedAt: now,
+    publishedAt: status === "published" ? now : null,
+    blocks: body.blocks,
+  };
+  await env.GALLERY_KV.put(postKey(post.id), JSON.stringify(post));
+
+  const index = await readPostsIndex(env);
+  index.posts = index.posts.filter((p) => p.id !== post.id);
+  index.posts.push(postMeta(post));
+  if (body.featured === true && status === "published") index.featuredId = post.id;
+  await writePostsIndex(env, index);
+  return postsJson(post, 201);
+}
+
+// PUT /api/posts/{id} — 전체 교체
+async function handleUpdatePost(id, request, env) {
+  const raw = await env.GALLERY_KV.get(postKey(id));
+  if (!raw) return postsJson({ error: "Post not found" }, 404);
+  let existing;
+  try {
+    existing = JSON.parse(raw);
+  } catch {
+    return postsJson({ error: "Corrupted post" }, 500);
+  }
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return postsJson({ error: "Invalid JSON" }, 400);
+  }
+  const invalid = validatePostBody(body);
+  if (invalid) return postsJson({ error: invalid }, 400);
+
+  const now = new Date().toISOString();
+  const status = body.status === "published" ? "published" : "draft";
+  const post = {
+    ...existing,
+    title: body.title,
+    titleEmoji: body.titleEmoji ?? null,
+    subtitle: body.subtitle ?? null,
+    status,
+    excerpt: body.excerpt ?? "",
+    coverImage: body.coverImage ?? null,
+    updatedAt: now,
+    publishedAt:
+      status === "published" ? existing.publishedAt || now : existing.publishedAt,
+    blocks: body.blocks,
+  };
+  await env.GALLERY_KV.put(postKey(id), JSON.stringify(post));
+
+  const index = await readPostsIndex(env);
+  index.posts = index.posts.filter((p) => p.id !== id);
+  index.posts.push(postMeta(post));
+  if (body.featured === true && status === "published") {
+    index.featuredId = id;
+  } else if (index.featuredId === id && (body.featured === false || status !== "published")) {
+    index.featuredId = null;
+  }
+  await writePostsIndex(env, index);
+  return postsJson(post);
+}
+
+// DELETE /api/posts/{id}
+async function handleDeletePost(id, env) {
+  await env.GALLERY_KV.delete(postKey(id));
+  const index = await readPostsIndex(env);
+  index.posts = index.posts.filter((p) => p.id !== id);
+  if (index.featuredId === id) index.featuredId = null;
+  await writePostsIndex(env, index);
+  return postsJson({ ok: true });
 }
