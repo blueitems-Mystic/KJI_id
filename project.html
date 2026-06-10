@@ -403,10 +403,12 @@
           }
           const tag = child.tagName;
           if (!ALLOWED_TAGS.has(tag)) {
+            // 태그 제거하되 자식 텍스트는 보존 (unwrap)
             const textContent = document.createTextNode(child.textContent);
             child.replaceWith(textContent);
             continue;
           }
+          // 속성 화이트리스트
           const allowedAttrs = ALLOWED_ATTRS[tag] || new Set();
           for (const attr of Array.from(child.attributes)) {
             if (!allowedAttrs.has(attr.name.toLowerCase())) {
@@ -414,20 +416,24 @@
             }
           }
           if (tag === "A") {
+            // href는 허용 스킴 화이트리스트 (제어문자/공백 제거 후 판정)
             const rawHref = child.getAttribute("href") || "";
             const cleaned = rawHref.replace(/[\u0000-\u001F\u007F\s]/g, "");
             let safe = false;
             if (cleaned.startsWith("#")) {
+              // fragment
               safe = true;
             } else if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(cleaned)) {
               const scheme = cleaned.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/)[1].toLowerCase();
               safe = ["http", "https", "mailto", "tel"].includes(scheme);
             } else if (!cleaned.startsWith("//")) {
+              // 상대 경로 (protocol-relative //evil.com 차단)
               safe = true;
             }
             if (!safe) {
               child.removeAttribute("href");
             }
+            // 외부 링크는 rel 보강
             if (child.getAttribute("target") === "_blank") {
               child.setAttribute("rel", "noopener noreferrer");
             }
@@ -795,7 +801,7 @@
               </div>
             </div>
             <div className="os-body text-center py-16">
-              <p className="pixel-font text-gray-400">NO LOGS FOUND</p>
+              <p className="pixel-font text-gray-400">{state.error ? "SYSTEM ERROR — RETRY LATER" : "NO LOGS FOUND"}</p>
             </div>
           </div>
         );
