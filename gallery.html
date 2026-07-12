@@ -286,6 +286,23 @@
       border-radius: 3px;
       pointer-events: none;
     }
+    .masonry-views {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0,0,0,0.7);
+      color: #f1c40f;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.5rem;
+      padding: 3px 6px;
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .masonry-views .eye { font-family: 'Gowun Dodum', sans-serif; font-size: 0.7rem; }
 
     /* === Edit Mode (inline reorder) === */
     .header-actions {
@@ -454,6 +471,17 @@
       color: #888;
       font-size: 0.85rem;
     }
+    .lightbox-views {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 8px;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.55rem;
+      color: #b2bec3;
+    }
+    .lightbox-views .eye { font-family: 'Gowun Dodum', sans-serif; font-size: 0.8rem; }
     .lightbox-close {
       position: fixed;
       top: 16px;
@@ -891,6 +919,104 @@
     }
     .admin-btn-danger:hover { color: #e74c3c; }
 
+    /* === Admin Stats Dashboard === */
+    .admin-stats {
+      height: calc(100vh - 46px);
+      overflow-y: auto;
+      padding: 24px;
+      background: #1a1a1a;
+      font-family: 'Gowun Dodum', sans-serif;
+    }
+    .admin-stats-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 46px);
+      background: #1a1a1a;
+      color: #636e72;
+      font-size: 1rem;
+    }
+    .admin-stats-heading {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.7rem;
+      color: #f1c40f;
+      letter-spacing: 1px;
+      margin: 0 0 14px;
+    }
+    .admin-stats-section { margin-bottom: 34px; }
+    .admin-stat-tiles { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 34px; }
+    .admin-stat-tile {
+      flex: 1;
+      min-width: 160px;
+      background: #222;
+      border: 2px solid #636e72;
+      border-radius: 6px;
+      padding: 18px 20px;
+    }
+    .admin-stat-tile-label { font-size: 0.9rem; color: #888; margin-bottom: 12px; }
+    .admin-stat-tile-value {
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 1.4rem;
+      color: #f1c40f;
+    }
+    .trend-empty, .rank-empty { color: #636e72; font-size: 0.9rem; padding: 8px 0; }
+    .trend-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .trend-date { width: 88px; flex-shrink: 0; color: #888; font-size: 0.75rem; }
+    .trend-bar-track {
+      flex: 1;
+      height: 14px;
+      background: #111;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .trend-bar-fill {
+      height: 100%;
+      min-width: 2px;
+      background: #f1c40f;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .trend-count { width: 42px; flex-shrink: 0; text-align: right; color: #ccc; font-size: 0.8rem; }
+    .rank-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .rank-num {
+      width: 26px;
+      flex-shrink: 0;
+      text-align: center;
+      color: #f1c40f;
+      font-family: 'Press Start 2P', 'Gowun Dodum', sans-serif;
+      font-size: 0.6rem;
+    }
+    .rank-thumb {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      object-fit: cover;
+      border-radius: 3px;
+      background: #111;
+    }
+    .rank-title {
+      flex: 1;
+      min-width: 0;
+      color: #ccc;
+      font-size: 0.95rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rank-title.deleted { color: #636e72; font-style: italic; }
+    .rank-views { flex-shrink: 0; color: #b2bec3; font-size: 0.85rem; }
+
     /* Image cards in group detail */
     .admin-image-card {
       width: 110px;
@@ -1239,6 +1365,47 @@
       return "https://res.cloudinary.com/" + cloudName + "/image/upload/c_limit,w_1920,q_auto,f_auto/" + publicId;
     }
 
+    // === View-count helpers ===
+    // Compact number formatting for view badges (1200 -> 1.2k)
+    function formatViews(n) {
+      if (n == null || isNaN(n)) return '';
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+      return String(n);
+    }
+
+    // In-memory cache: imageId -> views. Survives Lightbox remount within a page
+    // session so re-viewing an image shows the count WITHOUT re-incrementing.
+    const imageViewCache = {};
+
+    // sessionStorage-backed set of imageIds already counted this session.
+    // All access guarded (private mode / disabled storage safe).
+    function getViewedImages() {
+      try {
+        const raw = sessionStorage.getItem('viewedImages');
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
+    }
+    function hasViewedImage(imageId) {
+      return getViewedImages().indexOf(imageId) !== -1;
+    }
+    function markImageViewed(imageId) {
+      try {
+        const list = getViewedImages();
+        if (list.indexOf(imageId) === -1) {
+          list.push(imageId);
+          sessionStorage.setItem('viewedImages', JSON.stringify(list));
+        }
+      } catch (e) { /* storage unavailable — dedup degrades to in-memory only */ }
+    }
+    function unmarkImageViewed(imageId) {
+      try {
+        const list = getViewedImages().filter(id => id !== imageId);
+        sessionStorage.setItem('viewedImages', JSON.stringify(list));
+      } catch (e) { /* ignore */ }
+    }
+
     // === Components ===
 
     function GalleryHeader({ categories, activeCategory, onCategoryChange, editMode, showEditBtn, onEnterEdit, theme, toggleTheme }) {
@@ -1288,7 +1455,8 @@
       );
     }
 
-    function MasonryGrid({ groups, cloudName, onItemClick, editMode, onReorder }) {
+    function MasonryGrid({ groups, cloudName, onItemClick, editMode, onReorder, views }) {
+      const viewMap = views || {};
       const [dragIdx, setDragIdx] = React.useState(null);
       const [dropIdx, setDropIdx] = React.useState(null);
 
@@ -1380,6 +1548,11 @@
                 {count > 1 && (
                   <div className="masonry-badge">+{count - 1}</div>
                 )}
+                {!editMode && viewMap[group.id] > 0 && (
+                  <div className="masonry-views" title={viewMap[group.id] + ' views'}>
+                    <span className="eye">&#128065;</span>{formatViews(viewMap[group.id])}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -1403,6 +1576,53 @@
 
       function goNext() { if (len > 1) onNavigate(groupIndex, nextIdx); }
       function goPrev() { if (len > 1) onNavigate(groupIndex, prevIdx); }
+
+      // Per-image view count (non-blocking, fail-safe, session-deduped)
+      const [views, setViews] = React.useState(null); // number | null
+      const [viewsLoading, setViewsLoading] = React.useState(false);
+      const currentImageId = current && current.imageId;
+
+      React.useEffect(() => {
+        if (!currentImageId) { setViews(null); setViewsLoading(false); return; }
+        let cancelled = false;
+
+        // 1. Already resolved this session → show instantly, no request, no re-increment
+        if (imageViewCache[currentImageId] != null) {
+          setViews(imageViewCache[currentImageId]);
+          setViewsLoading(false);
+          return;
+        }
+        // 2. Counted earlier this session but count not cached (e.g. after reload) →
+        //    don't re-POST (avoids double counting); simply hide the badge.
+        if (hasViewedImage(currentImageId)) {
+          setViews(null);
+          setViewsLoading(false);
+          return;
+        }
+
+        // 3. New this session → record the hit. Mark first so rapid re-navigation
+        //    can't fire a duplicate POST while this one is in flight.
+        setViews(null);
+        setViewsLoading(true);
+        markImageViewed(currentImageId);
+        api('/api/stats/hit', { method: 'POST', json: { type: 'imageView', imageId: currentImageId, groupId: group.id } })
+          .then(res => {
+            const v = (res && typeof res.views === 'number') ? res.views : null;
+            if (v != null) imageViewCache[currentImageId] = v; // cache even if unmounted/navigated
+            if (cancelled) return;
+            setViews(v);
+            setViewsLoading(false);
+          })
+          .catch(() => {
+            // Roll back the session mark so a later view can retry the hit.
+            unmarkImageViewed(currentImageId);
+            if (cancelled) return;
+            setViews(null);
+            setViewsLoading(false);
+          });
+
+        return () => { cancelled = true; };
+      }, [currentImageId]);
 
       React.useEffect(() => {
         function handleKey(e) {
@@ -1449,6 +1669,12 @@
             </div>
             {group.description && (
               <div className="lightbox-info-desc">{group.description}</div>
+            )}
+            {(viewsLoading || views != null) && (
+              <div className="lightbox-views">
+                <span className="eye">&#128065;</span>
+                {viewsLoading ? '…' : (formatViews(views) + ' views')}
+              </div>
             )}
           </div>
 
@@ -2402,6 +2628,121 @@
       );
     }
 
+    // --- Admin Stats Dashboard ---
+    function AdminStatsPanel({ config, cloudName }) {
+      const [stats, setStats] = React.useState(null);
+      const [loading, setLoading] = React.useState(true);
+      const [error, setError] = React.useState(false);
+
+      React.useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        setError(false);
+        api('/api/admin/stats')
+          .then(data => {
+            if (cancelled) return;
+            if (!data || data.error) { setError(true); setLoading(false); return; }
+            setStats(data);
+            setLoading(false);
+          })
+          .catch(() => { if (cancelled) return; setError(true); setLoading(false); });
+        return () => { cancelled = true; };
+      }, []);
+
+      // groupId -> group (from loaded admin config) for resolving human titles
+      const groupById = React.useMemo(() => {
+        const m = {};
+        (config.groups || []).forEach(g => { m[g.id] = g; });
+        return m;
+      }, [config]);
+
+      if (loading) {
+        return <div className="admin-stats-state">통계 불러오는 중…</div>;
+      }
+      if (error || !stats) {
+        return <div className="admin-stats-state">통계를 불러올 수 없습니다 (서버 응답 없음)</div>;
+      }
+
+      const visitors = stats.visitors || {};
+      const trend = Array.isArray(stats.trend) ? stats.trend : [];
+      const topImages = Array.isArray(stats.topImages) ? stats.topImages : [];
+      const totalImageViews = typeof stats.totalImageViews === 'number' ? stats.totalImageViews : 0;
+      const maxTrend = trend.reduce((mx, d) => Math.max(mx, (d && d.uniques) || 0), 0) || 1;
+
+      return (
+        <div className="admin-stats">
+          <div className="admin-stat-tiles">
+            <div className="admin-stat-tile">
+              <div className="admin-stat-tile-label">오늘 방문자</div>
+              <div className="admin-stat-tile-value">{formatViews(visitors.today || 0)}</div>
+            </div>
+            <div className="admin-stat-tile">
+              <div className="admin-stat-tile-label">총 방문자</div>
+              <div className="admin-stat-tile-value">{formatViews(visitors.total || 0)}</div>
+            </div>
+            <div className="admin-stat-tile">
+              <div className="admin-stat-tile-label">총 이미지 뷰</div>
+              <div className="admin-stat-tile-value">{formatViews(totalImageViews)}</div>
+            </div>
+          </div>
+
+          <div className="admin-stats-section">
+            <h3 className="admin-stats-heading">최근 추이</h3>
+            {trend.length === 0 ? (
+              <div className="trend-empty">데이터 없음</div>
+            ) : (
+              trend.map((d, i) => {
+                const uniques = (d && d.uniques) || 0;
+                const pct = Math.round((uniques / maxTrend) * 100);
+                return (
+                  <div className="trend-row" key={(d && d.date) || i}>
+                    <span className="trend-date">{(d && d.date) || '—'}</span>
+                    <span className="trend-bar-track">
+                      <span className="trend-bar-fill" style={{ width: pct + '%' }} />
+                    </span>
+                    <span className="trend-count">{formatViews(uniques)}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="admin-stats-section">
+            <h3 className="admin-stats-heading">이미지 뷰 랭킹 (총 {formatViews(totalImageViews)})</h3>
+            {topImages.length === 0 ? (
+              <div className="rank-empty">데이터 없음</div>
+            ) : (
+              topImages.map((row, i) => {
+                const imageId = row && row.imageId;
+                const g = groupById[row && row.groupId];
+                const imageExists = g && (g.images || []).some(im => im.imageId === imageId);
+                const deleted = !g;
+                const title = deleted ? '(삭제됨)' : (g.title || 'Untitled');
+                return (
+                  <div className="rank-row" key={(imageId || '') + '_' + i}>
+                    <span className="rank-num">{i + 1}</span>
+                    {imageExists ? (
+                      <img
+                        className="rank-thumb"
+                        src={thumbUrl(cloudName, imageId, null, 120)}
+                        alt=""
+                        loading="lazy"
+                        onError={e => { e.target.style.visibility = 'hidden'; }}
+                      />
+                    ) : (
+                      <span className="rank-thumb" />
+                    )}
+                    <span className={"rank-title" + (deleted ? " deleted" : "")}>{title}</span>
+                    <span className="rank-views">&#128065; {formatViews((row && row.views) || 0)}</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      );
+    }
+
     // --- Component 6: AdminApp (New Single-Flow) ---
     function AdminApp({ config, setConfig, allImages, setAllImages, onExit, cloudName }) {
       const [selectedGroup, setSelectedGroup] = React.useState(null);
@@ -2410,6 +2751,7 @@
       const [searchQuery, setSearchQuery] = React.useState('');
       const [poolDragOver, setPoolDragOver] = React.useState(false);
       const [folders, setFolders] = React.useState([]);
+      const [showStats, setShowStats] = React.useState(false);
 
       // 폴더 목록 로드 (KV 캐시 경유)
       React.useEffect(() => {
@@ -2612,6 +2954,13 @@
             </button>
             <span className="pixel-font" style={{color: '#f1c40f', fontSize: '1.1rem'}}>Admin Mode</span>
             <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <button
+                className="admin-btn"
+                onClick={() => setShowStats(s => !s)}
+                style={{background: 'transparent', color: '#f1c40f', border: '1px solid #636e72'}}
+              >
+                {showStats ? '◀ 편집' : '📊 통계'}
+              </button>
               <span style={{display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: saveStatusDot}} />
               <span style={{fontSize: '0.95rem', color: '#888'}}>{saveStatusText}</span>
               <button className="admin-btn success" onClick={saveConfig} disabled={saving}>
@@ -2620,6 +2969,9 @@
             </div>
           </div>
 
+          {showStats ? (
+            <AdminStatsPanel config={config} cloudName={cloudName} />
+          ) : (
           <div className="admin-layout">
             <div className="admin-left">
               <AdminUploadZone cloudName={cloudName} uploadImage={handleUploadComplete} toast={toast} folders={folders} onAddFolder={handleAddFolder} />
@@ -2682,6 +3034,7 @@
               />
             </div>
           </div>
+          )}
         </div>
       );
     }
@@ -2701,6 +3054,7 @@
     // === Main App ===
     function App() {
       const [galleryData, setGalleryData] = React.useState(null);
+      const [galleryViews, setGalleryViews] = React.useState({}); // { [groupId]: views }
       const [loading, setLoading] = React.useState(true);
       const [category, setCategory] = React.useState('all');
 
@@ -2740,6 +3094,12 @@
             console.error('Failed to fetch gallery:', err);
             setLoading(false);
           });
+        // Per-group view counts — non-blocking; gallery renders fine if this is down/undeployed.
+        api('/api/stats/gallery')
+          .then(data => {
+            setGalleryViews((data && data.groups && typeof data.groups === 'object') ? data.groups : {});
+          })
+          .catch(() => setGalleryViews({}));
       }
 
       React.useEffect(() => {
@@ -3040,6 +3400,7 @@
               onItemClick={openLightbox}
               editMode={editMode}
               onReorder={handleReorder}
+              views={galleryViews}
             />
           )}
 

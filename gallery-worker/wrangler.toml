@@ -1,6 +1,6 @@
 name = "kji-gallery-api"
 main = "src/index.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-03-01"
 
 [vars]
 CLOUDINARY_CLOUD_NAME = "duwi0pqm2"
@@ -14,3 +14,11 @@ ALLOWED_ORIGIN = "https://blueitems-mystic.github.io"
 [[kv_namespaces]]
 binding = "GALLERY_KV"
 id = "a47f220e89464e7484fc53bddbe1cf85"
+
+[[durable_objects.bindings]]
+name = "STATS"
+class_name = "StatsCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["StatsCounter"]

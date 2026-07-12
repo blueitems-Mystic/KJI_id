@@ -1642,7 +1642,7 @@
       return GOOMBA_DEFAULT_LINES[worldX] || "...";
     }
 
-    function HeaderStage({ header }) {
+    function HeaderStage({ header, visitorStats }) {
       const canvasRef = React.useRef(null);
       const rafRef = React.useRef(0);
       const [bubbles, setBubbles] = React.useState([]);
@@ -1911,6 +1911,10 @@
         };
       }, []);
 
+      // 방문자 카운터 표시 포맷: 숫자면 6자리 zero-pad(레트로 스코어 스타일), 없으면 fallback
+      const fmtVisit = (n) =>
+        typeof n === "number" && isFinite(n) ? String(n).padStart(6, "0") : "--";
+
       return (
         <div className="hero-shell">
           <div className="hero-canvas-wrap">
@@ -1946,6 +1950,10 @@
               <div>WORLD</div>
               <div style={{ color: "#606060" }}>1-1</div>
             </div>
+            <div style={{ textAlign: "center", fontFamily: "'Press Start 2P', 'Gowun Dodum', sans-serif" }}>
+              <div>오늘 {fmtVisit(visitorStats && visitorStats.today)}</div>
+              <div style={{ color: "#606060" }}>누적 {fmtVisit(visitorStats && visitorStats.total)}</div>
+            </div>
             <div style={{ textAlign: "right" }}>
               <div><span className="coin-ico">✦</span> ×24</div>
               <div style={{ color: "#606060" }}>TIME 400</div>
@@ -1959,8 +1967,8 @@
       );
     }
 
-    function Header({ header }) {
-      return <HeaderStage header={header} />;
+    function Header({ header, visitorStats }) {
+      return <HeaderStage header={header} visitorStats={visitorStats} />;
     }
 
     /* Tweakable defaults (editable via the Tweaks panel). */
@@ -2307,6 +2315,27 @@
       const [isCrt, setIsCrt] = React.useState(true);
       // featured 포스트 (프로젝트 섹션) — 실패 시 null 유지 → FALLBACK 렌더
       const [featuredPost, setFeaturedPost] = React.useState(null);
+      // 방문자 통계 (HUD) — 실패/미해결 시 null 유지 → "--" fallback 렌더
+      const [visitorStats, setVisitorStats] = React.useState(null);
+
+      // 방문자 히트 POST + 카운트 read (Worker 병렬 구축 중 — non-blocking, 실패해도 render 무영향)
+      React.useEffect(() => {
+        let cancelled = false;
+        fetch(API_BASE + "/api/stats/hit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "visit" }),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (cancelled || !d) return;
+            if (typeof d.today === "number" && typeof d.total === "number") {
+              setVisitorStats({ today: d.today, total: d.total });
+            }
+          })
+          .catch(() => {});
+        return () => { cancelled = true; };
+      }, []);
 
       React.useEffect(() => {
         let cancelled = false;
@@ -2400,7 +2429,7 @@
             toggleCrt={() => setIsCrt(v => !v)}
           />
           <div style={{ maxWidth: "1100px", position: "relative", zIndex: 10 }} className="mx-auto p-4 sm:p-8">
-            <Header header={content.header} />
+            <Header header={content.header} visitorStats={visitorStats} />
             <ProfileSection profile={content.profile} />
             {content.sections.filter((s) => s.id !== "mysticisland").map(s => <Section key={s.id} section={s} />)}
             <FeaturedPostSection post={featuredPost} />

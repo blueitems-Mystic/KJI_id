@@ -1,3 +1,120 @@
+export class StatsCounter {
+  constructor(state, env) {
+    this.state = state;
+    this.sql = state.storage.sql;
+    this._init();
+  }
+
+  _init() {
+    this.sql.exec("CREATE TABLE IF NOT EXISTS daily_visitors (date TEXT, hash TEXT, PRIMARY KEY(date, hash))");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS daily_counts  (date TEXT PRIMARY KEY, uniques INTEGER NOT NULL DEFAULT 0)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS image_views   (image_id TEXT PRIMARY KEY, group_id TEXT, views INTEGER NOT NULL DEFAULT 0)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS totals        (k TEXT PRIMARY KEY, v INTEGER NOT NULL DEFAULT 0)");
+  }
+
+  async fetch(request) {
+    const path = new URL(request.url).pathname;
+    const readBody = async () => request.method === "GET" ? {} : await request.json();
+
+    if (path === "/recordVisit" && request.method === "POST") {
+      const body = await readBody();
+      return Response.json(this.recordVisit(body.date, body.hash));
+    }
+    if (path === "/recordImageView" && request.method === "POST") {
+      const body = await readBody();
+      return Response.json(this.recordImageView(body.imageId, body.groupId));
+    }
+    if (path === "/getSummary" && (request.method === "GET" || request.method === "POST")) {
+      const body = await readBody();
+      return Response.json(this.getSummary(body.date));
+    }
+    if (path === "/getGalleryViews" && (request.method === "GET" || request.method === "POST")) {
+      return Response.json(this.getGalleryViews());
+    }
+    if (path === "/getDashboard" && (request.method === "GET" || request.method === "POST")) {
+      const body = await readBody();
+      return Response.json(this.getDashboard(body.date));
+    }
+    if (path === "/reset" && request.method === "POST") {
+      return Response.json(this.reset());
+    }
+
+    return new Response("Not Found", { status: 404 });
+  }
+
+  recordVisit(date, hash) {
+    const existing = this.sql.exec("SELECT COUNT(*) AS count FROM daily_visitors WHERE date=?", date).one();
+    const isNewDate = (existing?.count || 0) === 0;
+    const cur = this.sql.exec("INSERT OR IGNORE INTO daily_visitors(date,hash) VALUES(?,?)", date, hash);
+
+    if (cur.rowsWritten > 0) {
+      if (isNewDate) {
+        const cutoff = new Date(Date.now() + 9 * 3600 * 1000 - 90 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+        this.sql.exec("DELETE FROM daily_visitors WHERE date < ?", cutoff);
+      }
+      this.sql.exec("INSERT INTO daily_counts(date,uniques) VALUES(?,1) ON CONFLICT(date) DO UPDATE SET uniques=uniques+1", date);
+      this.sql.exec("INSERT INTO totals(k,v) VALUES('total_visits',1) ON CONFLICT(k) DO UPDATE SET v=v+1");
+    }
+
+    return this.getSummary(date);
+  }
+
+  recordImageView(imageId, groupId) {
+    this.sql.exec(
+      "INSERT INTO image_views(image_id,group_id,views) VALUES(?,?,1) ON CONFLICT(image_id) DO UPDATE SET views=views+1, group_id=COALESCE(excluded.group_id, image_views.group_id)",
+      imageId,
+      groupId ?? null
+    );
+    const row = this.sql.exec("SELECT views FROM image_views WHERE image_id=?", imageId).one();
+    return { imageId, views: row?.views || 0 };
+  }
+
+  getSummary(date) {
+    // NOTE: cursor.one() throws when zero rows match, so use array-spread and index [0]
+    // to correctly yield 0 for the empty state (fresh DB / no visits for `date` yet).
+    const todayRow = [...this.sql.exec("SELECT uniques FROM daily_counts WHERE date=?", date)][0];
+    const totalRow = [...this.sql.exec("SELECT v FROM totals WHERE k='total_visits'")][0];
+    return {
+      today: todayRow?.uniques || 0,
+      total: totalRow?.v || 0,
+    };
+  }
+
+  getGalleryViews() {
+    const rows = [...this.sql.exec("SELECT group_id, sum(views) AS views FROM image_views GROUP BY group_id")];
+    const groups = {};
+    for (const row of rows) {
+      if (row.group_id !== null) groups[row.group_id] = row.views;
+    }
+    return groups;
+  }
+
+  getDashboard(date) {
+    const visitors = this.getSummary(date);
+    const trend = [...this.sql.exec("SELECT date,uniques FROM daily_counts ORDER BY date DESC LIMIT 30")]
+      .reverse()
+      .map(row => ({ date: row.date, uniques: row.uniques }));
+    const topImages = [...this.sql.exec("SELECT image_id,group_id,views FROM image_views ORDER BY views DESC LIMIT 20")]
+      .map(row => ({ imageId: row.image_id, groupId: row.group_id, views: row.views }));
+    const totalImageViewsRow = this.sql.exec("SELECT sum(views) AS views FROM image_views").one();
+    return {
+      visitors,
+      trend,
+      topImages,
+      totalImageViews: totalImageViewsRow?.views || 0,
+    };
+  }
+
+  reset() {
+    // Admin-only wipe of all analytics data (visitors + image views). Irreversible.
+    this.sql.exec("DELETE FROM daily_visitors");
+    this.sql.exec("DELETE FROM daily_counts");
+    this.sql.exec("DELETE FROM image_views");
+    this.sql.exec("DELETE FROM totals");
+    return { ok: true, reset: true };
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -129,6 +246,97 @@ export default {
         return corsResponse(env, request, await handleDeletePost(id, env));
       }
 
+      if (path === "/api/stats/hit" && method === "POST") {
+        let body;
+        try {
+          body = await request.json();
+        } catch {
+          return corsResponse(env, request, postsJson({ error: "Invalid JSON" }, 400));
+        }
+        const stub = getStatsStub(env);
+
+        if (body.type === "visit") {
+          const ip = request.headers.get("cf-connecting-ip") || "";
+          const ua = request.headers.get("user-agent") || "";
+          const date = kstDate();
+          const salt = env.STATS_SALT || "kji";
+          const hash = await sha256Hex(`${ip}|${ua}|${date}|${salt}`);
+          const res = await stub.fetch("https://do/recordVisit", {
+            method: "POST",
+            body: JSON.stringify({ date, hash }),
+          });
+          const { today, total } = await res.json();
+          return corsResponse(env, request, postsJson({ today, total }));
+        }
+
+        if (body.type === "imageView") {
+          if (typeof body.imageId !== "string" || !body.imageId.trim()) {
+            return corsResponse(env, request, postsJson({ error: "imageId required" }, 400));
+          }
+          const res = await stub.fetch("https://do/recordImageView", {
+            method: "POST",
+            body: JSON.stringify({ imageId: body.imageId, groupId: body.groupId ?? null }),
+          });
+          const { imageId, views } = await res.json();
+          return corsResponse(env, request, postsJson({ imageId, views }));
+        }
+
+        return corsResponse(env, request, postsJson({ error: "invalid type" }, 400));
+      }
+
+      if (path === "/api/stats/summary" && method === "GET") {
+        const cached = await env.GALLERY_KV.get("stats:summary", { type: "json" });
+        if (cached && Date.now() - cached.asOf < 60000) {
+          return corsResponse(env, request, postsJson(cached));
+        }
+        const stub = getStatsStub(env);
+        const res = await stub.fetch("https://do/getSummary", {
+          method: "POST",
+          body: JSON.stringify({ date: kstDate() }),
+        });
+        const { today, total } = await res.json();
+        const payload = { today, total, asOf: Date.now() };
+        await env.GALLERY_KV.put("stats:summary", JSON.stringify(payload), { expirationTtl: 60 });
+        return corsResponse(env, request, postsJson(payload));
+      }
+
+      if (path === "/api/stats/gallery" && method === "GET") {
+        const cached = await env.GALLERY_KV.get("stats:gallery", { type: "json" });
+        if (cached && Date.now() - cached.asOf < 60000) {
+          return corsResponse(env, request, postsJson(cached));
+        }
+        const stub = getStatsStub(env);
+        const res = await stub.fetch("https://do/getGalleryViews");
+        const groups = await res.json();
+        const payload = { groups, asOf: Date.now() };
+        await env.GALLERY_KV.put("stats:gallery", JSON.stringify(payload), { expirationTtl: 60 });
+        return corsResponse(env, request, postsJson(payload));
+      }
+
+      if (path === "/api/admin/stats" && method === "GET") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        const stub = getStatsStub(env);
+        const res = await stub.fetch("https://do/getDashboard", {
+          method: "POST",
+          body: JSON.stringify({ date: kstDate() }),
+        });
+        const dashboard = await res.json();
+        return corsResponse(env, request, postsJson({ ...dashboard, generatedAt: new Date().toISOString() }));
+      }
+
+      if (path === "/api/admin/stats/reset" && method === "POST") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        const stub = getStatsStub(env);
+        const res = await stub.fetch("https://do/reset", { method: "POST" });
+        const out = await res.json();
+        // 리셋 즉시 반영되도록 공개 캐시 무효화
+        await env.GALLERY_KV.delete("stats:summary");
+        await env.GALLERY_KV.delete("stats:gallery");
+        return corsResponse(env, request, postsJson(out));
+      }
+
       return corsResponse(env, request, new Response("Not Found", { status: 404 }));
     } catch (err) {
       return corsResponse(env, request, new Response(JSON.stringify({ error: err.message }), {
@@ -177,6 +385,20 @@ function checkAuth(request, env) {
     });
   }
   return null;
+}
+
+function getStatsStub(env) {
+  const id = env.STATS.idFromName("global");
+  return env.STATS.get(id);
+}
+
+function kstDate() {
+  return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
 // --- Cloudinary helper ---
