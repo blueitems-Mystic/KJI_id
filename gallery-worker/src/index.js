@@ -491,7 +491,13 @@ async function handleListFolders(env) {
 
   // Cloudinary에서 폴더 목록 조회
   const result = await cloudinaryRequest("GET", "/folders", env);
-  const folders = (result.folders || []).map(f => f.path || f.name).sort();
+  // 실패 응답(키 오류 등)은 캐싱하지 않는다 — 빈 목록이 TTL 동안 남는 것 방지
+  if (result.error || !Array.isArray(result.folders)) {
+    return new Response(JSON.stringify({ error: result.error?.message || "folder list failed" }), {
+      status: 502, headers: { "Content-Type": "application/json" },
+    });
+  }
+  const folders = result.folders.map(f => f.path || f.name).sort();
 
   // KV에 캐싱
   await env.GALLERY_KV.put(CACHE_KEY, JSON.stringify({ folders, fetchedAt: Math.floor(Date.now() / 1000) }));
@@ -525,7 +531,7 @@ async function handleListImages(env) {
 async function handleUpload(request, env) {
   const formData = await request.formData();
   const file = formData.get("file");
-  const folder = formData.get("folder") || "";
+  const folder = (formData.get("folder") || "").trim();
 
   if (!file) {
     return new Response(JSON.stringify({ error: "file required" }), {
@@ -535,14 +541,16 @@ async function handleUpload(request, env) {
 
   const uploadData = new FormData();
   uploadData.append("file", file);
-  uploadData.append("folder", folder);
+  if (folder) uploadData.append("folder", folder);
   uploadData.append("api_key", env.CLOUDINARY_API_KEY);
 
   const timestamp = Math.floor(Date.now() / 1000);
   uploadData.append("timestamp", timestamp.toString());
 
   // Generate SHA-1 signature
-  const signStr = `folder=${folder}&timestamp=${timestamp}${env.CLOUDINARY_API_SECRET}`;
+  // Cloudinary는 빈 값 파라미터를 서명 문자열에서 뺀다 → 빈 folder는 서명에 넣지 않는다
+  const signParams = folder ? `folder=${folder}&timestamp=${timestamp}` : `timestamp=${timestamp}`;
+  const signStr = `${signParams}${env.CLOUDINARY_API_SECRET}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(signStr);
   const hashBuffer = await crypto.subtle.digest("SHA-1", data);
