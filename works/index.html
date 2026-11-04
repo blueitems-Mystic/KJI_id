@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>김종일 컨셉아트 작업</title>
+<meta name="description" content="김종일 컨셉아트 작업 모음. 생성형 AI를 과정에 넣은 컨셉 작업과 직접 그린 프로젝트 이미지.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="김종일 컨셉아트 작업">
+<meta property="og:description" content="생성형 AI를 작업 과정에 넣은 컨셉 작업과, 직접 그린 프로젝트 이미지를 모았습니다.">
+<meta property="og:image" content="https://kji.blueitems.net/works/thumbs/project-cx.jpg">
+<meta property="og:url" content="https://kji.blueitems.net/works/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+  /* 작업 페이지 3종과 같은 보드 팔레트 */
+  :root {
+    --canvas: #46484b;
+    --sheet: #5f6164;
+    --deep: #3a3c3f;
+    --ink: #e6e4df;
+    --ink-soft: #b9b7b2;
+    --rule: #6d6f72;
+    --pen: #e0412c;
+    --pen-dark: #b5301d;
+    --serif: 'Gowun Batang', 'IBM Plex Sans KR', serif;
+    --sans: 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif;
+    --hand: 'Nanum Pen Script', 'Gowun Dodum', sans-serif;
+    --wrap: 1200px;
+    --gutter: clamp(16px, 4vw, 40px);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--canvas); }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+
+  /* ── 머리 ─────────────────────────── */
+  .masthead { padding-top: clamp(48px, 9vw, 112px); padding-bottom: clamp(40px, 6vw, 72px); }
+  .masthead-row {
+    display: flex; flex-wrap: wrap; align-items: flex-end;
+    justify-content: space-between; gap: 20px 40px;
+  }
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 5.2vw, 3.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+  }
+  .masthead p { margin: 0; max-width: 36em; color: var(--ink-soft); }
+  .portfolio-link {
+    flex: none;
+    display: inline-block;
+    padding: 10px 0 4px;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color .2s;
+  }
+  .portfolio-link:hover { border-bottom-color: var(--ink); }
+
+  /* ── 배너 목록 ─────────────────────── */
+  .works { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(40px, 6vw, 72px); }
+  .work { position: relative; }
+  .work > a { display: block; text-decoration: none; color: inherit; }
+
+  .banner {
+    position: relative;
+    display: flex;
+    aspect-ratio: 3.2 / 1;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .panel { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; }
+  .panel + .panel { border-left: 3px solid var(--canvas); }
+  .panel.spacer { background: var(--sheet); }
+  .panel img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none; -webkit-user-drag: none;
+  }
+
+  .caption {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: clamp(20px, 3vw, 36px);
+    pointer-events: none;
+  }
+  .caption.left  { background: linear-gradient(to top right, rgba(58,60,63,.92) 0%, rgba(58,60,63,.62) 38%, rgba(58,60,63,0) 64%); }
+  .caption.right { align-items: flex-end; text-align: left; }
+  .caption-inner { max-width: 26em; }
+  .caption.right .caption-inner { width: calc(44.4% - 2 * clamp(20px, 3vw, 36px)); max-width: none; }
+  .work-meta { margin: 0 0 6px; font-size: 0.85rem; color: var(--ink-soft); }
+  .work h2 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.2;
+    margin: 0 0 10px;
+    text-shadow: 0 1px 12px rgba(40,42,45,.5);
+  }
+  .work h2 span { background-image: linear-gradient(var(--pen), var(--pen)); background-size: 0 2px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .35s ease; }
+  .work > a:hover h2 span, .work > a:focus-visible h2 span { background-size: 100% 2px; }
+  .work-summary { margin: 0; font-size: 0.98rem; line-height: 1.65; color: var(--ink); text-shadow: 0 1px 8px rgba(40,42,45,.6); }
+
+  /* AI활용 라벨: 보드에 붙인 종이 쪽지 + 빨간 펜 글씨 */
+  .ai-tag {
+    position: absolute;
+    left: calc(-1 * min(22px, var(--gutter) - 4px));
+    top: -14px;
+    z-index: 2;
+    transform: rotate(-4deg);
+    padding: 3px 16px 1px 14px;
+    background: var(--ink);
+    color: var(--pen-dark);
+    font-family: var(--hand);
+    font-size: 1.75rem;
+    line-height: 1.15;
+    box-shadow: 0 2px 0 rgba(40,42,45,.35);
+    pointer-events: none;
+  }
+  .ai-tag svg { position: absolute; inset: -6px -10px; width: calc(100% + 20px); height: calc(100% + 12px); overflow: visible; }
+  .ai-tag path { fill: none; stroke: var(--pen); stroke-width: 2; stroke-linecap: round; }
+
+  /* ── 수작업 · 푸터 ─────────────────── */
+  .manual { margin-top: clamp(64px, 9vw, 112px); padding-top: 28px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 40px; align-items: baseline; }
+  .manual h2 { font-family: var(--serif); font-size: 1.5rem; margin: 0; }
+  .manual p { margin: 6px 0 0; color: var(--ink-soft); max-width: 34em; }
+  .manual a { font-size: 0.95rem; text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+  .manual a:hover { border-bottom-color: var(--ink); }
+  footer { padding: clamp(48px, 7vw, 88px) 0 48px; color: var(--ink-soft); font-size: 0.85rem; }
+  footer p { margin: 0 0 6px; max-width: 46em; }
+
+  .load-error { padding: 32px 0; color: var(--ink-soft); }
+
+  /* ── 모바일: 글은 배너 아래로 ──────── */
+  @media (max-width: 720px) {
+    .banner { aspect-ratio: 16 / 10; }
+    .panel.spacer { display: none; }
+    .caption, .caption.left, .caption.right {
+      position: static; background: none; padding: 16px 0 0; pointer-events: auto;
+      align-items: stretch;
+    }
+    .caption.right .caption-inner, .caption-inner { width: auto; max-width: none; }
+    .work h2, .work-summary { text-shadow: none; }
+    .ai-tag { left: 10px; top: -12px; font-size: 1.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* ── 크롭 편집 모드 (?edit=1) ──────── */
+  .edit-bar { position: sticky; top: 0; z-index: 10; background: var(--deep); border-bottom: 1px solid var(--rule); padding: 10px var(--gutter); display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; font-size: 0.85rem; }
+  .edit-bar button { font: inherit; background: var(--ink); color: var(--deep); border: 0; padding: 6px 14px; cursor: pointer; }
+  .edit-bar span { color: var(--ink-soft); }
+  body.editing .panel:not(.spacer) { cursor: grab; outline: 1px dashed rgba(230,228,223,.35); outline-offset: -1px; }
+  body.editing .panel.dragging { cursor: grabbing; }
+  body.editing .caption { opacity: .55; }
+  .panel-readout { position: absolute; right: 6px; top: 6px; z-index: 3; background: rgba(58,60,63,.85); padding: 2px 6px; font-size: 0.72rem; font-family: var(--sans); }
+</style>
+</head>
+<body>
+<header class="wrap masthead">
+  <div class="masthead-row">
+    <div>
+      <h1 id="site-title">김종일 컨셉아트 작업</h1>
+      <p id="site-intro"></p>
+    </div>
+    <a class="portfolio-link" id="portfolio-link" href="https://kji.blueitems.net/">김종일 통합 포트폴리오 사이트</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <ul class="works" id="works" aria-label="작업 목록"></ul>
+  <section class="manual" id="manual" hidden>
+    <div>
+      <h2>수작업 프로젝트</h2>
+      <p>AI 없이 직접 그린 프로젝트 컨셉아트입니다.</p>
+    </div>
+    <a id="manual-link" href="#">수작업 이미지 보기</a>
+  </section>
+</main>
+
+<footer class="wrap"><p id="ai-note"></p><p>© 김종일</p></footer>
+
+<script>
+(function () {
+  var editing = new URLSearchParams(location.search).get('edit') === '1';
+  var data = null;
+
+  function el(tag, attrs, children) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'text') n.textContent = attrs[k];
+      else if (k === 'class') n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c) n.appendChild(c); });
+    return n;
+  }
+
+  // 초점(x,y %) + 줌 → 어떤 비율의 배너에서도 피사체 유지
+  function applyCrop(img, p) {
+    var x = p.x == null ? 50 : p.x, y = p.y == null ? 50 : p.y, z = p.zoom || 1;
+    img.style.objectPosition = x + '% ' + y + '%';
+    img.style.transformOrigin = x + '% ' + y + '%';
+    img.style.transform = z === 1 ? '' : 'scale(' + z + ')';
+  }
+
+  function aiTag() {
+    var t = el('span', { class: 'ai-tag', text: 'AI활용' });
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 100 40'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M8 22 C 6 8, 40 2, 70 4 C 94 6, 99 18, 94 28 C 88 38, 40 40, 16 35 C 4 32, 2 22, 14 13');
+    path.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.appendChild(path); t.appendChild(svg);
+    return t;
+  }
+
+  function renderPost(post, index) {
+    var panels = post.banner.panels.map(function (p) {
+      var panel = el('div', { class: 'panel' + (p.spacer ? ' spacer' : '') });
+      panel.style.flex = (p.flex || 1) + ' 1 0';
+      if (!p.spacer) {
+        var img = el('img', {
+          src: p.src, alt: p.alt || '', decoding: 'async',
+          loading: index === 0 ? 'eager' : 'lazy',
+          draggable: 'false'
+        });
+        if (index === 0) img.setAttribute('fetchpriority', 'high');
+        if (p.srcSmall) {
+          img.setAttribute('srcset', p.srcSmall + ' 960w, ' + p.src + ' 3000w');
+          img.setAttribute('sizes', '(max-width: 1240px) 100vw, 1200px');
+        }
+        applyCrop(img, p);
+        panel.appendChild(img);
+        if (editing) attachCropEditor(panel, img, p);
+      }
+      return panel;
+    });
+    var banner = el('div', { class: 'banner' }, panels);
+    banner.style.background = post.banner.bg || '';
+
+    var caption = el('div', { class: 'caption ' + (post.textAlign === 'right' ? 'right' : 'left') }, [
+      el('div', { class: 'caption-inner' }, [
+        post.meta ? el('p', { class: 'work-meta', text: post.meta }) : null,
+        el('h2', null, [el('span', { text: post.title })]),
+        post.summary ? el('p', { class: 'work-summary', text: post.summary }) : null
+      ])
+    ]);
+
+    var link = el('a', { href: post.href }, [el('div', { style: 'position:relative' }, [banner, caption])]);
+    // 모바일에서는 caption이 static이 되므로 banner 뒤에 자연스럽게 붙는다
+    if (editing) link.addEventListener('click', function (e) { e.preventDefault(); });
+    var li = el('li', { class: 'work', id: 'work-' + post.id }, [post.ai ? aiTag() : null, link]);
+    return li;
+  }
+
+  function attachCropEditor(panel, img, p) {
+    var readout = el('span', { class: 'panel-readout' });
+    panel.appendChild(readout);
+    function show() { readout.textContent = 'x ' + Math.round(p.x) + '  y ' + Math.round(p.y) + '  zoom ' + (p.zoom || 1).toFixed(2); }
+    show();
+    var start = null;
+    panel.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      panel.setPointerCapture(e.pointerId); panel.classList.add('dragging');
+      start = { px: e.clientX, py: e.clientY, x: p.x == null ? 50 : p.x, y: p.y == null ? 50 : p.y };
+    });
+    panel.addEventListener('pointermove', function (e) {
+      if (!start) return;
+      var r = panel.getBoundingClientRect(), z = p.zoom || 1;
+      // 끌면 그림이 손을 따라 움직이도록: 초점은 반대로 이동
+      p.x = Math.max(0, Math.min(100, start.x - (e.clientX - start.px) / r.width * 100 / z));
+      p.y = Math.max(0, Math.min(100, start.y - (e.clientY - start.py) / r.height * 100 / z));
+      applyCrop(img, p); show();
+    });
+    function end() { start = null; panel.classList.remove('dragging'); }
+    panel.addEventListener('pointerup', end);
+    panel.addEventListener('pointercancel', end);
+    panel.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      p.zoom = Math.max(1, Math.min(4, (p.zoom || 1) * (e.deltaY < 0 ? 1.06 : 1 / 1.06)));
+      p.zoom = Math.round(p.zoom * 100) / 100;
+      applyCrop(img, p); show();
+    }, { passive: false });
+  }
+
+  function editBar() {
+    var status = el('span', { text: '그림을 끌어 위치, 휠로 확대. 끝나면 JSON을 복사해 works/works.json에 붙여 넣으세요.' });
+    var copy = el('button', { type: 'button', text: 'JSON 복사' });
+    copy.addEventListener('click', function () {
+      data.posts.forEach(function (post) { post.banner.panels.forEach(function (p) { if (!p.spacer) { p.x = Math.round(p.x); p.y = Math.round(p.y); } }); });
+      var json = JSON.stringify(data, null, 2) + '\n';
+      (navigator.clipboard ? navigator.clipboard.writeText(json) : Promise.reject())
+        .then(function () { status.textContent = '복사했습니다. works/works.json 전체를 이 내용으로 바꾸세요.'; })
+        .catch(function () { console.log(json); status.textContent = '복사가 막혀 콘솔에 출력했습니다.'; });
+    });
+    document.body.classList.add('editing');
+    document.body.insertBefore(el('div', { class: 'edit-bar' }, [el('strong', { text: '크롭 편집' }), copy, status]), document.body.firstChild);
+  }
+
+  fetch('works.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      data = d;
+      var s = d.site || {};
+      if (s.title) { document.getElementById('site-title').textContent = s.title; }
+      document.getElementById('site-intro').textContent = s.intro || '';
+      var pl = document.getElementById('portfolio-link');
+      if (s.portfolioUrl) pl.href = s.portfolioUrl;
+      if (s.portfolioLabel) pl.textContent = s.portfolioLabel;
+      document.getElementById('ai-note').textContent = s.aiNote || '';
+      if (s.manualUrl) {
+        document.getElementById('manual-link').href = s.manualUrl;
+        document.getElementById('manual').hidden = false;
+      }
+      var list = document.getElementById('works');
+      d.posts.forEach(function (post, i) { list.appendChild(renderPost(post, i)); });
+      if (editing) editBar();
+    })
+    .catch(function () {
+      document.getElementById('works').appendChild(el('li', { class: 'load-error', text: '작업 목록을 불러오지 못했습니다. 페이지를 새로 고쳐 주세요.' }));
+    });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로데릭 블레이드 — 컨셉 과정</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+/*
+  설계 메모 (AA2-hero/boards_v2.html 규칙 그대로)
+  - 바탕: 작업 시트 회색. 강조는 빨간 펜 하나.
+  - 생성 중간 과정물은 넣지 않는다 (종일군 지시 10-29). 본인 초안, 종족 도표, 레퍼런스, 최종만.
+  - 문구는 종일군 워딩과 디자인 정의 원문. 영문 대문자 라벨, 가운뎃점 메타, 장식 화살표 없음.
+*/
+:root{
+  --canvas:#46484b; --sheet:#5f6164; --deep:#3a3c3f;
+  --ink:#f2efe9; --ink2:#d2cfc9; --ink3:#a6a39d;
+  --pen:#e0412c;
+  --title:"Gowun Batang",serif; --body:"IBM Plex Sans KR",sans-serif; --hand:"Nanum Pen Script",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+h1,h2,h3,p,li,span,blockquote,div,td{word-break:keep-all}
+body{background:#222;font-family:var(--body);color:var(--ink);font-weight:400}
+.board{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--canvas);margin:0 auto 40px}
+body.single .board{display:none;margin:0}body.single .board.on{display:block}
+img{display:block}
+.page{position:absolute;right:72px;bottom:46px;font-family:var(--title);font-size:22px;color:var(--ink3)}
+.page b{color:var(--ink);font-weight:700}
+h2{font-family:var(--title);font-weight:700;font-size:54px;line-height:1.22;letter-spacing:-.01em}
+.sub{font-size:19px;color:var(--ink3);margin-top:12px}
+.body{font-size:19px;line-height:1.75;color:var(--ink2);font-weight:300}
+.hand{font-family:var(--hand);color:var(--pen);font-size:34px;line-height:1.05}
+svg.pen{position:absolute;inset:0;pointer-events:none;overflow:visible}
+svg.pen path{fill:none;stroke:var(--pen);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.fig{position:absolute}
+.fig img{width:100%;height:100%;object-fit:contain}
+.note{position:absolute;width:300px}
+.note p{font-size:15px;line-height:1.55;color:var(--ink2);font-weight:300;margin-top:6px}
+.cap{position:absolute;font-size:15px;color:var(--ink3)}
+
+/* 1 표지 */
+.cover .art{position:absolute;left:0;top:0;width:720px;height:1080px;object-fit:cover;object-position:50% 40%}
+.cover .art2{position:absolute;left:720px;top:0;width:680px;height:1080px;object-fit:cover;object-position:50% 30%}
+.cover .side{position:absolute;left:1400px;top:0;width:520px;height:1080px;padding:0 70px 0 64px;display:flex;flex-direction:column;justify-content:center}
+.cover .proj{font-size:20px;color:var(--ink2)}
+.cover h1{font-family:var(--title);font-weight:700;font-size:92px;line-height:1.05;margin-top:18px}
+.cover .who{font-size:21px;color:var(--ink2);margin-top:16px}
+.cover .story{margin-top:44px;font-size:18px;line-height:1.85;color:var(--ink2);font-weight:300}
+.cover .role{margin-top:38px;font-size:15px;line-height:1.9;color:var(--ink3)}
+.cover .role b{color:var(--ink);font-weight:500}
+
+/* 2 설정 변경 */
+.shift .head{position:absolute;left:110px;top:120px;width:380px}
+.shift .sheet{position:absolute;left:520px;top:40px;width:1330px;height:940px;background:#fff}
+.shift .body{margin-top:40px;font-size:18px}
+
+/* 3 키워드와 인과 */
+.keys .head{position:absolute;left:110px;top:80px;width:1100px}
+.keys .dia{left:110px;top:230px;width:1180px;height:678px}
+.keys .src{position:absolute;left:110px;top:920px;font-size:14px;color:var(--ink3)}
+.keys .era{position:absolute;left:110px;top:194px;font-size:16px;color:var(--ink2)}
+.keys .map{position:absolute;left:1360px;top:96px;width:470px}
+.keys .map h3{font-family:var(--title);font-size:24px;font-weight:700;margin-bottom:16px}
+.keys table{border-collapse:collapse;width:100%}
+.keys td{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;font-size:15.5px;line-height:1.55;color:var(--ink2);font-weight:300}
+.keys td:first-child{width:150px;padding-right:16px;font-family:var(--title);font-weight:700;font-size:17px;color:var(--ink)}
+.keys td .hand{font-size:27px;display:block;margin-bottom:2px}
+.keys blockquote{margin-top:26px;font-size:15px;line-height:1.75;color:var(--ink2);font-weight:300;border-left:2px solid rgba(255,255,255,.18);padding-left:18px}
+
+/* 4 레퍼런스 */
+.refs .head{position:absolute;left:110px;top:70px;width:1700px}
+.refs .grp{position:absolute}
+.refs .grp .hand{font-size:30px;margin-bottom:10px}
+.refs .row{display:flex;gap:16px;align-items:flex-start}
+.refs .row figure{margin:0}
+.refs .row img{background:var(--sheet)}
+.refs figcaption{font-size:13.5px;line-height:1.45;color:var(--ink2);font-weight:300;margin-top:7px;max-width:240px}
+.refs figcaption span{display:block;color:var(--ink3);font-size:12.5px}
+
+/* 5 용어 정의 */
+.def .head{position:absolute;left:110px;top:110px;width:560px}
+.def blockquote{margin-top:34px;font-size:17px;line-height:1.85;color:var(--ink2);font-weight:300;border-left:2px solid rgba(255,255,255,.18);padding-left:20px}
+
+/* 6 러프와 최종 */
+.ba .head{position:absolute;left:110px;top:110px;width:380px}
+.ba .body{margin-top:30px;font-size:17px}
+</style>
+<style>
+/* 웹 공개용: 1920x1080 보드를 화면 폭에 맞춰 축소 (핸드오프 묶음에서 추가) */
+.fit{max-width:1920px;margin:0 auto 24px;overflow:hidden}
+.fit .board{margin:0;transform-origin:0 0}
+</style>
+</head>
+<body>
+<nav class="kji-back" style="padding:14px clamp(16px,4vw,40px);font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a></nav>
+
+<!-- 1 표지 -->
+<section class="board cover" id="b1">
+  <img class="art" src="src/final.jpg" alt="">
+  <img class="art2" src="src/final_upper.jpg" alt="">
+  <div class="side">
+    <div class="proj">프로젝트 G 칼레온</div>
+    <h1>로데릭 블레이드</h1>
+    <div class="who">칼레온 황제 캐릭터 컨셉</div>
+    <p class="story">자신의 대검에 귀속된 늙지않는 퇴폐미 절대군주.</p>
+    <p class="role">초안러프이미지 제작 -> AI 업스케일링 -> 최종리터칭</p>
+  </div>
+</section>
+
+<!-- 2 설정 변경 -->
+<section class="board shift" id="b2">
+  <div class="head">
+    <h2>설정 변경</h2>
+    <p class="sub">프로젝트 극초반 시안에서 리뉴얼 캐릭터 시안으로</p>
+    <p class="body">육중폐황 아저씨에서<br>자신의 대검에 귀속된 늙지않는 퇴폐미 절대군주로.</p>
+    <p class="body" style="margin-top:22px">리뉴얼 초안이 PD에게 통과된 뒤 프로젝트가 중단됐다.</p>
+  </div>
+  <div class="fig sheet"><img src="src/pg054_sheet.jpg" alt=""></div>
+  <svg class="pen" viewBox="0 0 1920 1080" id="pen2"></svg>
+  <div class="hand" style="position:absolute;left:1360px;top:996px;font-size:36px">본인 초안, PD 통과</div>
+  <div class="page"><b>2</b> / 6</div>
+</section>
+
+<!-- 3 칼레온 키워드와 인과 -->
+<section class="board keys" id="b3">
+  <div class="head"><h2>칼레온 종족 키워드와 인과</h2><p class="sub">종족 특성을 인과로 정리하고, 그 키워드를 색과 형태로 옮겼다</p></div>
+  <p class="era">2021년도 당시 각 종족특성 비주얼키워드 직접설정 -> 기획팀이 발전</p>
+  <div class="fig dia"><img src="src/caleon_diagram.jpg" alt=""></div>
+  <p class="src">칼레온 종족 특성 정리 및 인과 도표. PD 설명에서 키워드를 추출해 정리</p>
+  <div class="map">
+    <h3>키워드에서 비주얼로</h3>
+    <table>
+      <tr><td>세속적</td><td><span class="hand">골드</span>절제되고 미니멀한 어두운부위와 대조되는 화려한금장</td></tr>
+      <tr><td>야망</td><td><span class="hand">레드</span>불, 야망</td></tr>
+      <tr><td>엄격한 획일화<br>자유통제</td><td><span class="hand">블랙</span>엄격함, 획일화 통제. 미니멀</td></tr>
+      <tr><td>수직적 계급사회</td><td><span class="hand">금 견갑</span>계급·권위 표시</td></tr>
+      <tr><td>혈통·가문 중심</td><td><span class="hand">가문 문장</span>릭 블러드의 블러드 가문 문장</td></tr>
+    </table>
+    <blockquote>칼레온은 마르크스의 유물론적 세계관을 기반으로 비주얼설정을 잡았고 물질중심사고와 이성을 내세우며 통제와 획일성, 단절과 엄격함을 비주얼 키워드로 세움. 마르크스의 유물론이 오히려 획일성과 전체주의로 수렴하면서 소통의 단절과 체계와 효율만 내세우며 오히려 강한 신분제사회로 발전한 딜레마를 비대칭디자인으로 상징.</blockquote>
+  </div>
+  <div class="page"><b>3</b> / 6</div>
+</section>
+
+<!-- 4 키워드별 레퍼런스 -->
+<section class="board refs" id="b4">
+  <div class="head"><h2>키워드별 레퍼런스</h2><p class="sub">키워드마다 붙인 레퍼런스와 메모</p></div>
+  <div class="grp" style="left:110px;top:225px">
+    <div class="hand">비대칭, 단절, 직선적 획일성</div>
+    <div class="row">
+      <figure><img src="src/ref_3.jpg" style="height:330px" alt=""><figcaption><span>외부 레퍼런스</span></figcaption></figure>
+      <figure><img src="src/ref_8.jpg" style="height:330px" alt=""><figcaption>겹처진 비대칭 구조<span>외부 레퍼런스</span></figcaption></figure>
+      <figure><img src="src/ref_9.jpg" style="height:330px" alt=""><figcaption>겹쳐진 비대칭구조<span>외부 레퍼런스</span></figcaption></figure>
+      <figure><img src="src/ref_2.jpg" style="height:330px" alt=""><figcaption><span>본인 작업, 릭 블러드</span></figcaption></figure>
+      <figure><img src="src/ref_4.jpg" style="height:330px" alt=""><figcaption>비대칭 스커트<span>본인 작업, 로건 더스트</span></figcaption></figure>
+    </div>
+  </div>
+  <div class="grp" style="left:110px;top:655px">
+    <div class="hand">블랙</div>
+    <div class="row"><figure><img src="src/ref_10.jpg" style="height:280px" alt=""><figcaption>획일성, 통제, 엄격함. 블랙테마<span>외부 레퍼런스</span></figcaption></figure></div>
+  </div>
+  <div class="grp" style="left:440px;top:655px">
+    <div class="hand">금 견갑</div>
+    <div class="row"><figure><img src="src/ref_6.jpg" style="height:240px" alt=""><figcaption style="max-width:290px">맨오브스틸 러셀크로우 가슴 어깨플레이트의 안과밖이 서로 겹치며 연결된 유기적 구조 디자인<span>외부 레퍼런스</span></figcaption></figure></div>
+  </div>
+  <div class="grp" style="left:860px;top:655px">
+    <div class="hand">금 장식 토시</div>
+    <div class="row"><figure><img src="src/ref_7.jpg" style="height:280px" alt=""><figcaption>목에 집중된 화려한 금장<span>외부 레퍼런스</span></figcaption></figure></div>
+  </div>
+  <div class="grp" style="left:1150px;top:655px">
+    <div class="hand">레드 반망토</div>
+    <div class="row"><figure><img src="src/ref_5.jpg" style="height:280px" alt=""><figcaption>망토 뒷구조<span>본인 작업, 릭 블러드 시트</span></figcaption></figure></div>
+  </div>
+  <div class="page"><b>4</b> / 6</div>
+</section>
+
+<!-- 5 로데릭 디자인 정의 -->
+<section class="board def" id="b5">
+  <div class="head">
+    <h2>디자인 정의</h2>
+    <p class="sub">초안의 디자인 요소를 글로 정리</p>
+    <blockquote>자신의 대검에 귀속된 늙지않는 퇴폐미 절대군주. 육중함 보다 날렵하고 예리하지만 엄청난 괴력을 갖고 있다는 설정으로 호리호리한 체형과 미형 얼굴 양옆으로 볼드하고 두툼한 대칭적 금갑견장이 얹혀있고 이를 크고 볼드한 금장 금속벨트로 연결됨. 멀리서 봤을때 긴 몸 양쪽에 대칭적 금장과 완만한 U 자형 금장벨트가 캐릭터라인이자 특징. 복식의 어두운부위는 칼레온 특유의 비대칭 사선형 겹침 양식.</blockquote>
+  </div>
+  <div class="fig" id="f5" style="left:760px;top:30px;width:560px;height:1020px;background:#fff"><img src="src/draft.jpg" alt=""></div>
+  <svg class="pen" viewBox="0 0 1920 1080" id="pen5"></svg>
+  <div class="note" style="left:1420px;top:150px"><div class="hand">대칭 금갑견장</div><p>볼드하고 두툼하게, 몸 양옆에</p></div>
+  <div class="note" style="left:1420px;top:330px"><div class="hand">U자 금장벨트</div><p>견장과 견장을 잇는 크고 볼드한 금속 벨트</p></div>
+  <div class="note" style="left:1420px;top:520px"><div class="hand">비대칭 사선형 겹침</div><p>복식의 어두운 부위</p></div>
+  <div class="note" style="left:1420px;top:700px"><div class="hand">대검</div><p>끝은 불에 달군 붉은색</p></div>
+  <div class="page"><b>5</b> / 6</div>
+</section>
+
+<!-- 6 러프와 최종 -->
+<section class="board ba" id="b6">
+  <div class="head">
+    <h2>러프 초안과 최종</h2>
+    <p class="sub">같은 디자인의 초안 러프와 완성본</p>
+    <p class="body">초안의 실루엣, 대칭 금갑견장과 U자 금장벨트, 끝이 붉게 타는 대검을 유지했다.</p>
+  </div>
+  <div class="fig" style="left:560px;top:60px;width:520px;height:940px;background:#fff"><img src="src/draft.jpg" alt=""></div>
+  <div class="fig" style="left:1140px;top:60px;width:627px;height:940px"><img src="src/final.jpg" alt=""></div>
+  <div class="cap" style="left:560px;top:1010px">초안 러프</div>
+  <div class="cap" style="left:1140px;top:1010px">최종</div>
+  <div class="page"><b>6</b> / 6</div>
+</section>
+
+<script>
+let seed = 11;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const J = (a) => (rnd() - .5) * 2 * a;
+function path(svgId, d){ const p = document.createElementNS("http://www.w3.org/2000/svg","path"); p.setAttribute("d", d); document.getElementById(svgId).appendChild(p); }
+function ring(id, cx, cy, rx, ry, tilt=-.06){
+  let d = "", n = 46, start = J(.4) - 1.9;
+  for (let i = 0; i <= n; i++){
+    const t = start + (i / n) * Math.PI * 2.12, w = 1 + J(.035) + i / n * .05;
+    const x = cx + Math.cos(t) * rx * w, y = cy + Math.sin(t) * ry * w;
+    const xr = cx + (x - cx) * Math.cos(tilt) - (y - cy) * Math.sin(tilt), yr = cy + (x - cx) * Math.sin(tilt) + (y - cy) * Math.cos(tilt);
+    d += (i ? " L" : "M") + xr.toFixed(1) + " " + yr.toFixed(1);
+  }
+  path(id, d);
+}
+function lead(id, x1, y1, x2, y2, bend=30){
+  const mx = (x1 + x2) / 2 + J(bend), my = (y1 + y2) / 2 - bend;
+  path(id, `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`);
+}
+function box(fig){
+  const f = document.getElementById(fig), im = f.querySelector("img");
+  const L = f.offsetLeft, T = f.offsetTop, W = f.offsetWidth, H = f.offsetHeight;
+  const s = Math.min(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s;
+  return { x: L + (W - w) / 2, y: T + (H - h) / 2, w, h };
+}
+function draw(){
+  ring("pen2", 1590, 560, 235, 430, .02);
+  const d = box("f5");
+  const P = (x, y) => [d.x + x * d.w, d.y + y * d.h];
+  [[.66,.19,1410,170],[.5,.225,1410,350],[.42,.4,1410,540],[.82,.6,1410,720]].forEach(([x,y,nx,ny]) => { const [px,py] = P(x,y); lead("pen5", nx, ny, px, py, 20); });
+}
+const b = new URLSearchParams(location.search).get("b");
+if (b) { document.body.classList.add("single"); document.getElementById("b" + b).classList.add("on"); }
+window.addEventListener("load", draw);
+</script>
+<script>
+/* 웹 공개용: 보드를 감싸고 화면 폭에 맞춰 축소. 보드 내부 좌표(빨간 펜 등)는 그대로 */
+(function () {
+  if (document.body.classList.contains('single')) return;
+  var boards = [].slice.call(document.querySelectorAll('.board'));
+  boards.forEach(function (b) {
+    var w = document.createElement('div'); w.className = 'fit';
+    b.parentNode.insertBefore(w, b); w.appendChild(b);
+  });
+  function fit() {
+    var s = Math.min(1, document.documentElement.clientWidth / 1920);
+    boards.forEach(function (b) {
+      b.style.transform = s < 1 ? 'scale(' + s + ')' : '';
+      b.parentNode.style.height = Math.ceil(1080 * s) + 'px';
+    });
+  }
+  fit();
+  addEventListener('resize', fit);
+})();
+</script>
+<nav class="kji-back" style="padding:40px clamp(16px,4vw,40px) 48px;font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/" style="color:#b9b7b2;text-decoration:none;margin-left:24px">김종일 통합 포트폴리오 사이트</a></nav>
+</body>
+</html>

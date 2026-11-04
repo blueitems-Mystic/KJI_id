@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기란 자유무역도시</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #46484b;
+    --sheet: #5f6164;
+    --ink: #e6e4df;
+    --ink-soft: #b9b7b2;
+    --rule: #6d6f72;
+    --pen: #e0412c;
+    --serif: "Gowun Batang", serif;
+    --sans: "IBM Plex Sans KR", sans-serif;
+    --hand: "Nanum Pen Script", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font: 400 16px/1.75 var(--sans);
+    word-break: keep-all;
+  }
+  img { display: block; width: 100%; height: auto; }
+  a { color: inherit; }
+  a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  .hero { margin: 0; }
+  .hero a { display: block; }
+
+  .intro, .step, .note {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .intro { padding-top: 56px; padding-bottom: 72px; }
+  h1 {
+    margin: 0 0 18px;
+    font: 700 clamp(34px, 5vw, 56px)/1.2 var(--serif);
+    letter-spacing: -0.01em;
+  }
+  .intro p { margin: 0; max-width: 40em; color: var(--ink-soft); font-size: 17px; }
+
+  .step { padding-bottom: 96px; }
+  .step-head {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    align-items: baseline;
+    margin-bottom: 20px;
+    border-top: 1px solid var(--rule);
+    padding-top: 22px;
+  }
+  .step-head .n { font: 400 28px/1 var(--serif); color: var(--ink-soft); }
+  h2 { margin: 0; font: 700 26px/1.35 var(--serif); }
+  .step-head p { grid-column: 2; margin: 8px 0 0; max-width: 42em; color: var(--ink-soft); }
+
+  .sheet { background: var(--sheet); padding: 18px; }
+  .sheet + .sheet { margin-top: 18px; }
+  figure { margin: 0; }
+  figcaption { margin-top: 12px; font-size: 15px; color: var(--ink-soft); max-width: 46em; }
+  figcaption b { color: var(--ink); font-weight: 500; }
+
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 52px; }
+  .marked { position: relative; }
+  .marked svg { position: absolute; inset: -14px -10px; width: calc(100% + 20px); height: calc(100% + 28px); pointer-events: none; overflow: visible; }
+  .marked .pen-note {
+    position: absolute; right: 2%; top: -0.2em; transform: translateY(-100%) rotate(-4deg);
+    font: 400 34px/1 var(--hand); color: var(--pen);
+  }
+
+  .zoom { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+  /* 리터치 전후 */
+  .ba { position: relative; overflow: hidden; touch-action: pan-y; cursor: ew-resize; user-select: none; }
+  .ba .after { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--cut, 50%)); }
+  .ba .after img { height: 100%; object-fit: cover; }
+  .ba .line { position: absolute; top: 0; bottom: 0; left: var(--cut, 50%); width: 2px; background: var(--ink); box-shadow: 0 0 0 1px rgba(0,0,0,.45); transform: translateX(-1px); pointer-events: none; }
+  .ba input {
+    position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
+    opacity: 0; pointer-events: none;
+  }
+  .ba:focus-within { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .ba-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 15px; color: var(--ink-soft); }
+
+  .note { padding-top: 28px; padding-bottom: 80px; color: var(--ink-soft); font-size: 14px; }
+  .note p { margin: 0 0 6px; max-width: 60em; }
+
+  @media (max-width: 760px) {
+    .intro, .step, .note { padding-left: 16px; padding-right: 16px; }
+    .intro { padding-top: 36px; padding-bottom: 48px; }
+    .step { padding-bottom: 64px; }
+    .step-head { grid-template-columns: 2.2rem 1fr; }
+    h2 { font-size: 22px; }
+    .sheet { padding: 10px; }
+    .pair, .compare, .zoom { grid-template-columns: 1fr; gap: 12px; }
+    .compare { padding-top: 10px; gap: 44px; }
+    .marked .pen-note { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<nav class="kji-back" style="padding:14px clamp(16px,4vw,40px);font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a></nav>
+
+<figure class="hero">
+  <a href="img/final-3000.jpg"><img src="img/final.jpg" width="2560" height="1265" alt="기란 자유무역도시 최종 완성본. 낮은 시점에서 올려다본 청록 돔 궁전과 성채, 왼쪽의 아치 다리와 석상, 오른쪽 아래 빨간 지붕 마을"></a>
+</figure>
+
+<header class="intro">
+  <h1>기란 자유무역도시</h1>
+  <p>초기 설정 스케치와 2012년 러프 단계에서 중단된 도시 컨셉. 2026년 같은 구도로 AI 디테일 완성 후 직접 리터치로 마감.</p>
+</header>
+
+<section class="step" aria-labelledby="s1">
+  <div class="step-head">
+    <span class="n">1</span>
+    <h2 id="s1">초기 설정 스케치</h2>
+    <p>기란 대도시 레벨 구성 시안. 도시 입장 동선, 조감 배치, 전경 초안을 한 장에 정리. 메모는 당시 그대로.</p>
+  </div>
+  <figure class="sheet">
+    <a href="img/sheet.jpg"><img loading="lazy" decoding="async" src="img/sheet.jpg" width="2000" height="1181" alt="레벨 구성 시안 시트: 왼쪽 도시 입장 동선 스케치와 메모, 오른쪽 위 조감 선화, 오른쪽 아래 전경 초안 컬러 러프"></a>
+  </figure>
+</section>
+
+<section class="step" aria-labelledby="s2">
+  <div class="step-head">
+    <span class="n">2</span>
+    <h2 id="s2">2012년 러프</h2>
+    <p>저각 구도와 조감 구도 두 장을 러프 단계에서 중단. 이번 완성 대상은 러프 A.</p>
+  </div>
+  <div class="sheet pair">
+    <figure>
+      <a href="img/orig-a.jpg"><img loading="lazy" decoding="async" src="img/orig-a.jpg" width="1920" height="949" alt="2012년 러프 A: 낮은 시점의 궁전과 성채, 아치 다리"></a>
+      <figcaption><b>A</b> 저각 구도</figcaption>
+    </figure>
+    <figure>
+      <a href="img/orig-b.jpg"><img loading="lazy" decoding="async" src="img/orig-b.jpg" width="1920" height="1240" alt="2012년 러프 B: 언덕 위 도시 조감, 청록 지붕 궁전과 곡선 다리"></a>
+      <figcaption><b>B</b> 조감 구도</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="step" aria-labelledby="s3">
+  <div class="step-head">
+    <span class="n">3</span>
+    <h2 id="s3">디테일 완성 비교</h2>
+    <p>러프 A를 입력해 서로 다른 이미지 생성 AI 두 개로 디테일 작업. 조건은 구도, 실루엣, 팔레트 유지.</p>
+  </div>
+  <div class="sheet compare">
+    <figure>
+      <a href="img/compare-1.jpg"><img loading="lazy" decoding="async" src="img/compare-1.jpg" width="1920" height="942" alt="비교안 1: 원화의 붓 터치와 어두운 명암 유지"></a>
+      <figcaption><b>비교안 1</b> 원화의 붓 터치와 명암 구조 유지. 오른쪽 성벽은 러프 상태로 남음.</figcaption>
+    </figure>
+    <figure>
+      <div class="marked">
+        <a href="img/compare-2.jpg"><img loading="lazy" decoding="async" src="img/compare-2.jpg" width="1920" height="950" alt="비교안 2: 창, 아치, 폭포, 식생이 그려진 완성형 일러스트"></a>
+        <span class="pen-note" aria-hidden="true">선택</span>
+        <svg viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M6 9 C 22 1, 70 0, 92 6 C 99 10, 99 48, 93 54 C 74 60, 24 61, 7 55 C 1 50, 0 16, 8 7" fill="none" stroke="#e0412c" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+      <figcaption><b>비교안 2</b> 창, 아치, 폭포, 식생까지 묘사. 하늘이 밝은 청색으로 바뀌고 화풍이 매끈해짐. 깃발 추가. 이 안으로 진행.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="step" aria-labelledby="s4">
+  <div class="step-head">
+    <span class="n">4</span>
+    <h2 id="s4">4K 업스케일</h2>
+    <p>선택안을 입력으로 같은 구도의 4K 업스케일 작업. 해상도는 2048px에서 3840px로 상승. 아래는 같은 영역을 같은 크기로 확대한 비교.</p>
+  </div>
+  <div class="sheet zoom">
+    <figure>
+      <img loading="lazy" decoding="async" src="img/zoom-r1.jpg" width="720" height="480" alt="선택안 마을 부분 확대: 지붕과 창이 뭉개짐">
+      <figcaption><b>선택안</b> 2048px</figcaption>
+    </figure>
+    <figure>
+      <img loading="lazy" decoding="async" src="img/zoom-4k.jpg" width="720" height="480" alt="4K 업스케일 마을 부분 확대: 기와, 창살, 석재 줄눈이 보임">
+      <figcaption><b>4K 업스케일</b> 3840px</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="step" aria-labelledby="s5">
+  <div class="step-head">
+    <span class="n">5</span>
+    <h2 id="s5">리터치와 최종본</h2>
+    <p>4K 출력 위에 직접 리터치로 마감. 아래는 2012년 러프와 최종본 비교. 그림 위를 좌우로 끌어 전후 확인.</p>
+  </div>
+  <div class="sheet">
+    <div class="ba" style="--cut:50%">
+      <img loading="lazy" decoding="async" src="img/orig-a-2560.jpg" width="2560" height="1265" alt="2012년 러프 A">
+      <div class="after"><img loading="lazy" decoding="async" src="img/final.jpg" width="2560" height="1265" alt="최종본"></div>
+      <div class="line"></div>
+      <input type="range" min="0" max="100" value="50" aria-label="러프와 최종본 비교 위치. 왼쪽이 2012년 러프, 오른쪽이 최종본">
+    </div>
+    <div class="ba-labels" aria-hidden="true"><span>2012년 러프</span><span>최종본</span></div>
+  </div>
+</section>
+
+<footer class="note">
+  <p>설정 스케치와 2012년 러프는 직접 작업. 디테일 완성과 4K 업스케일 작업을 AI사용. 최종 리터치는 직접 작업.</p>
+  <p>작업자 김종일</p>
+</footer>
+
+<script>
+  document.querySelectorAll('.ba').forEach(function (ba) {
+    var r = ba.querySelector('input');
+    function set(v) { r.value = v; ba.style.setProperty('--cut', v + '%'); }
+    function at(e) {
+      var b = ba.getBoundingClientRect();
+      set(Math.max(0, Math.min(100, (e.clientX - b.left) / b.width * 100)).toFixed(1));
+    }
+    r.addEventListener('input', function () { set(r.value); });
+    ba.addEventListener('pointerdown', function (e) { try { ba.setPointerCapture(e.pointerId); } catch (_) {} at(e); });
+    ba.addEventListener('pointermove', function (e) { if (ba.hasPointerCapture(e.pointerId)) at(e); });
+  });
+</script>
+<nav class="kji-back" style="padding:40px clamp(16px,4vw,40px) 48px;font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/" style="color:#b9b7b2;text-decoration:none;margin-left:24px">김종일 통합 포트폴리오 사이트</a></nav>
+</body>
+</html>

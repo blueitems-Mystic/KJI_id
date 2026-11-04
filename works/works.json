@@ -1,0 +1,87 @@
+{
+  "site": {
+    "title": "김종일 컨셉아트 작업",
+    "intro": "생성형 AI를 작업 과정에 넣은 컨셉 작업과, 직접 그린 프로젝트 이미지를 모았습니다.",
+    "portfolioUrl": "https://kji.blueitems.net/",
+    "portfolioLabel": "김종일 통합 포트폴리오 사이트",
+    "manualUrl": "https://kji.blueitems.net/gallery.html",
+    "aiNote": "AI활용 라벨이 붙은 작업은 이미지 생성 AI를 과정 일부에 썼습니다. 직접 작업한 단계와 AI를 쓴 단계는 각 페이지에 적어 두었습니다."
+  },
+  "posts": [
+    {
+      "id": "project-cx",
+      "href": "project-cx/",
+      "ai": true,
+      "title": "Project CX",
+      "meta": "캐릭터, 비히클 컨셉",
+      "summary": "기본설정, 러프스케치, 리터칭은 직접 하고 스타일라이징 단계에 AI를 썼습니다.",
+      "textAlign": "left",
+      "banner": {
+        "bg": "#46484b",
+        "panels": [
+          {
+            "src": "project-cx/img/00-title.jpg",
+            "srcSmall": "thumbs/project-cx.jpg",
+            "alt": "Project CX 로고와 노란 작업복 캐릭터의 옆모습",
+            "x": 50,
+            "y": 20,
+            "zoom": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "giran-trade-city",
+      "href": "giran-trade-city/",
+      "ai": true,
+      "title": "기란 자유무역도시",
+      "meta": "배경 컨셉",
+      "summary": "2012년 러프 단계에서 멈춘 도시를 같은 구도로 완성했습니다. 디테일과 업스케일에 AI, 마감 리터치는 직접.",
+      "textAlign": "left",
+      "banner": {
+        "bg": "#46484b",
+        "panels": [
+          {
+            "src": "giran-trade-city/img/final.jpg",
+            "srcSmall": "thumbs/giran-trade-city.jpg",
+            "alt": "폭포가 흐르는 절벽 위 청록 돔 궁전 도시",
+            "x": 70,
+            "y": 10,
+            "zoom": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "roderick-blade",
+      "href": "roderick-blade/",
+      "ai": true,
+      "title": "로데릭 블레이드",
+      "meta": "프로젝트 G 칼레온, 캐릭터 컨셉",
+      "summary": "대검에 귀속된 늙지 않는 절대군주. 초안 러프와 최종 리터칭은 직접, 업스케일에 AI를 썼습니다.",
+      "textAlign": "right",
+      "banner": {
+        "bg": "#46484b",
+        "panels": [
+          {
+            "src": "roderick-blade/src/final.jpg",
+            "alt": "금장 견갑과 붉은 망토를 두른 황제 캐릭터 전신",
+            "flex": 2,
+            "x": 50,
+            "y": 40,
+            "zoom": 1
+          },
+          {
+            "src": "roderick-blade/src/final_upper.jpg",
+            "alt": "같은 캐릭터의 상반신 클로즈업",
+            "flex": 3,
+            "x": 50,
+            "y": 22,
+            "zoom": 1
+          },
+          { "flex": 4, "spacer": true }
+        ]
+      }
+    }
+  ]
+}
