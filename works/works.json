@@ -4,7 +4,6 @@
     "intro": "생성형 AI를 작업 과정에 넣은 컨셉 작업과, 직접 그린 프로젝트 이미지를 모았습니다.",
     "portfolioUrl": "https://kji.blueitems.net/",
     "portfolioLabel": "김종일 통합 포트폴리오 사이트",
-    "manualUrl": "https://kji.blueitems.net/gallery.html",
     "aiNote": "AI활용 라벨이 붙은 작업은 이미지 생성 AI를 과정 일부에 썼습니다. 직접 작업한 단계와 AI를 쓴 단계는 각 페이지에 적어 두었습니다."
   },
   "posts": [
@@ -107,5 +106,34 @@
         ]
       }
     }
-  ]
+  ],
+  "manual": {
+    "id": "manual",
+    "ai": false,
+    "title": "수작업 프로젝트",
+    "meta": "직접 그린 프로젝트 컨셉아트",
+    "summary": "AI 없이 직접 그린 프로젝트 이미지입니다. 최신 작업부터 순서대로 모았습니다.",
+    "textAlign": "right",
+    "banner": {
+      "bg": "#46484b",
+      "panels": [
+        {
+          "src": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_2000,q_auto,f_auto/03_z7ncne",
+          "srcSmall": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_960,q_auto,f_auto/03_z7ncne",
+          "alt": "Rogan Durst. 금장 견갑에 거대한 망치를 든 백발 노장 캐릭터의 전신과 얼굴 클로즈업",
+          "flex": 5,
+          "x": 40,
+          "y": 20,
+          "zoom": 1
+        },
+        { "flex": 4, "spacer": true }
+      ]
+    },
+    "galleryApi": "https://kji-gallery-api.blueitems7.workers.dev/api/gallery",
+    "galleryUrl": "https://kji.blueitems.net/gallery.html",
+    "cloudName": "duwi0pqm2",
+    "skipTitles": ["새 게시물"],
+    "projectAlias": { "Tacktan": "Tactan", "Tantan": "Tactan" },
+    "estimatedYears": { "Tactan": 2021, "ArcheAge2": 2019, "Triple S": 2016.5 }
+  }
 }
