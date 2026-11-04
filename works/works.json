@@ -87,7 +87,7 @@
       "id": "pca-builder",
       "href": "pca-builder/",
       "ai": true,
-      "title": "PCA Builder",
+      "title": "Project Concept Art Builder",
       "meta": "컨셉 작업 도구",
       "summary": "세계관·용어·레퍼런스·방향 표를 근거로 에이전트가 시안을 계획·생성하고 스스로 평가·수정하는 로컬 도구. 리터치와 채택은 직접.",
       "textAlign": "right",
