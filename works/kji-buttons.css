@@ -1,0 +1,22 @@
+/* works 공용 버튼 — 보드 위 종이 쪽지(채움) + 연필 선(테두리)
+   허브(works/), 수작업(manual/), 컨셉군 작업 페이지 상단 내비에서 같이 씀 */
+.kji-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.kji-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 46px; padding: 10px 22px; box-sizing: border-box;
+  font: 500 15px/1.2 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; letter-spacing: .01em;
+  text-decoration: none; border: 1px solid #e6e4df; border-radius: 2px;
+  transition: background-color .2s, color .2s, border-color .2s, transform .2s;
+}
+.kji-btn .arrow { font-size: 1.05em; line-height: 1; transition: transform .2s; }
+.kji-btn-fill { background: #e6e4df; color: #3a3c3f; }
+.kji-btn-fill:hover { background: #ffffff; border-color: #ffffff; }
+.kji-btn-fill:hover .arrow { transform: translate(2px, -2px); }
+.kji-btn-line { background: transparent; color: #e6e4df; border-color: #6d6f72; }
+.kji-btn-line:hover { border-color: #e6e4df; background: rgba(230, 228, 223, .06); }
+.kji-btn-line:hover .arrow-back { transform: translateX(-3px); }
+.kji-btn-line:hover .arrow-out { transform: translate(2px, -2px); }
+.kji-btn:active { transform: translateY(1px); }
+.kji-btn:focus-visible { outline: 2px solid #e6e4df; outline-offset: 3px; }
+.kji-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .kji-btn, .kji-btn .arrow { transition: none; } }

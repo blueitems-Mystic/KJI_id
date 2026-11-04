@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../kji-buttons.css">
 <style>
   /* works 허브·작업 페이지와 같은 보드 팔레트 */
   :root {
@@ -37,23 +38,7 @@
   h1 { margin: 0 0 14px; font: 700 clamp(34px, 5vw, 56px)/1.2 var(--serif); }
   .intro p { margin: 0; max-width: 42em; color: var(--ink-soft); font-size: 17px; }
 
-  /* 버튼: 보드 위 종이 쪽지(채움) + 연필 선(테두리) */
-  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    min-height: 46px; padding: 10px 22px;
-    font: 500 15px/1.2 var(--sans); letter-spacing: .01em;
-    text-decoration: none; border: 1px solid var(--ink); border-radius: 2px;
-    transition: background-color .2s, color .2s, border-color .2s, transform .2s;
-  }
-  .btn .arrow { font-size: 1.05em; line-height: 1; transition: transform .2s; }
-  .btn-fill { background: var(--ink); color: var(--deep); }
-  .btn-fill:hover { background: #ffffff; border-color: #ffffff; }
-  .btn-fill:hover .arrow { transform: translate(2px, -2px); }
-  .btn-line { background: transparent; color: var(--ink); border-color: var(--rule); }
-  .btn-line:hover { border-color: var(--ink); background: rgba(230,228,223,.06); }
-  .btn-line:hover .arrow { transform: translateX(-3px); }
-  .btn:active { transform: translateY(1px); }
+  .actions { margin-top: 28px; }
 
   /* 게시물: 제목·연도 → 이미지 전부 가로 폭에 맞춤, 세로는 원본 비율 */
   .arc + .arc { margin-top: clamp(80px, 10vw, 128px); }
@@ -98,9 +83,9 @@
 <header class="wrap intro">
   <h1 id="title">수작업 프로젝트</h1>
   <p id="intro">AI 없이 직접 그린 프로젝트 이미지입니다. 최신 작업부터 순서대로 모았습니다.</p>
-  <div class="actions">
-    <a class="btn btn-fill" href="https://www.artstation.com/blueitems" target="_blank" rel="noopener">ArtStation에서 보기 <span class="arrow" aria-hidden="true">↗</span><span class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">(새 창)</span></a>
-    <a class="btn btn-line" href="https://kji.blueitems.net/"><span class="arrow" aria-hidden="true">←</span> 사이트 홈으로</a>
+  <div class="actions kji-actions">
+    <a class="kji-btn kji-btn-fill" href="https://www.artstation.com/blueitems" target="_blank" rel="noopener">ArtStation <span class="arrow" aria-hidden="true">↗</span><span class="kji-sr">(새 창)</span></a>
+    <a class="kji-btn kji-btn-line" href="../"><span class="arrow arrow-back" aria-hidden="true">←</span> 사이트 홈으로</a>
   </div>
 </header>
 

@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kji-buttons.css">
 <style>
   /* 작업 페이지 3종과 같은 보드 팔레트 */
   :root {
@@ -61,16 +62,7 @@
     margin: 0 0 18px;
   }
   .masthead p { margin: 0; max-width: 36em; color: var(--ink-soft); }
-  .portfolio-link {
-    flex: none;
-    display: inline-block;
-    padding: 10px 0 4px;
-    font-size: 0.95rem;
-    text-decoration: none;
-    border-bottom: 1px solid var(--rule);
-    transition: border-color .2s;
-  }
-  .portfolio-link:hover { border-bottom-color: var(--ink); }
+  .masthead-actions { flex: 0 1 auto; max-width: 100%; }
 
   /* ── 배너 목록 ─────────────────────── */
   .works { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(40px, 6vw, 72px); }
@@ -176,7 +168,10 @@
       <h1 id="site-title">김종일 컨셉아트 작업</h1>
       <p id="site-intro"></p>
     </div>
-    <a class="portfolio-link" id="portfolio-link" href="https://kji.blueitems.net/">김종일 통합 포트폴리오 사이트</a>
+    <div class="kji-actions masthead-actions">
+      <a class="kji-btn kji-btn-fill" href="https://www.artstation.com/blueitems" target="_blank" rel="noopener">ArtStation <span class="arrow" aria-hidden="true">↗</span><span class="kji-sr">(새 창)</span></a>
+      <a class="kji-btn kji-btn-line" id="portfolio-link" href="https://kji.blueitems.net/"><span id="portfolio-label">김종일 통합 포트폴리오 사이트</span> <span class="arrow arrow-out" aria-hidden="true">→</span></a>
+    </div>
   </div>
 </header>
 
@@ -318,7 +313,7 @@
       document.getElementById('site-intro').textContent = s.intro || '';
       var pl = document.getElementById('portfolio-link');
       if (s.portfolioUrl) pl.href = s.portfolioUrl;
-      if (s.portfolioLabel) pl.textContent = s.portfolioLabel;
+      if (s.portfolioLabel) document.getElementById('portfolio-label').textContent = s.portfolioLabel;
       document.getElementById('ai-note').textContent = s.aiNote || '';
       var list = document.getElementById('works');
       d.posts.forEach(function (post, i) { list.appendChild(renderPost(post, i)); });
