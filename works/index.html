@@ -138,33 +138,8 @@
   .ai-tag path { fill: none; stroke: var(--pen); stroke-width: 2; stroke-linecap: round; }
 
   /* ── 수작업 · 푸터 ─────────────────── */
-  .manual { margin-top: clamp(64px, 9vw, 112px); padding-top: clamp(40px, 6vw, 72px); border-top: 1px solid var(--rule); }
-  .manual .works { margin-bottom: clamp(56px, 8vw, 96px); }
+  .manual { margin-top: clamp(40px, 6vw, 72px); }
 
-  /* 수작업 아카이브: 게시물마다 메인 크게 + 나머지 4열 */
-  .arc + .arc { margin-top: clamp(64px, 8vw, 104px); }
-  .arc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0 0 16px; }
-  .arc-head h3 { font-family: var(--serif); font-weight: 700; font-size: clamp(1.35rem, 2.4vw, 1.8rem); line-height: 1.25; margin: 0; }
-  .arc-meta { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
-  .arc a { display: block; cursor: zoom-in; }
-  .arc img { display: block; }
-  .arc-main { background: var(--deep); }
-  .arc-main img { width: auto; max-width: 100%; height: auto; max-height: 82vh; margin: 0 auto; }
-  .arc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
-  .arc-grid img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--deep); }
-  .arc-empty { color: var(--ink-soft); }
-
-  /* 크게 보기 */
-  .lb { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(40,41,43,.97); color: var(--ink); }
-  .lb::backdrop { background: transparent; }
-  .lb-stage { position: absolute; inset: 0 0 56px 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  .lb-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; color: var(--ink-soft); }
-  .lb-bar button { font: inherit; color: inherit; background: none; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 16px; cursor: pointer; }
-  .lb-bar button:hover { border-color: var(--ink-soft); }
-  .lb-count { min-width: 5.5em; text-align: center; }
-  .lb-title { position: absolute; left: 20px; max-width: 30%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .lb-close { position: absolute; right: 20px; }
   footer { padding: clamp(48px, 7vw, 88px) 0 48px; color: var(--ink-soft); font-size: 0.85rem; }
   footer p { margin: 0 0 6px; max-width: 46em; }
 
@@ -181,10 +156,6 @@
     .caption.right .caption-inner, .caption-inner { width: auto; max-width: none; }
     .work h2, .work-summary { text-shadow: none; }
     .ai-tag { left: 10px; top: -12px; font-size: 1.5rem; }
-    .arc-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-    .arc-main img { max-height: none; }
-    .lb-title { display: none; }
-    .lb-close { position: static; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -213,20 +184,8 @@
   <ul class="works" id="works" aria-label="작업 목록"></ul>
   <section class="manual" id="manual" hidden>
     <ul class="works" id="manual-card" aria-label="수작업 프로젝트"></ul>
-    <div id="archive" aria-label="수작업 이미지 목록"></div>
   </section>
 </main>
-
-<dialog class="lb" id="lb" aria-label="크게 보기">
-  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
-  <div class="lb-bar">
-    <span class="lb-title" id="lb-title"></span>
-    <button type="button" id="lb-prev" aria-label="이전 이미지">‹</button>
-    <span class="lb-count" id="lb-count"></span>
-    <button type="button" id="lb-next" aria-label="다음 이미지">›</button>
-    <button type="button" class="lb-close" id="lb-close">닫기</button>
-  </div>
-</dialog>
 
 <footer class="wrap"><p id="ai-note"></p><p>© 김종일</p></footer>
 
@@ -298,7 +257,7 @@
     ]);
 
     var inner = el('div', { style: 'position:relative' }, [banner, caption]);
-    // href 없는 카드(수작업 섹션 머리)는 링크 없이 그대로
+    // href 없는 카드는 링크 없이 그대로
     var link = post.href ? el('a', { href: post.href }, [inner]) : inner;
     // 모바일에서는 caption이 static이 되므로 banner 뒤에 자연스럽게 붙는다
     if (editing && post.href) link.addEventListener('click', function (e) { e.preventDefault(); });
@@ -350,104 +309,6 @@
     document.body.insertBefore(el('div', { class: 'edit-bar' }, [el('strong', { text: '크롭 편집' }), copy, status]), document.body.firstChild);
   }
 
-  // ── 수작업 아카이브 (갤러리 API를 그대로 읽음 → 관리자에서 바꾸면 자동 반영) ──
-  var YEAR_RE = /\s*\b((?:19|20)\d{2})\s*$/;
-  function splitYear(s) {
-    s = (s || '').trim();
-    var m = s.match(YEAR_RE);
-    return m ? { name: s.slice(0, m.index).trim(), year: +m[1] } : { name: s, year: null };
-  }
-
-  function cld(cloud, id, t) { return 'https://res.cloudinary.com/' + cloud + '/image/upload/' + t + '/' + id; }
-
-  function archiveEntries(g, conf) {
-    var alias = conf.projectAlias || {}, est = conf.estimatedYears || {}, skip = conf.skipTitles || [];
-    return (g.groups || []).map(function (grp) {
-      var t = splitYear(grp.title), p = splitYear(grp.project);
-      var project = alias[p.name] || p.name;
-      var images = (grp.images || []).filter(function (i) { return i.visible !== false; }).map(function (i) { return i.imageId; });
-      // 메인 = 관리자가 고른 썸네일 이미지, 없으면 첫 장
-      var mainId = grp.thumbnail && images.indexOf(grp.thumbnail.imageId) >= 0 ? grp.thumbnail.imageId : images[0];
-      var year = t.year || p.year;
-      return {
-        title: t.name, year: year, project: project, category: grp.category || '',
-        sortYear: year || est[project] || 0, known: !!year, pos: grp.gridPosition || 0,
-        main: mainId, rest: images.filter(function (id) { return id !== mainId; })
-      };
-    }).filter(function (e) { return e.title && skip.indexOf(e.title) < 0 && e.main; })
-      .sort(function (a, b) { return (b.sortYear - a.sortYear) || (b.known - a.known) || (a.pos - b.pos); });
-  }
-
-  var lb = { set: [], i: 0, title: '' };
-  function lbShow() {
-    var img = document.getElementById('lb-img');
-    img.src = lb.set[lb.i].src; img.alt = lb.set[lb.i].alt;
-    document.getElementById('lb-count').textContent = (lb.i + 1) + ' / ' + lb.set.length;
-    document.getElementById('lb-title').textContent = lb.title;
-    var one = lb.set.length < 2;
-    document.getElementById('lb-prev').hidden = one; document.getElementById('lb-next').hidden = one;
-  }
-  function lbStep(d) { lb.i = (lb.i + d + lb.set.length) % lb.set.length; lbShow(); }
-  function lbOpen(set, i, title) {
-    lb.set = set; lb.i = i; lb.title = title; lbShow();
-    var dlg = document.getElementById('lb');
-    if (!dlg.open) dlg.showModal();
-  }
-  (function wireLightbox() {
-    var dlg = document.getElementById('lb');
-    document.getElementById('lb-prev').addEventListener('click', function () { lbStep(-1); });
-    document.getElementById('lb-next').addEventListener('click', function () { lbStep(1); });
-    document.getElementById('lb-close').addEventListener('click', function () { dlg.close(); });
-    document.getElementById('lb-stage').addEventListener('click', function (e) { if (e.target.id === 'lb-stage') dlg.close(); });
-    dlg.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); lbStep(-1); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); lbStep(1); }
-    });
-    dlg.addEventListener('close', function () { document.getElementById('lb-img').removeAttribute('src'); });
-  })();
-
-  function renderArchive(entries, cloud) {
-    var box = document.getElementById('archive');
-    entries.forEach(function (e) {
-      var alt = e.title + (e.year ? ' (' + e.year + ')' : '');
-      var meta = [e.year, e.project, e.category].filter(Boolean).join(' · ');
-      var ids = [e.main].concat(e.rest);
-      var set = ids.map(function (id, k) { return { src: cld(cloud, id, 'c_limit,w_2400,q_auto,f_auto'), alt: alt + ' ' + (k + 1) }; });
-      function zoomLink(k, img) {
-        var a = el('a', { href: set[k].src, 'aria-label': alt + ' ' + (k + 1) + '번째 크게 보기' }, [img]);
-        a.addEventListener('click', function (ev) { ev.preventDefault(); lbOpen(set, k, alt); });
-        return a;
-      }
-      var main = el('img', {
-        src: cld(cloud, e.main, 'c_limit,w_1600,q_auto,f_auto'),
-        srcset: cld(cloud, e.main, 'c_limit,w_800,q_auto,f_auto') + ' 800w, ' + cld(cloud, e.main, 'c_limit,w_1600,q_auto,f_auto') + ' 1600w',
-        sizes: '(max-width: 1240px) 100vw, 1120px',
-        alt: alt, loading: 'lazy', decoding: 'async'
-      });
-      var mainLink = zoomLink(0, main); mainLink.className = 'arc-main';
-      var grid = e.rest.length ? el('div', { class: 'arc-grid' }, e.rest.map(function (id, k) {
-        return zoomLink(k + 1, el('img', { src: cld(cloud, id, 'c_fill,g_auto,w_600,h_750,q_auto,f_auto'), alt: alt + ' ' + (k + 2), loading: 'lazy', decoding: 'async' }));
-      })) : null;
-      box.appendChild(el('article', { class: 'arc' }, [
-        el('header', { class: 'arc-head' }, [el('h3', { text: e.title }), meta ? el('p', { class: 'arc-meta', text: meta }) : null]),
-        mainLink, grid
-      ]));
-    });
-  }
-
-  function loadArchive(conf) {
-    if (!conf.galleryApi) return;
-    fetch(conf.galleryApi)
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (g) { renderArchive(archiveEntries(g, conf), g.cloudName || conf.cloudName); })
-      .catch(function () {
-        var box = document.getElementById('archive');
-        var p = el('p', { class: 'arc-empty', text: '이미지를 불러오지 못했습니다. ' });
-        if (conf.galleryUrl) p.appendChild(el('a', { href: conf.galleryUrl, text: '갤러리 페이지에서 보기' }));
-        box.appendChild(p);
-      });
-  }
-
   fetch('works.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
@@ -464,7 +325,6 @@
       if (d.manual) {
         document.getElementById('manual-card').appendChild(renderPost(d.manual, 1));
         document.getElementById('manual').hidden = false;
-        loadArchive(d.manual);
       }
       if (editing) editBar();
     })

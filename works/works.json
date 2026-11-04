@@ -109,6 +109,7 @@
   ],
   "manual": {
     "id": "manual",
+    "href": "manual/",
     "ai": false,
     "title": "수작업 프로젝트",
     "meta": "직접 그린 프로젝트 컨셉아트",

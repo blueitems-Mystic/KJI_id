@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수작업 프로젝트 · 김종일 컨셉아트</title>
+<meta name="description" content="김종일이 AI 없이 직접 그린 프로젝트 컨셉아트. 최신 작업부터 순서대로.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="수작업 프로젝트 · 김종일 컨셉아트">
+<meta property="og:image" content="https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_1200,q_auto,f_jpg/03_z7ncne">
+<meta property="og:url" content="https://kji.blueitems.net/works/manual/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* works 허브·작업 페이지와 같은 보드 팔레트 */
+  :root {
+    --canvas: #46484b;
+    --deep: #3a3c3f;
+    --ink: #e6e4df;
+    --ink-soft: #b9b7b2;
+    --rule: #6d6f72;
+    --serif: 'Gowun Batang', 'IBM Plex Sans KR', serif;
+    --sans: 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--canvas); }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 16px/1.7 var(--sans); word-break: keep-all; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .back { padding-top: 14px; padding-bottom: 14px; font-size: 15px; }
+  .back a { text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+  .back a + a { margin-left: 24px; border-bottom: 0; color: var(--ink-soft); }
+  .intro { padding-top: 40px; padding-bottom: 72px; }
+  h1 { margin: 0 0 14px; font: 700 clamp(34px, 5vw, 56px)/1.2 var(--serif); }
+  .intro p { margin: 0; max-width: 42em; color: var(--ink-soft); font-size: 17px; }
+
+  /* 게시물: 제목·연도 → 이미지 전부 가로 폭에 맞춤, 세로는 원본 비율 */
+  .arc + .arc { margin-top: clamp(80px, 10vw, 128px); }
+  .arc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0 0 20px; }
+  .arc-head h2 { font: 700 clamp(24px, 3vw, 32px)/1.3 var(--serif); margin: 0; }
+  .arc-meta { margin: 0; color: var(--ink-soft); font-size: 15px; }
+  .arc a { display: block; cursor: zoom-in; background: var(--deep); }
+  .arc a + a { margin-top: 16px; }
+  .arc img { display: block; width: 100%; height: auto; }
+  .status { color: var(--ink-soft); }
+
+  .note { margin-top: 112px; padding-bottom: 24px; color: var(--ink-soft); font-size: 14px; }
+  .note .rule { border-top: 1px solid var(--rule); padding-top: 24px; }
+  .note p { margin: 0 0 6px; }
+  .back.bottom { padding-bottom: 48px; }
+
+  /* 크게 보기 */
+  .lb { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(40,41,43,.97); color: var(--ink); }
+  .lb::backdrop { background: transparent; }
+  .lb-stage { position: absolute; inset: 0 0 56px 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .lb-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; color: var(--ink-soft); }
+  .lb-bar button { font: inherit; color: inherit; background: none; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 16px; cursor: pointer; }
+  .lb-bar button:hover { border-color: var(--ink-soft); }
+  .lb-count { min-width: 5.5em; text-align: center; }
+  .lb-title { position: absolute; left: 20px; max-width: 30%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .lb-close { position: absolute; right: 20px; }
+
+  @media (max-width: 760px) {
+    .wrap { padding-left: 16px; padding-right: 16px; }
+    .intro { padding-top: 24px; padding-bottom: 48px; }
+    .arc a + a { margin-top: 10px; }
+    .note { margin-top: 80px; }
+    .lb-title { display: none; }
+    .lb-close { position: static; }
+  }
+</style>
+</head>
+<body>
+<nav class="wrap back"><a href="../">← 컨셉아트 작업 목록</a></nav>
+
+<header class="wrap intro">
+  <h1 id="title">수작업 프로젝트</h1>
+  <p id="intro">AI 없이 직접 그린 프로젝트 이미지입니다. 최신 작업부터 순서대로 모았습니다.</p>
+</header>
+
+<main class="wrap" id="archive" aria-label="수작업 이미지 목록">
+  <p class="status" id="status">이미지를 불러오는 중…</p>
+</main>
+
+<footer class="wrap note"><div class="rule"><p>모든 이미지는 직접 그린 작업입니다.</p><p>© 김종일</p></div></footer>
+<nav class="wrap back bottom"><a href="../">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/">김종일 통합 포트폴리오 사이트</a></nav>
+
+<dialog class="lb" id="lb" aria-label="크게 보기">
+  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
+  <div class="lb-bar">
+    <span class="lb-title" id="lb-title"></span>
+    <button type="button" id="lb-prev" aria-label="이전 이미지">‹</button>
+    <span class="lb-count" id="lb-count"></span>
+    <button type="button" id="lb-next" aria-label="다음 이미지">›</button>
+    <button type="button" class="lb-close" id="lb-close">닫기</button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  function el(tag, attrs, children) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'text') n.textContent = attrs[k];
+      else if (k === 'class') n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c) n.appendChild(c); });
+    return n;
+  }
+
+  // 갤러리 API를 그대로 읽음 → 관리자 갤러리에서 바꾸면 자동 반영
+  var YEAR_RE = /\s*\b((?:19|20)\d{2})\s*$/;
+  function splitYear(s) {
+    s = (s || '').trim();
+    var m = s.match(YEAR_RE);
+    return m ? { name: s.slice(0, m.index).trim(), year: +m[1] } : { name: s, year: null };
+  }
+  function cld(cloud, id, t) { return 'https://res.cloudinary.com/' + cloud + '/image/upload/' + t + '/' + id; }
+
+  function entries(g, conf) {
+    var alias = conf.projectAlias || {}, est = conf.estimatedYears || {}, skip = conf.skipTitles || [];
+    return (g.groups || []).map(function (grp) {
+      var t = splitYear(grp.title), p = splitYear(grp.project);
+      var project = alias[p.name] || p.name;
+      var images = (grp.images || []).filter(function (i) { return i.visible !== false; }).map(function (i) { return i.imageId; });
+      // 첫 장 = 관리자가 고른 썸네일 이미지, 나머지는 갤러리 순서
+      var mainId = grp.thumbnail && images.indexOf(grp.thumbnail.imageId) >= 0 ? grp.thumbnail.imageId : images[0];
+      var year = t.year || p.year;
+      return {
+        title: t.name, year: year, project: project, category: grp.category || '',
+        sortYear: year || est[project] || 0, known: !!year, pos: grp.gridPosition || 0,
+        ids: mainId ? [mainId].concat(images.filter(function (id) { return id !== mainId; })) : []
+      };
+    }).filter(function (e) { return e.title && skip.indexOf(e.title) < 0 && e.ids.length; })
+      // 연도 최신순 → 같은 해는 실제 연도 우선 → 갤러리 순서
+      .sort(function (a, b) { return (b.sortYear - a.sortYear) || (b.known - a.known) || (a.pos - b.pos); });
+  }
+
+  var lb = { set: [], i: 0, title: '' };
+  var dlg = document.getElementById('lb');
+  function lbShow() {
+    var img = document.getElementById('lb-img');
+    img.src = lb.set[lb.i].src; img.alt = lb.set[lb.i].alt;
+    document.getElementById('lb-count').textContent = (lb.i + 1) + ' / ' + lb.set.length;
+    document.getElementById('lb-title').textContent = lb.title;
+    var one = lb.set.length < 2;
+    document.getElementById('lb-prev').hidden = one; document.getElementById('lb-next').hidden = one;
+  }
+  function lbStep(d) { lb.i = (lb.i + d + lb.set.length) % lb.set.length; lbShow(); }
+  function lbOpen(set, i, title) { lb.set = set; lb.i = i; lb.title = title; lbShow(); if (!dlg.open) dlg.showModal(); }
+  document.getElementById('lb-prev').addEventListener('click', function () { lbStep(-1); });
+  document.getElementById('lb-next').addEventListener('click', function () { lbStep(1); });
+  document.getElementById('lb-close').addEventListener('click', function () { dlg.close(); });
+  document.getElementById('lb-stage').addEventListener('click', function (e) { if (e.target.id === 'lb-stage') dlg.close(); });
+  dlg.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); lbStep(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); lbStep(1); }
+  });
+  dlg.addEventListener('close', function () { document.getElementById('lb-img').removeAttribute('src'); });
+
+  function render(list, cloud) {
+    var box = document.getElementById('archive');
+    box.textContent = '';
+    list.forEach(function (e, n) {
+      var alt = e.title + (e.year ? ' (' + e.year + ')' : '');
+      var meta = [e.year, e.project, e.category].filter(Boolean).join(' · ');
+      var set = e.ids.map(function (id, k) { return { src: cld(cloud, id, 'c_limit,w_2400,q_auto,f_auto'), alt: alt + ' ' + (k + 1) }; });
+      var links = e.ids.map(function (id, k) {
+        var img = el('img', {
+          src: cld(cloud, id, 'c_limit,w_1600,q_auto,f_auto'),
+          srcset: [800, 1200, 1600, 2400].map(function (w) { return cld(cloud, id, 'c_limit,w_' + w + ',q_auto,f_auto') + ' ' + w + 'w'; }).join(', '),
+          sizes: '(max-width: 1200px) calc(100vw - 32px), 1120px',
+          alt: set[k].alt, decoding: 'async', loading: n === 0 && k === 0 ? 'eager' : 'lazy'
+        });
+        var a = el('a', { href: set[k].src, 'aria-label': alt + ' ' + (k + 1) + '번째 크게 보기' }, [img]);
+        a.addEventListener('click', function (ev) { ev.preventDefault(); lbOpen(set, k, alt); });
+        return a;
+      });
+      box.appendChild(el('article', { class: 'arc', id: 'p' + (n + 1) }, [
+        el('header', { class: 'arc-head' }, [el('h2', { text: e.title }), meta ? el('p', { class: 'arc-meta', text: meta }) : null])
+      ].concat(links)));
+    });
+  }
+
+  function fail(conf) {
+    var s = document.getElementById('status');
+    s.textContent = '이미지를 불러오지 못했습니다. ';
+    if (conf && conf.galleryUrl) s.appendChild(el('a', { href: conf.galleryUrl, text: '갤러리 페이지에서 보기' }));
+  }
+
+  fetch('../works.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      var conf = d.manual || {};
+      if (conf.title) document.getElementById('title').textContent = conf.title;
+      if (conf.summary) document.getElementById('intro').textContent = conf.summary;
+      return fetch(conf.galleryApi)
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (g) { render(entries(g, conf), g.cloudName || conf.cloudName); })
+        .catch(function () { fail(conf); });
+    })
+    .catch(function () { fail(null); });
+})();
+</script>
+</body>
+</html>
