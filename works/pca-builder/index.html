@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCA Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #46484b;
+    --sheet: #5f6164;
+    --ink: #e6e4df;
+    --ink-soft: #b9b7b2;
+    --rule: #6d6f72;
+    --pen: #e0412c;
+    --serif: "Gowun Batang", serif;
+    --sans: "IBM Plex Sans KR", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font: 400 16px/1.75 var(--sans);
+    word-break: keep-all;
+  }
+  img { display: block; width: 100%; height: auto; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  a.zoom { display: block; cursor: zoom-in; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .intro { padding-top: 56px; padding-bottom: 72px; }
+  h1 { margin: 0 0 14px; font: 700 clamp(34px, 5vw, 56px)/1.2 var(--serif); }
+  .intro p { margin: 0 0 8px; max-width: 42em; color: var(--ink-soft); font-size: 17px; }
+
+  section { margin-top: 96px; }
+  section:first-of-type { margin-top: 0; }
+  h2 { margin: 0 0 8px; font: 700 clamp(24px, 3vw, 32px)/1.35 var(--serif); }
+  .lead { margin: 0 0 32px; max-width: 42em; color: var(--ink-soft); }
+  h3 { margin: 56px 0 12px; font: 700 20px/1.4 var(--serif); }
+
+  figure { margin: 0; }
+  figure + figure, .pair + figure, figure + .pair { margin-top: 48px; }
+  figcaption { margin-top: 12px; max-width: 46em; color: var(--ink-soft); font-size: 15px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .narrow { max-width: 760px; }
+
+  ol.loop { margin: 0; padding: 0 0 0 1.4em; max-width: 46em; }
+  ol.loop li { margin: 0 0 14px; padding-left: 4px; }
+  ol.loop b { font-weight: 500; }
+
+  .sheet { background: var(--sheet); padding: 24px 28px; margin: 32px 0 0; }
+  .sheet dl { margin: 0; display: grid; grid-template-columns: 7.5em 1fr; gap: 6px 20px; }
+  .sheet dt { color: var(--ink-soft); }
+  .sheet dd { margin: 0; }
+
+  .tbl { overflow-x: auto; margin-top: 32px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.6; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); }
+  th { font-weight: 500; color: var(--ink-soft); }
+  td.id { white-space: nowrap; color: var(--ink-soft); }
+  td.v { white-space: nowrap; }
+  tr.fail td { color: var(--pen); }
+  tr.fail td.id { color: var(--pen); }
+
+  .steps p { margin: 0 0 10px; max-width: 46em; }
+  .stats { max-width: 46em; }
+
+  .note { margin-top: 112px; padding-bottom: 80px; color: var(--ink-soft); font-size: 14px; }
+  .note .rule { border-top: 1px solid var(--rule); padding-top: 24px; }
+  .note p { margin: 0 0 6px; max-width: 60em; }
+
+  /* 크게 보기 */
+  dialog {
+    width: 100vw; height: 100vh; max-width: none; max-height: none;
+    margin: 0; padding: 0; border: 0;
+    background: rgba(40, 41, 43, .97); color: var(--ink);
+  }
+  dialog::backdrop { background: transparent; }
+  .view {
+    position: absolute; inset: 0 0 56px 0; overflow: hidden;
+    touch-action: none; user-select: none; cursor: zoom-in;
+  }
+  .view.zoomed { cursor: grab; }
+  .view.panning { cursor: grabbing; }
+  .view img {
+    position: absolute; left: 0; top: 0; max-width: none;
+    transform-origin: 0 0; will-change: transform; -webkit-user-drag: none;
+  }
+  .view img.anim { transition: transform .18s ease-out; }
+  .view img.px { image-rendering: pixelated; }
+  .bar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 56px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 15px; color: var(--ink-soft);
+  }
+  .bar .zoomctl { display: inline-flex; align-items: center; gap: 4px; margin-left: 24px; }
+  .bar .zoomctl button { padding: 4px 10px; min-width: 2.4em; }
+  .bar .zval { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; }
+  .bar button {
+    background: none; border: 1px solid var(--rule); border-radius: 2px;
+    padding: 4px 16px; cursor: pointer;
+  }
+  .bar button:hover { border-color: var(--ink-soft); }
+  .bar .count { min-width: 5.5em; text-align: center; }
+  .bar .close { position: absolute; right: 20px; }
+
+  @media (max-width: 760px) {
+    .wrap { padding-left: 16px; padding-right: 16px; }
+    .intro { padding-top: 32px; padding-bottom: 48px; }
+    section { margin-top: 72px; }
+    .pair { grid-template-columns: 1fr; gap: 32px; }
+    .sheet { padding: 18px 16px; }
+    .sheet dl { grid-template-columns: 1fr; gap: 0; }
+    .sheet dd { margin-bottom: 10px; }
+    table { font-size: 14px; }
+    th.how, td.how { display: none; }
+    .note { margin-top: 80px; }
+    .bar { gap: 4px; font-size: 14px; }
+    .bar button { padding: 4px 10px; }
+    .bar .count { min-width: 4em; }
+    .bar .zoomctl { margin-left: 8px; }
+    .bar .zoomctl .z100, .bar .zval { display: none; }
+    .bar .close { position: static; }
+  }
+</style>
+</head>
+<body>
+<nav class="kji-back" style="padding:14px clamp(16px,4vw,40px);font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a></nav>
+
+<header class="wrap intro">
+  <h1>PCA Builder</h1>
+  <p>프로젝트 진행 중에 쌓이는 세계관·컨셉 정의, 용어(Codex), 레퍼런스, 방향 표를 근거로 에이전트가 시안을 계획·생성하고 프로젝트 규칙 기준으로 스스로 평가·수정하는 로컬 작업 도구.</p>
+  <p>화면은 근미래 SF 프로젝트의 남자 주인공 게시물 기준. 사이트는 공개하지 않고 캡처로 소개.</p>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <h2>쌓이는 자료</h2>
+    <p class="lead">프로젝트 단위로 세계관과 Codex, 게시물 단위로 컨셉 정의·레퍼런스·방향 표를 관리. 생성 계획은 이 항목들의 번호를 근거로 작성.</p>
+
+    <figure class="narrow">
+      <a class="zoom" href="img/01-world.jpg"><img loading="lazy" decoding="async" src="img/01-world.jpg" width="1000" height="1258" alt="세계관 정의 화면. 시대·배경, 세력, 지역, 기술 수준, 생활·문화, 미정 사항 섹션별 항목과 작성자, 공개 범위 표시. 항목 내용은 모자이크"></a>
+      <figcaption>세계관 정의. 섹션별 항목마다 작성자와 공개 범위 표시, 수정 이력 보관.</figcaption>
+    </figure>
+
+    <figure>
+      <a class="zoom" href="img/02-concept.jpg"><img loading="lazy" decoding="async" src="img/02-concept.jpg" width="1560" height="1500" alt="남자 주인공 게시물의 컨셉 정의 탭. 한 줄 요약, 역할, 설정, 필수 요소, 피할 것, 열린 질문, 규칙 섹션. 항목 내용은 모자이크"></a>
+      <figcaption>게시물 컨셉 정의. 한 줄 요약, 역할, 설정, 필수 요소, 피할 것, 열린 질문, 규칙.</figcaption>
+    </figure>
+
+    <figure>
+      <a class="zoom" href="img/03-codex.jpg"><img loading="lazy" decoding="async" src="img/03-codex.jpg" width="1480" height="2150" alt="Concept Codex 화면. 승인 대기 제안, 용어 조회, 세계관 용어와 장비 용어 카드. 장비 카드마다 정의 문장과 원화 위 위치 표시"></a>
+      <figcaption>Concept Codex. 장비·세계관 용어를 버전 단위로 관리. 용어마다 정의, 결정 주체, 원화 위 위치. 에이전트는 용어 변경을 제안만 하고, 반영은 승인 후.</figcaption>
+    </figure>
+
+    <figure>
+      <a class="zoom" href="img/04-direction.jpg"><img loading="lazy" decoding="async" src="img/04-direction.jpg" width="1520" height="1580" alt="방향 표 화면. 축, 키워드, 근거 이미지, 가중치, 상태, 작성, 메모 열로 된 표"></a>
+      <figcaption>방향 표. 레퍼런스에서 뽑은 키워드를 축별로 정리하고 근거 이미지, 가중치, 사용·금지 상태를 붙임. 에이전트가 쓴 행은 추정 표시, 직접 고친 행은 작성자가 바뀜.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>생성 루프</h2>
+    <p class="lead">생성 요청 하나를 아래 순서로 처리. 2번 계획 등록이 없으면 생성 호출 차단.</p>
+    <ol class="loop">
+      <li><b>맥락 팩.</b> 게시물의 컨셉 정의, Codex, 방향 표, 레퍼런스, 열린 피드백을 한 묶음으로 출력.</li>
+      <li><b>생성 계획.</b> 반영할 항목과 강도(상·중·하), 입력 이미지, 제외 항목과 이유, 항목별 확인 방법을 파일로 작성해 등록.</li>
+      <li><b>생성.</b> 이미지 생성 AI 호출. 결과는 부모 이미지, 계획과 연결해 시안 풀에 등록.</li>
+      <li><b>자기 평가.</b> 확인 항목마다 원본 해상도 크롭으로 통과·위반·판단 불가 판정. 위반 영역 좌표 기록.</li>
+      <li><b>부분 수정.</b> 위반 영역만 다시 생성하고 영역 안의 바뀐 픽셀만 합성. 이미지당 최대 2회.</li>
+      <li><b>기록.</b> 생성·평가·수정 이력과 모델별 관찰 메모 저장. 채택과 버전 올리기는 직접 결정.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>예시: 남자 주인공을 여자 캐릭터로 전환</h2>
+    <p class="lead">같은 장면·포즈·장비를 유지하고 인물만 10대 후반 여성으로 바꾸는 요청. 계획부터 평가, 위반 수정까지 에이전트가 진행.</p>
+
+    <div class="pair">
+      <figure>
+        <a class="zoom" href="img/05-base.jpg"><img loading="lazy" decoding="async" src="img/05-base.jpg" width="1200" height="1800" alt="베이스 이미지. 노란 크롭 재킷, 흰 후드, 검정 카고 바지 차림 남자 주인공의 정면 3D 렌더"></a>
+        <figcaption>베이스. 남자 주인공 정면 렌더 시안.</figcaption>
+      </figure>
+      <figure>
+        <a class="zoom" href="img/06-round0.jpg"><img loading="lazy" decoding="async" src="img/06-round0.jpg" width="1200" height="1800" alt="생성 결과. 같은 포즈와 장비의 10대 후반 여자 캐릭터 정면 렌더"></a>
+        <figcaption>생성 결과(수정 전). 같은 포즈·장비, 인물만 교체.</figcaption>
+      </figure>
+    </div>
+
+    <div class="sheet">
+      <dl>
+        <dt>입력</dt><dd>베이스 렌더 1장. 장면·포즈·장비를 유지하는 편집이라 베이스를 이어받음.</dd>
+        <dt>반영 항목</dt><dd>컨셉 정의 4개, Codex 장비 용어 6개. 강도 상 9, 중 1.</dd>
+        <dt>제외 항목</dt><dd>남자 주인공 전용 신장 항목. 여자 캐릭터 신장은 미정이라 프레임 안 비율만 맞춤. 무기 디자인 관련 열린 질문은 베이스 그대로.</dd>
+        <dt>확인 항목</dt><dd>반영 항목마다 1개, 총 10개.</dd>
+      </dl>
+    </div>
+
+    <h3>1차 평가</h3>
+    <figure style="margin-bottom:24px">
+      <a class="zoom" href="img/06b-eval.jpg"><img loading="lazy" decoding="async" src="img/06b-eval.jpg" width="1908" height="1422" alt="평가 과정. 왼쪽 베이스 렌더 위에 확인 항목 c1부터 c10까지 빨간 펜 원과 번호. 오른쪽 생성 결과 위에 항목별 측정 영역 회색 상자와 탄환 스트랩의 위반 c8 빨간 상자"></a>
+      <figcaption>왼쪽은 계획의 확인 항목 c1~c10, 에이전트가 베이스 위에 직접 표시. 오른쪽은 생성 결과의 항목별 측정 영역. 빨간 상자는 위반 c8.</figcaption>
+    </figure>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>항목</th><th>대상</th><th class="how">확인 방법</th><th>판정</th><th>메모</th></tr></thead>
+        <tbody>
+          <tr><td class="id">c1</td><td>얼굴·헤어</td><td class="how">머리 100% 크롭. 10대 후반 여성, 진한 화장 없음, 홑꺼풀</td><td class="v">통과</td><td>옆머리 삭발 라인 유지</td></tr>
+          <tr><td class="id">c2</td><td>신체</td><td class="how">전신 50%. 기계 팔다리, 금속 피부 없음</td><td class="v">통과</td><td></td></tr>
+          <tr><td class="id">c3</td><td>작업복 재킷</td><td class="how">상체 100%. 원색 노랑 크롭 재킷, 가슴 흰 글씨, 패치 위치</td><td class="v">통과</td><td>패치 위치 베이스와 같음</td></tr>
+          <tr><td class="id">c4</td><td>어깨 플레이트</td><td class="how">어깨 100%. 분절 플레이트와 둥근 볼트, 좁아진 어깨에 맞는 부착</td><td class="v">통과</td><td></td></tr>
+          <tr><td class="id">c5</td><td>고주파 레이더</td><td class="how">가슴 100%. 베이지 상자, 주황 사각 로고</td><td class="v">통과</td><td>아래 작은 글씨 뭉개짐(베이스와 같음)</td></tr>
+          <tr><td class="id">c6</td><td>장갑 컨트롤러</td><td class="how">왼팔 100%. 키패드, LCD, 방향키, 코일 케이블</td><td class="v">통과</td><td></td></tr>
+          <tr><td class="id">c7</td><td>장갑 착용</td><td class="how">양손 100%. 두꺼운 손가락, 장갑 위 손톱 없음</td><td class="v">통과</td><td></td></tr>
+          <tr class="fail"><td class="id">c8</td><td>탄환 스트랩</td><td class="how">스트랩 100%. 일렬이 아닌 배치, 빠진 탄, 큰 탄, 용도별 색</td><td class="v">위반</td><td>같은 크기·같은 간격의 탄이 빈칸 없이 한 줄. 베이스에서 이어받은 상태</td></tr>
+          <tr><td class="id">c9</td><td>하의·신발</td><td class="how">하체 50%. 카고 바지 스트랩·포켓, 흰 하이탑</td><td class="v">통과</td><td></td></tr>
+          <tr><td class="id">c10</td><td>소형 레일건</td><td class="how">오른손 100%. 형태, 주황 셀, 쥔 자세</td><td class="v">통과</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>위반 수정</h3>
+    <figure>
+      <a class="zoom" href="img/07-strap-rounds.jpg"><img loading="lazy" decoding="async" src="img/07-strap-rounds.jpg" width="1882" height="760" alt="탄환 스트랩 부분 크롭 4장. 왼쪽부터 수정 전, 1회차, 2회차 픽셀 편집, 2회차 재생성"></a>
+      <figcaption>탄환 스트랩. 왼쪽부터 수정 전, 1회차, 2회차 픽셀 편집, 2회차 재생성.</figcaption>
+    </figure>
+    <div class="steps" style="margin-top:24px">
+      <p>1회차. c8 위반 영역(스트랩 상자)만 다시 생성하고 상자 안 바뀐 픽셀만 합성. 엇갈린 높이, 끝이 나온 큰 탄 2개, 빨강·초록·노랑 색 띠 반영. 빈 고리는 미반영이라 c8 위반 유지. 상자 밖 변화 없음 확인(c11 통과).</p>
+      <p>2회차 픽셀 편집. 생성 호출이 크레딧 부족으로 실패. 에이전트가 픽셀 편집으로 위·가운데·아래 탄 3개를 빼고 빈 고리로 처리. c8 통과. 200% 확대에서 칠한 고리가 주변 렌더보다 평평함.</p>
+      <p>2회차 재생성. 다른 생성 경로(구독 계정)로 같은 지시를 다시 실행. 빈 고리 3개 반영. 다만 결과가 이미지 전체를 다시 그려 해상도 저하, 가슴 로고 글자 깨짐, 끝이 나온 큰 탄 누락. 스트랩 상자 안 바뀐 픽셀만 합성하고 로고와 큰 탄 영역은 1회차 유지. c8, c11 통과.</p>
+      <p>모델 관찰 메모: 첫 경로는 엇갈림·큰 탄·색 띠 지시를 1회에 반영하고 빈 고리 지시는 미반영. 두 번째 경로는 빈 고리를 반영하지만 편집 범위 밖도 다시 그림.</p>
+    </div>
+
+    <figure>
+      <a class="zoom" href="img/08-viewer-fix1.jpg"><img loading="lazy" decoding="async" src="img/08-viewer-fix1.jpg" width="1600" height="1000" alt="확대 보기 화면. 왼쪽 정보 패널에 반영 항목, 뺀 항목, 평가 결과와 계보. 이미지 위에 c8 위반 영역 점선 상자"></a>
+      <figcaption>확대 보기 정보 패널. 1회차 생성의 반영 항목, 뺀 항목, 판정, 계보. 이미지 위 점선 상자가 위반 영역. 생성 설정과 원문 계획은 모자이크.</figcaption>
+    </figure>
+
+    <figure class="narrow">
+      <a class="zoom" href="img/09-final.jpg"><img loading="lazy" decoding="async" src="img/09-final.jpg" width="1536" height="2304" alt="최종 이미지. 핫핑크 재킷, 빈 고리가 섞인 탄환 스트랩, 반투명 벨크로 스트랩 흰 하이탑 차림의 10대 후반 여자 캐릭터 정면 렌더"></a>
+      <figcaption>수정 2회 후 결과에 재킷 색(핫핑크)과 신발 교체 요청 반영. 재킷 원단과 신발 영역만 합성, 탄환 스트랩·패치·글씨는 이전 결과 그대로. 확인 항목 전부 통과. 이후 리터치 직접 작업.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>기록</h2>
+    <figure>
+      <a class="zoom" href="img/10-log.jpg"><img loading="lazy" decoding="async" src="img/10-log.jpg" width="1480" height="580" alt="게시물 기록 탭의 타임라인. 생성, 맥락 팩 실행, 작업 기록 항목이 시간순으로 나열"></a>
+      <figcaption>게시물 기록 탭. 생성, 맥락 팩 실행, 작업 기록을 시간순으로 보관.</figcaption>
+    </figure>
+    <figure>
+      <a class="zoom" href="img/11-drafts.jpg"><img loading="lazy" decoding="async" src="img/11-drafts.jpg" width="1600" height="1000" alt="시안 탭. 남자 주인공 시안 썸네일 격자와 분기, 종류, 상태 표시"></a>
+      <figcaption>시안 탭. 파생 이미지가 모두 시안으로 들어오고, 분기별 최신 시안만 따로 보기 가능. 채택·보류·휴지통은 직접 결정.</figcaption>
+    </figure>
+    <p class="stats" style="margin-top:40px">근미래 SF 프로젝트 기준(2026-11-04): 계획과 평가가 붙은 생성 85건, 확인 항목 401개 중 위반 29건, 부분 수정 생성 17건.</p>
+  </section>
+
+</main>
+
+<footer class="wrap note">
+  <div class="rule">
+    <p>화면은 로컬에서 실행한 PCA Builder 캡처. 시안은 이미지 생성 AI 결과. 리터치, 빨간 펜, 채택은 직접 작업. 프로젝트 설정 내용은 모자이크 처리.</p>
+    <p>작업자 김종일</p>
+  </div>
+</footer>
+
+<dialog id="viewer" aria-label="크게 보기">
+  <div class="view"><img alt=""></div>
+  <div class="bar">
+    <button type="button" class="prev">이전</button>
+    <span class="count" aria-live="polite"></span>
+    <button type="button" class="next">다음</button>
+    <span class="zoomctl">
+      <button type="button" class="zout" title="축소 (-)" aria-label="축소">−</button>
+      <button type="button" class="zfit" title="화면 맞춤 (0)">맞춤</button>
+      <button type="button" class="z100" title="원본 크기 (1)">100%</button>
+      <button type="button" class="zin" title="확대 (+)" aria-label="확대">+</button>
+      <span class="zval" aria-live="polite"></span>
+    </span>
+    <button type="button" class="close">닫기</button>
+  </div>
+</dialog>
+
+<script>
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('main a.zoom'));
+    var dlg = document.getElementById('viewer');
+    if (!dlg || typeof dlg.showModal !== 'function') return; // 미지원 브라우저는 링크로 원본 열기
+    var vp = dlg.querySelector('.view');
+    var img = vp.querySelector('img');
+    var count = dlg.querySelector('.count');
+    var zval = dlg.querySelector('.zval');
+    var cur = 0, MAXZ = 4, PAD = 20;
+    var V = { W: 0, H: 0, s: 1, fit: 1, tx: 0, ty: 0 };
+
+    function size() { var r = vp.getBoundingClientRect(); return { w: r.width, h: r.height, r: r }; }
+    function atFit() { return V.s <= V.fit * 1.001; }
+    function clampPan() {
+      var z = size(), sw = V.W * V.s, sh = V.H * V.s;
+      V.tx = sw <= z.w ? (z.w - sw) / 2 : Math.min(0, Math.max(z.w - sw, V.tx));
+      V.ty = sh <= z.h ? (z.h - sh) / 2 : Math.min(0, Math.max(z.h - sh, V.ty));
+    }
+    function apply(anim) {
+      if (!V.W) return;
+      img.classList.toggle('anim', !!anim);
+      img.classList.toggle('px', V.s >= 2);
+      img.style.width = V.W + 'px'; img.style.height = V.H + 'px';
+      img.style.transform = 'translate(' + V.tx + 'px,' + V.ty + 'px) scale(' + V.s + ')';
+      zval.textContent = Math.round(V.s * 100) + '%';
+      vp.classList.toggle('zoomed', !atFit());
+    }
+    function fitView(anim) {
+      var z = size();
+      if (!V.W || !z.w) return;
+      V.fit = Math.max(0.02, Math.min((z.w - PAD * 2) / V.W, (z.h - PAD * 2) / V.H, 1));
+      V.s = V.fit; clampPan(); apply(anim);
+    }
+    function zoomAt(s2, cx, cy, anim) {
+      if (!V.W) return;
+      s2 = Math.min(MAXZ, Math.max(V.fit, s2));
+      var ix = (cx - V.tx) / V.s, iy = (cy - V.ty) / V.s;
+      V.tx = cx - ix * s2; V.ty = cy - iy * s2; V.s = s2;
+      clampPan(); apply(anim);
+    }
+    function zoomCenter(s2) { var z = size(); zoomAt(s2, z.w / 2, z.h / 2, true); }
+    function toggleZoom(x, y) {
+      if (atFit()) zoomAt(V.fit < 0.8 ? 1 : V.fit * 2, x, y, true);
+      else fitView(true);
+    }
+
+    function show(i) {
+      cur = (i + links.length) % links.length;
+      var a = links[cur], t = a.querySelector('img');
+      V.W = 0; img.style.transform = 'scale(0)';
+      img.onload = function () { V.W = img.naturalWidth; V.H = img.naturalHeight; fitView(false); };
+      img.src = a.getAttribute('href');
+      img.alt = t ? t.alt : '';
+      count.textContent = (cur + 1) + ' / ' + links.length;
+      if (img.complete && img.naturalWidth) img.onload();
+    }
+    links.forEach(function (a, i) {
+      a.addEventListener('click', function (e) { e.preventDefault(); dlg.showModal(); show(i); });
+    });
+    dlg.querySelector('.prev').addEventListener('click', function () { show(cur - 1); });
+    dlg.querySelector('.next').addEventListener('click', function () { show(cur + 1); });
+    dlg.querySelector('.close').addEventListener('click', function () { dlg.close(); });
+    dlg.querySelector('.zin').addEventListener('click', function () { zoomCenter(V.s * 1.5); });
+    dlg.querySelector('.zout').addEventListener('click', function () { zoomCenter(V.s / 1.5); });
+    dlg.querySelector('.zfit').addEventListener('click', function () { fitView(true); });
+    dlg.querySelector('.z100').addEventListener('click', function () { zoomCenter(1); });
+
+    vp.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var r = size().r;
+      zoomAt(V.s * Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+
+    var pts = {}, drag = null, pinch = null;
+    function ptList() { return Object.keys(pts).map(function (k) { return pts[k]; }); }
+    function startPinch() {
+      var p = ptList(), r = size().r;
+      pinch = {
+        d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) || 1, s: V.s,
+        mx: (p[0].x + p[1].x) / 2 - r.left, my: (p[0].y + p[1].y) / 2 - r.top,
+        tx: V.tx, ty: V.ty
+      };
+      drag = null;
+    }
+    vp.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      e.preventDefault();
+      try { vp.setPointerCapture(e.pointerId); } catch (_) {}
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var n = ptList().length;
+      if (n === 2) startPinch();
+      else if (n === 1) { drag = { x: e.clientX, y: e.clientY, tx: V.tx, ty: V.ty, moved: false, onImg: e.target === img }; vp.classList.add('panning'); }
+    });
+    vp.addEventListener('pointermove', function (e) {
+      if (!pts[e.pointerId]) return;
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (pinch && ptList().length >= 2) {
+        var p = ptList(), r = size().r;
+        var d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        var mx = (p[0].x + p[1].x) / 2 - r.left, my = (p[0].y + p[1].y) / 2 - r.top;
+        var s2 = Math.min(MAXZ, Math.max(V.fit, pinch.s * d / pinch.d));
+        var ix = (pinch.mx - pinch.tx) / pinch.s, iy = (pinch.my - pinch.ty) / pinch.s;
+        V.s = s2; V.tx = mx - ix * s2; V.ty = my - iy * s2;
+        clampPan(); apply();
+      } else if (drag) {
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+        V.tx = drag.tx + dx; V.ty = drag.ty + dy; clampPan(); apply();
+      }
+    });
+    function endPointer(e) {
+      if (!pts[e.pointerId]) return;
+      delete pts[e.pointerId];
+      var n = ptList().length;
+      if (pinch) { if (n < 2) { pinch = null; drag = null; vp.classList.remove('panning'); } return; }
+      if (drag && n === 0) {
+        var d = drag; drag = null; vp.classList.remove('panning');
+        if (!d.moved && e.type === 'pointerup') {
+          if (!d.onImg && atFit()) { dlg.close(); return; }
+          var r = size().r; toggleZoom(e.clientX - r.left, e.clientY - r.top);
+        }
+      }
+    }
+    vp.addEventListener('pointerup', endPointer);
+    vp.addEventListener('pointercancel', endPointer);
+
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') show(cur - 1);
+      else if (e.key === 'ArrowRight') show(cur + 1);
+      else if (e.key === '0') fitView(true);
+      else if (e.key === '1') zoomCenter(1);
+      else if (e.key === '+' || e.key === '=') zoomCenter(V.s * 1.5);
+      else if (e.key === '-') zoomCenter(V.s / 1.5);
+      else return;
+      e.preventDefault();
+    });
+    addEventListener('resize', function () {
+      if (!dlg.open || !V.W) return;
+      var wasFit = atFit(), z = size();
+      V.fit = Math.max(0.02, Math.min((z.w - PAD * 2) / V.W, (z.h - PAD * 2) / V.H, 1));
+      if (wasFit) fitView(false); else { V.s = Math.max(V.s, V.fit); clampPan(); apply(); }
+    });
+  })();
+</script>
+<nav class="kji-back" style="padding:40px clamp(16px,4vw,40px) 48px;font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/" style="color:#b9b7b2;text-decoration:none;margin-left:24px">김종일 통합 포트폴리오 사이트</a></nav>
+</body>
+</html>
