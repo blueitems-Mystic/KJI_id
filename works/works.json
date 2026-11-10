@@ -8,6 +8,45 @@
   },
   "posts": [
     {
+      "id": "project-cx2",
+      "href": "project-cx2/",
+      "ai": true,
+      "title": "Project CX2",
+      "meta": "장비, 캐릭터 컨셉",
+      "summary": "Project CX의 헬멧, 라이플, 방탄조끼, 조준경, 드론 등 장비와 이를 갖춘 캐릭터.",
+      "textAlign": "left",
+      "banner": {
+        "bg": "#46484b",
+        "panels": [
+          {
+            "src": "project-cx2/img/00-helmet-white.jpg",
+            "srcSmall": "thumbs/project-cx2.jpg",
+            "alt": "흰 도장 헬멧의 앞모습과 뒷모습",
+            "flex": 2,
+            "x": 60,
+            "y": 40,
+            "zoom": 1
+          },
+          {
+            "src": "project-cx2/img/08-cobalt-a.jpg",
+            "alt": "흰 헬멧과 방탄조끼 차림 남자 캐릭터의 라이플 조준 자세",
+            "flex": 1,
+            "x": 50,
+            "y": 25,
+            "zoom": 1
+          },
+          {
+            "src": "project-cx2/img/12-rayban-girl.jpg",
+            "alt": "검은 생머리 여자 캐릭터의 라이플 조준 자세",
+            "flex": 1,
+            "x": 50,
+            "y": 25,
+            "zoom": 1
+          }
+        ]
+      }
+    },
+    {
       "id": "project-cx",
       "href": "project-cx/",
       "ai": true,

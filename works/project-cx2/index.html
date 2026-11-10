@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project CX2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #46484b;
+    --ink: #e6e4df;
+    --ink-soft: #b9b7b2;
+    --rule: #6d6f72;
+    --serif: "Gowun Batang", serif;
+    --sans: "IBM Plex Sans KR", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font: 400 16px/1.75 var(--sans);
+    word-break: keep-all;
+  }
+  img { display: block; width: 100%; height: auto; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  .hero { margin: 0; }
+  .hero a, .seq a { display: block; cursor: zoom-in; }
+
+  .intro, .note { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+  .intro { padding-top: 52px; padding-bottom: 80px; }
+  h1 { margin: 0 0 14px; font: 700 clamp(34px, 5vw, 56px)/1.2 var(--serif); }
+  .intro p { margin: 0; max-width: 40em; color: var(--ink-soft); font-size: 17px; }
+
+  .seq { margin: 0 auto; padding: 0 40px; }
+  .seq + .seq { margin-top: 88px; }
+  .seq figure { margin: 0; }
+  .one  { max-width: 1200px; }
+  .wide { max-width: 1400px; }
+  .pair { max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .stack { max-width: 1200px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .four { max-width: 1400px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .half { max-width: 592px; }
+  .seq.cont { margin-top: 16px; }
+
+  .note { margin-top: 96px; padding-top: 24px; padding-bottom: 80px; color: var(--ink-soft); font-size: 14px; }
+  .note p { margin: 0 0 6px; max-width: 60em; }
+  .note .rule { border-top: 1px solid var(--rule); padding-top: 24px; }
+
+  /* 크게 보기 */
+  dialog {
+    width: 100vw; height: 100vh; max-width: none; max-height: none;
+    margin: 0; padding: 0; border: 0;
+    background: rgba(40, 41, 43, .97); color: var(--ink);
+  }
+  dialog::backdrop { background: transparent; }
+  .view {
+    position: absolute; inset: 0 0 56px 0; overflow: hidden;
+    touch-action: none; user-select: none; cursor: zoom-in;
+  }
+  .view.zoomed { cursor: grab; }
+  .view.panning { cursor: grabbing; }
+  .view img {
+    position: absolute; left: 0; top: 0; max-width: none;
+    transform-origin: 0 0; will-change: transform; -webkit-user-drag: none;
+  }
+  .view img.anim { transition: transform .18s ease-out; }
+  .view img.px { image-rendering: pixelated; }
+  .bar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 56px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 15px; color: var(--ink-soft);
+  }
+  .bar .zoom { display: inline-flex; align-items: center; gap: 4px; margin-left: 24px; }
+  .bar .zoom button { padding: 4px 10px; min-width: 2.4em; }
+  .bar .zval { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; }
+  .bar button {
+    background: none; border: 1px solid var(--rule); border-radius: 2px;
+    padding: 4px 16px; cursor: pointer;
+  }
+  .bar button:hover { border-color: var(--ink-soft); }
+  .bar .count { min-width: 5.5em; text-align: center; }
+  .bar .close { position: absolute; right: 20px; }
+
+  @media (max-width: 760px) {
+    .intro, .note, .seq { padding-left: 16px; padding-right: 16px; }
+    .intro { padding-top: 32px; padding-bottom: 48px; }
+    .seq + .seq { margin-top: 56px; }
+    .pair { grid-template-columns: 1fr; gap: 56px; }
+    .four { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .seq.cont { margin-top: 10px; }
+    .note { margin-top: 64px; }
+    .bar { gap: 4px; font-size: 14px; }
+    .bar button { padding: 4px 10px; }
+    .bar .count { min-width: 4em; }
+    .bar .zoom { margin-left: 8px; }
+    .bar .zoom .z100, .bar .zval { display: none; }
+    .bar .close { position: static; }
+  }
+</style>
+<link rel="stylesheet" href="../kji-buttons.css">
+</head>
+<body>
+<nav class="kji-back kji-actions" style="padding:14px clamp(16px,4vw,40px)"><a class="kji-btn kji-btn-fill" href="https://www.artstation.com/blueitems" target="_blank" rel="noopener">ArtStation <span class="arrow" aria-hidden="true">↗</span><span class="kji-sr">(새 창)</span></a><a class="kji-btn kji-btn-line" href="../"><span class="arrow arrow-back" aria-hidden="true">←</span> 사이트 홈으로</a></nav>
+
+<figure class="hero">
+  <a href="img/00-helmet-white.jpg"><img src="img/00-helmet-white.jpg" width="2304" height="1536" alt="Head Armor Vision Display. 흰 도장 헬멧의 앞모습과 뒷모습, 바이저와 측면 통신 모듈"></a>
+</figure>
+
+<header class="intro">
+  <h1>Project CX2</h1>
+  <p>Project CX의 장비 컨셉. 헬멧, 라이플, 방탄조끼, 조준경, 탄창, 장갑, 드론, 신발과 이를 갖춘 캐릭터.</p>
+</header>
+
+<main>
+  <figure class="seq one">
+    <a href="img/01-aug-custom.jpg"><img loading="lazy" decoding="async" src="img/01-aug-custom.jpg" width="1457" height="2027" alt="AUG SCG-Custom 021. 모래색 불펍 라이플의 세 방향 뷰와 부위 설명"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/02-body-armor.jpg"><img loading="lazy" decoding="async" src="img/02-body-armor.jpg" width="2304" height="1536" alt="Stealth Body Armor. 올리브 방탄조끼의 앞모습과 뒷모습, 부위 설명"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/03-optical-sight.jpg"><img loading="lazy" decoding="async" src="img/03-optical-sight.jpg" width="2304" height="1536" alt="Auto Tracking Optical Sight. 올리브 조준경 K-900 측면과 정면, 탄약과 레일"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/03b-optical-sight2.jpg"><img loading="lazy" decoding="async" src="img/03b-optical-sight2.jpg" width="2304" height="1536" alt="Radio-IR Tracking Sight. 사각 도트사이트 정면과 측면, 탄약과 레일"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/04-auto-feeder.jpg"><img loading="lazy" decoding="async" src="img/04-auto-feeder.jpg" width="2304" height="1536" alt="Auto Feeder Magazine. 급탄 벨트가 달린 회색 탄창 두 크기, 탄약과 레일"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/05-auto-feeder-revolve.jpg"><img loading="lazy" decoding="async" src="img/05-auto-feeder-revolve.jpg" width="2304" height="1536" alt="Auto Feeder Revolve Magazine. 쌍원형 드럼 탄창의 측면과 정면, 탄약과 레일"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/06-phc-glove.jpg"><img loading="lazy" decoding="async" src="img/06-phc-glove.jpg" width="2304" height="1536" alt="PowerAccess Hack-Control Globe. 손등에 키패드가 달린 전술 장갑 두 색"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/07-third-eye-drone.jpg"><img loading="lazy" decoding="async" src="img/07-third-eye-drone.jpg" width="2304" height="1536" alt="Third Eye Portable Dron. 접은 상태와 펼친 상태의 휴대용 쿼드콥터"></a>
+  </figure>
+  <figure class="seq one">
+    <a href="img/07b-plp-sneakers.jpg"><img loading="lazy" decoding="async" src="img/07b-plp-sneakers.jpg" width="1264" height="848" alt="PowerLaces Pike Sneakers. 흰 바탕에 빨강·남색 줄무늬, 생고무 밑창의 스니커즈. 자세 제어 센서와 바운싱 보조 시스템 설명"></a>
+  </figure>
+  <div class="seq pair">
+    <figure><a href="img/08-cobalt-a.jpg"><img loading="lazy" decoding="async" src="img/08-cobalt-a.jpg" width="1536" height="2304" alt="Player Unknown Male Cobalt. 흰 헬멧과 방탄조끼 차림 남자 캐릭터의 라이플 조준 자세, 비스듬한 앞모습"></a></figure>
+    <figure><a href="img/09-cobalt-b.jpg"><img loading="lazy" decoding="async" src="img/09-cobalt-b.jpg" width="1536" height="2304" alt="Player Unknown Male Cobalt. 같은 캐릭터의 라이플 조준 자세 옆모습"></a></figure>
+  </div>
+  <div class="seq pair cont">
+    <figure><a href="img/10-burgundy.jpg"><img loading="lazy" decoding="async" src="img/10-burgundy.jpg" width="1536" height="2304" alt="Player Unknown Male Burgundy. 회색 후드와 버건디 재킷 차림의 라이플 조준 자세"></a></figure>
+    <figure><a href="img/11-ivory.jpg"><img loading="lazy" decoding="async" src="img/11-ivory.jpg" width="1536" height="2304" alt="Player Unknown Male Ivory. 아이보리 재킷과 반바지, 줄무늬 양말 차림의 라이플 조준 자세"></a></figure>
+  </div>
+  <figure class="seq half cont">
+    <a href="img/12-rayban-girl.jpg"><img loading="lazy" decoding="async" src="img/12-rayban-girl.jpg" width="1536" height="2304" alt="Ray-ban HUD-Glasses 086. 검은 생머리 여자 캐릭터의 라이플 조준 자세와 노란 HUD 안경을 쓴 얼굴"></a>
+  </figure>
+
+  <figure class="seq one">
+    <a href="img/13-helmet-tan.jpg"><img loading="lazy" decoding="async" src="img/13-helmet-tan.jpg" width="2304" height="1536" alt="Head Armor Vision Display. 모래색 도장 헬멧의 앞모습과 뒷모습"></a>
+  </figure>
+</main>
+
+<footer class="note">
+  <div class="rule">
+    <p>작업과정: 기본설정 및 러프스케치 &gt; AI 스타일라이징 &gt; 리터칭 &gt; AI 스타일라이징 반복. 기본설정, 러프스케치, 리터칭은 직접 작업.</p>
+    <p>작업자 김종일</p>
+  </div>
+</footer>
+
+<dialog id="viewer" aria-label="크게 보기">
+  <div class="view"><img alt=""></div>
+  <div class="bar">
+    <button type="button" class="prev">이전</button>
+    <span class="count" aria-live="polite"></span>
+    <button type="button" class="next">다음</button>
+    <span class="zoom">
+      <button type="button" class="zout" title="축소 (-)" aria-label="축소">−</button>
+      <button type="button" class="zfit" title="화면 맞춤 (0)">맞춤</button>
+      <button type="button" class="z100" title="원본 크기 (1)">100%</button>
+      <button type="button" class="zin" title="확대 (+)" aria-label="확대">+</button>
+      <span class="zval" aria-live="polite"></span>
+    </span>
+    <button type="button" class="close">닫기</button>
+  </div>
+</dialog>
+
+<script>
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.hero a, main a'));
+    var dlg = document.getElementById('viewer');
+    if (!dlg || typeof dlg.showModal !== 'function') return; // 미지원 브라우저는 링크로 원본 열기
+    var vp = dlg.querySelector('.view');
+    var img = vp.querySelector('img');
+    var count = dlg.querySelector('.count');
+    var zval = dlg.querySelector('.zval');
+    var cur = 0, MAXZ = 4, PAD = 20;
+    // 보기 상태: 원본 픽셀 크기 W·H, 배율 s, 이동 tx·ty (PCA Builder 뷰어와 같은 방식)
+    var V = { W: 0, H: 0, s: 1, fit: 1, tx: 0, ty: 0 };
+
+    function size() { var r = vp.getBoundingClientRect(); return { w: r.width, h: r.height, r: r }; }
+    function atFit() { return V.s <= V.fit * 1.001; }
+    function clampPan() {
+      var z = size(), sw = V.W * V.s, sh = V.H * V.s;
+      V.tx = sw <= z.w ? (z.w - sw) / 2 : Math.min(0, Math.max(z.w - sw, V.tx));
+      V.ty = sh <= z.h ? (z.h - sh) / 2 : Math.min(0, Math.max(z.h - sh, V.ty));
+    }
+    function apply(anim) {
+      if (!V.W) return;
+      img.classList.toggle('anim', !!anim);
+      img.classList.toggle('px', V.s >= 2); // 200% 이상은 픽셀 그대로
+      img.style.width = V.W + 'px'; img.style.height = V.H + 'px';
+      img.style.transform = 'translate(' + V.tx + 'px,' + V.ty + 'px) scale(' + V.s + ')';
+      zval.textContent = Math.round(V.s * 100) + '%';
+      vp.classList.toggle('zoomed', !atFit());
+    }
+    function fitView(anim) {
+      var z = size();
+      if (!V.W || !z.w) return;
+      V.fit = Math.max(0.02, Math.min((z.w - PAD * 2) / V.W, (z.h - PAD * 2) / V.H, 1));
+      V.s = V.fit; clampPan(); apply(anim);
+    }
+    function zoomAt(s2, cx, cy, anim) {
+      if (!V.W) return;
+      s2 = Math.min(MAXZ, Math.max(V.fit, s2));
+      var ix = (cx - V.tx) / V.s, iy = (cy - V.ty) / V.s;
+      V.tx = cx - ix * s2; V.ty = cy - iy * s2; V.s = s2;
+      clampPan(); apply(anim);
+    }
+    function zoomCenter(s2) { var z = size(); zoomAt(s2, z.w / 2, z.h / 2, true); }
+    function toggleZoom(x, y) {
+      // 맞춤 상태면 원본 크기로(이미 원본에 가까우면 2배), 확대 상태면 맞춤으로
+      if (atFit()) zoomAt(V.fit < 0.8 ? 1 : V.fit * 2, x, y, true);
+      else fitView(true);
+    }
+
+    function show(i) {
+      cur = (i + links.length) % links.length;
+      var a = links[cur], t = a.querySelector('img');
+      V.W = 0; img.style.transform = 'scale(0)';
+      img.onload = function () { V.W = img.naturalWidth; V.H = img.naturalHeight; fitView(false); };
+      img.src = a.getAttribute('href');
+      img.alt = t ? t.alt : '';
+      count.textContent = (cur + 1) + ' / ' + links.length;
+      if (img.complete && img.naturalWidth) img.onload();
+    }
+    links.forEach(function (a, i) {
+      a.addEventListener('click', function (e) { e.preventDefault(); dlg.showModal(); show(i); });
+    });
+    dlg.querySelector('.prev').addEventListener('click', function () { show(cur - 1); });
+    dlg.querySelector('.next').addEventListener('click', function () { show(cur + 1); });
+    dlg.querySelector('.close').addEventListener('click', function () { dlg.close(); });
+    dlg.querySelector('.zin').addEventListener('click', function () { zoomCenter(V.s * 1.5); });
+    dlg.querySelector('.zout').addEventListener('click', function () { zoomCenter(V.s / 1.5); });
+    dlg.querySelector('.zfit').addEventListener('click', function () { fitView(true); });
+    dlg.querySelector('.z100').addEventListener('click', function () { zoomCenter(1); });
+
+    // 휠: 커서 위치 기준 확대·축소
+    vp.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var r = size().r;
+      zoomAt(V.s * Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+
+    // 끌기: 이동 / 클릭: 확대 전환(이미지 밖을 맞춤 상태에서 누르면 닫기) / 두 손가락: 확대·축소
+    var pts = {}, drag = null, pinch = null;
+    function ptList() { return Object.keys(pts).map(function (k) { return pts[k]; }); }
+    function startPinch() {
+      var p = ptList(), r = size().r;
+      pinch = {
+        d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) || 1, s: V.s,
+        mx: (p[0].x + p[1].x) / 2 - r.left, my: (p[0].y + p[1].y) / 2 - r.top,
+        tx: V.tx, ty: V.ty
+      };
+      drag = null;
+    }
+    vp.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      e.preventDefault();
+      try { vp.setPointerCapture(e.pointerId); } catch (_) {}
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var n = ptList().length;
+      if (n === 2) startPinch();
+      else if (n === 1) { drag = { x: e.clientX, y: e.clientY, tx: V.tx, ty: V.ty, moved: false, onImg: e.target === img }; vp.classList.add('panning'); }
+    });
+    vp.addEventListener('pointermove', function (e) {
+      if (!pts[e.pointerId]) return;
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (pinch && ptList().length >= 2) {
+        var p = ptList(), r = size().r;
+        var d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        var mx = (p[0].x + p[1].x) / 2 - r.left, my = (p[0].y + p[1].y) / 2 - r.top;
+        var s2 = Math.min(MAXZ, Math.max(V.fit, pinch.s * d / pinch.d));
+        var ix = (pinch.mx - pinch.tx) / pinch.s, iy = (pinch.my - pinch.ty) / pinch.s;
+        V.s = s2; V.tx = mx - ix * s2; V.ty = my - iy * s2;
+        clampPan(); apply();
+      } else if (drag) {
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+        V.tx = drag.tx + dx; V.ty = drag.ty + dy; clampPan(); apply();
+      }
+    });
+    function endPointer(e) {
+      if (!pts[e.pointerId]) return;
+      delete pts[e.pointerId];
+      var n = ptList().length;
+      if (pinch) { if (n < 2) { pinch = null; drag = null; vp.classList.remove('panning'); } return; }
+      if (drag && n === 0) {
+        var d = drag; drag = null; vp.classList.remove('panning');
+        if (!d.moved && e.type === 'pointerup') {
+          if (!d.onImg && atFit()) { dlg.close(); return; }
+          var r = size().r; toggleZoom(e.clientX - r.left, e.clientY - r.top);
+        }
+      }
+    }
+    vp.addEventListener('pointerup', endPointer);
+    vp.addEventListener('pointercancel', endPointer);
+
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') show(cur - 1);
+      else if (e.key === 'ArrowRight') show(cur + 1);
+      else if (e.key === '0') fitView(true);
+      else if (e.key === '1') zoomCenter(1);
+      else if (e.key === '+' || e.key === '=') zoomCenter(V.s * 1.5);
+      else if (e.key === '-') zoomCenter(V.s / 1.5);
+      else return;
+      e.preventDefault();
+    });
+    addEventListener('resize', function () {
+      if (!dlg.open || !V.W) return;
+      var wasFit = atFit(), z = size();
+      V.fit = Math.max(0.02, Math.min((z.w - PAD * 2) / V.W, (z.h - PAD * 2) / V.H, 1));
+      if (wasFit) fitView(false); else { V.s = Math.max(V.s, V.fit); clampPan(); apply(); }
+    });
+  })();
+</script>
+<nav class="kji-back" style="padding:40px clamp(16px,4vw,40px) 48px;font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/" style="color:#b9b7b2;text-decoration:none;margin-left:24px">김종일 통합 포트폴리오 사이트</a></nav>
+</body>
+</html>
