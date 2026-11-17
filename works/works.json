@@ -8,6 +8,45 @@
   },
   "posts": [
     {
+      "id": "cx-renewal",
+      "href": "cx-renewal/",
+      "ai": true,
+      "title": "CX renewal",
+      "meta": "캐릭터 컨셉",
+      "summary": "Project CX 캐릭터 리뉴얼. 전신 컨셉과 앞뒤 시트.",
+      "textAlign": "left",
+      "banner": {
+        "bg": "#46484b",
+        "panels": [
+          {
+            "src": "cx-renewal/img/01-unknown-a-sheet.jpg",
+            "srcSmall": "thumbs/cx-renewal.jpg",
+            "alt": "롱코트에 배낭을 멘 남자 캐릭터의 앞모습과 뒷모습",
+            "flex": 2,
+            "x": 50,
+            "y": 20,
+            "zoom": 1
+          },
+          {
+            "src": "cx-renewal/img/02-cnr-coat.jpg",
+            "alt": "해진 검은 후드 롱코트 차림으로 소총을 든 남자 캐릭터",
+            "flex": 1,
+            "x": 50,
+            "y": 15,
+            "zoom": 1
+          },
+          {
+            "src": "cx-renewal/img/03-cnr-jacket.jpg",
+            "alt": "짧은 검은 후드 재킷 차림의 같은 캐릭터",
+            "flex": 1,
+            "x": 50,
+            "y": 15,
+            "zoom": 1
+          }
+        ]
+      }
+    },
+    {
       "id": "project-cx2",
       "href": "project-cx2/",
       "ai": true,
