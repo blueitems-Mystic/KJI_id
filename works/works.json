@@ -19,7 +19,7 @@
         "bg": "#46484b",
         "panels": [
           {
-            "src": "cx-renewal/img/01-unknown-a-sheet.jpg",
+            "src": "cx-renewal/img/01.jpg",
             "srcSmall": "thumbs/cx-renewal.jpg",
             "alt": "롱코트에 배낭을 멘 남자 캐릭터의 앞모습과 뒷모습",
             "flex": 2,
@@ -28,7 +28,7 @@
             "zoom": 1
           },
           {
-            "src": "cx-renewal/img/02-cnr-coat.jpg",
+            "src": "cx-renewal/img/05_2.jpg",
             "alt": "해진 검은 후드 롱코트 차림으로 소총을 든 남자 캐릭터",
             "flex": 1,
             "x": 50,
@@ -36,7 +36,7 @@
             "zoom": 1
           },
           {
-            "src": "cx-renewal/img/03-cnr-jacket.jpg",
+            "src": "cx-renewal/img/05_1.jpg",
             "alt": "짧은 검은 후드 재킷 차림의 같은 캐릭터",
             "flex": 1,
             "x": 50,
