@@ -46,6 +46,7 @@
   .pair { max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
   .stack { max-width: 1200px; display: grid; grid-template-columns: 1fr; gap: 16px; }
   .four { max-width: 1400px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .three { max-width: 1200px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .half { max-width: 592px; }
   .tall { max-width: 960px; }
   .seq.cont { margin-top: 16px; }
@@ -94,7 +95,7 @@
     .intro { padding-top: 32px; padding-bottom: 48px; }
     .seq + .seq { margin-top: 56px; }
     .pair { gap: 10px; }
-    .four { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .four, .three { grid-template-columns: 1fr 1fr; gap: 10px; }
     .seq.cont { margin-top: 10px; }
     .note { margin-top: 64px; }
     .bar { gap: 4px; font-size: 14px; }
@@ -145,24 +146,14 @@
   <figure class="seq one">
     <a href="../project-cx2/img/02-body-armor.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/02-body-armor.jpg" width="2304" height="1536" alt="Stealth Body Armor. 올리브 방탄조끼의 앞모습과 뒷모습, 부위 설명"></a>
   </figure>
-  <figure class="seq one">
-    <a href="../project-cx2/img/03-optical-sight.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/03-optical-sight.jpg" width="2304" height="1536" alt="Auto Tracking Optical Sight. 올리브 조준경 K-900 측면과 정면, 탄약과 레일"></a>
-  </figure>
-  <figure class="seq one">
-    <a href="../project-cx2/img/03b-optical-sight2.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/03b-optical-sight2.jpg" width="2304" height="1536" alt="Radio-IR Tracking Sight. 사각 도트사이트 정면과 측면, 탄약과 레일"></a>
-  </figure>
-  <figure class="seq one">
-    <a href="../project-cx2/img/04-auto-feeder.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/04-auto-feeder.jpg" width="2304" height="1536" alt="Auto Feeder Magazine. 급탄 벨트가 달린 회색 탄창 두 크기, 탄약과 레일"></a>
-  </figure>
-  <figure class="seq one">
-    <a href="../project-cx2/img/05-auto-feeder-revolve.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/05-auto-feeder-revolve.jpg" width="2304" height="1536" alt="Auto Feeder Revolve Magazine. 쌍원형 드럼 탄창의 측면과 정면, 탄약과 레일"></a>
-  </figure>
-  <figure class="seq one">
-    <a href="../project-cx2/img/06-phc-glove.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/06-phc-glove.jpg" width="2304" height="1536" alt="PowerAccess Hack-Control Globe. 손등에 키패드가 달린 전술 장갑 두 색"></a>
-  </figure>
-  <figure class="seq one">
-    <a href="../project-cx2/img/07-third-eye-drone.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/07-third-eye-drone.jpg" width="2304" height="1536" alt="Third Eye Portable Dron. 접은 상태와 펼친 상태의 휴대용 쿼드콥터"></a>
-  </figure>
+  <div class="seq three">
+    <figure><a href="../project-cx2/img/03-optical-sight.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/03-optical-sight.jpg" width="2304" height="1536" alt="Auto Tracking Optical Sight. 올리브 조준경 K-900 측면과 정면, 탄약과 레일"></a></figure>
+    <figure><a href="../project-cx2/img/03b-optical-sight2.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/03b-optical-sight2.jpg" width="2304" height="1536" alt="Radio-IR Tracking Sight. 사각 도트사이트 정면과 측면, 탄약과 레일"></a></figure>
+    <figure><a href="../project-cx2/img/04-auto-feeder.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/04-auto-feeder.jpg" width="2304" height="1536" alt="Auto Feeder Magazine. 급탄 벨트가 달린 회색 탄창 두 크기, 탄약과 레일"></a></figure>
+    <figure><a href="../project-cx2/img/05-auto-feeder-revolve.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/05-auto-feeder-revolve.jpg" width="2304" height="1536" alt="Auto Feeder Revolve Magazine. 쌍원형 드럼 탄창의 측면과 정면, 탄약과 레일"></a></figure>
+    <figure><a href="../project-cx2/img/06-phc-glove.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/06-phc-glove.jpg" width="2304" height="1536" alt="PowerAccess Hack-Control Globe. 손등에 키패드가 달린 전술 장갑 두 색"></a></figure>
+    <figure><a href="../project-cx2/img/07-third-eye-drone.jpg"><img loading="lazy" decoding="async" src="../project-cx2/img/07-third-eye-drone.jpg" width="2304" height="1536" alt="Third Eye Portable Dron. 접은 상태와 펼친 상태의 휴대용 쿼드콥터"></a></figure>
+  </div>
 </main>
 
 <footer class="note">
