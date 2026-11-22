@@ -67,48 +67,76 @@
   .lb-title { position: absolute; left: 20px; max-width: 30%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .lb-close { position: absolute; right: 20px; }
 
-  /* 썸네일 인덱스: 데스크톱 = 왼쪽 고정 레일, 모바일 = 목록 버튼 → 시트 */
-  .arc { scroll-margin-top: 24px; }
+  /* 작업 목차: ≥1500px = 본문 옆 고정 목차, 그 아래 = 상단 고정 바 / 둘 다 "전체 보기" */
+  :root { --tocw: clamp(260px, 18vw, 340px); }
   .arc.flash .arc-head h2 { animation: flash 1.4s ease-out; }
   @keyframes flash { 0%, 30% { color: #fff; text-shadow: 0 0 12px rgba(255,255,255,.35); } 100% { color: inherit; text-shadow: none; } }
-  .idx-group { margin: 0 0 18px; }
-  .idx-label { margin: 0 0 6px; font-size: 11px; line-height: 1.3; letter-spacing: .02em; color: var(--ink-soft); overflow-wrap: anywhere; }
-  .idx-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-  .idx-list a { display: block; position: relative; aspect-ratio: 4 / 5; background: var(--canvas); outline: 1px solid transparent; outline-offset: 0; opacity: .55; transition: opacity .15s; }
-  .idx-list a:hover, .idx-list a:focus-visible { opacity: 1; }
-  .idx-list a[aria-current="true"] { opacity: 1; outline: 2px solid var(--ink); outline-offset: 1px; }
-  .idx-list img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .idx-top { font: inherit; font-size: 12px; color: var(--ink-soft); background: none; border: 1px solid var(--rule); border-radius: 2px; padding: 6px 0; width: 100%; cursor: pointer; }
-  .idx-top:hover { color: var(--ink); border-color: var(--ink-soft); }
+  .ui-btn { font: 500 13px/1.2 var(--sans); color: var(--ink); background: none; border: 1px solid var(--rule); border-radius: 2px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
+  .ui-btn:hover { border-color: var(--ink-soft); }
+  .ui-btn.fill { background: var(--ink); border-color: var(--ink); color: #2b2c2e; }
+  .ui-btn.fill:hover { background: #fff; }
+  .prog { height: 3px; background: var(--rule); }
+  .prog i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .2s; }
+  .count { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
 
-  .rail { display: none; }
-  .tip { position: fixed; z-index: 30; pointer-events: none; background: var(--ink); color: #222; font-size: 13px; line-height: 1.4; padding: 5px 9px; border-radius: 2px; white-space: nowrap; transform: translateY(-50%); }
-  .tip[hidden] { display: none; }
+  .toc { display: none; }
+  .toc-head { padding: 22px 0 16px; border-bottom: 1px solid var(--rule); }
+  .toc-head .count { font-size: 13px; }
+  .toc-head .prog { margin: 8px 0 10px; }
+  .toc-now { margin: 0; font-size: 14px; line-height: 1.45; min-height: 2.9em; }
+  .toc-now span { color: var(--ink-soft); }
+  .toc-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .toc-list { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 6px 32px 0; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; overscroll-behavior: contain; }
+  .proj { border-bottom: 1px solid rgba(109,111,114,.45); }
+  .proj-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 13px 0; background: none; border: 0; color: var(--ink); font: 500 13px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; text-align: left; cursor: pointer; }
+  .proj-btn .n { color: var(--ink-soft); font-weight: 400; letter-spacing: 0; }
+  .proj-btn .chev { margin-left: auto; color: var(--ink-soft); transition: transform .15s; }
+  .proj-btn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+  .proj-items { list-style: none; margin: 0 0 10px; padding: 0; }
+  .item { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; align-items: center; padding: 6px 8px 6px 10px; border-left: 2px solid transparent; text-decoration: none; color: var(--ink-soft); }
+  .item:hover { background: rgba(255,255,255,.04); color: var(--ink); }
+  .item[aria-current="true"] { border-left-color: var(--ink); background: rgba(255,255,255,.08); color: var(--ink); }
+  .item img { display: block; width: 48px; height: 60px; object-fit: cover; background: var(--deep); }
+  .item-t { display: block; font-size: 14px; line-height: 1.35; }
+  .item-m { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; color: var(--ink-soft); }
 
-  .fab { position: fixed; right: 16px; bottom: 16px; z-index: 20; display: flex; gap: 8px; }
-  .fab button { font: 500 14px/1 var(--sans); color: var(--ink); background: rgba(58,60,63,.94); border: 1px solid var(--rule); border-radius: 2px; padding: 12px 16px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
-  .fab[hidden] { display: none; }
-  .sheet { width: 100%; max-width: none; max-height: 82vh; margin: auto 0 0; padding: 0; border: 0; border-top: 1px solid var(--rule); background: var(--deep); color: var(--ink); }
-  .sheet::backdrop { background: rgba(0,0,0,.5); }
-  .sheet-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--deep); border-bottom: 1px solid var(--rule); }
-  .sheet-head h2 { margin: 0; font: 700 18px/1.3 var(--serif); }
-  .sheet-head button { font: inherit; font-size: 14px; color: inherit; background: none; border: 1px solid var(--rule); border-radius: 2px; padding: 6px 12px; cursor: pointer; }
-  .sheet-body { padding: 16px; }
-  .sheet .idx-list { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .sheet .idx-list a { opacity: .8; }
-  .sheet .idx-cap { display: block; margin-top: 4px; font-size: 11px; line-height: 1.3; color: var(--ink-soft); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .sheet .idx-list li { min-width: 0; }
+  .topbar { position: fixed; z-index: 20; left: 0; right: 0; top: 0; height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 clamp(16px, 4vw, 40px); background: rgba(58,60,63,.97); border-bottom: 1px solid var(--rule); transform: translateY(-110%); transition: transform .2s; }
+  .topbar[hidden] { display: none; }
+  .topbar.on { transform: none; }
+  .topbar .tb-now { flex: 1; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; }
+  .topbar .count { margin-right: 10px; }
+  .topbar .prog { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: transparent; }
 
-  @media (min-width: 1000px) {
-    body.has-rail { padding-left: 112px; }
-    .rail { display: flex; flex-direction: column; position: fixed; z-index: 15; left: 0; top: 0; bottom: 0; width: 112px; background: var(--deep); border-right: 1px solid var(--rule); }
-    .rail-scroll { flex: 1; overflow-y: auto; padding: 18px 16px 8px 20px; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
-    .rail-foot { padding: 10px 16px 14px 20px; border-top: 1px solid var(--rule); }
-    .fab { display: none; }
+  .ov { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow-y: auto; background: rgba(46,47,50,.98); color: var(--ink); overscroll-behavior: contain; }
+  .ov::backdrop { background: transparent; }
+  .ov-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 16px; padding: 12px clamp(16px, 4vw, 40px); background: rgba(46,47,50,.98); border-bottom: 1px solid var(--rule); }
+  .ov-head h2 { margin: 0; font: 700 20px/1.3 var(--serif); }
+  .ov-head .count { font-size: 14px; }
+  .ov-head .ui-btn { margin-left: auto; }
+  .ov-body { max-width: 1600px; margin: 0 auto; padding: 28px clamp(16px, 4vw, 40px) 64px; }
+  .ov-group + .ov-group { margin-top: 40px; }
+  .ov-label { margin: 0 0 14px; font: 500 13px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; }
+  .ov-label .n { color: var(--ink-soft); font-weight: 400; letter-spacing: 0; margin-left: 6px; }
+  .ov-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 22px 14px; }
+  .ov-grid li { min-width: 0; }
+  .ov-grid a { display: block; text-decoration: none; }
+  .ov-grid img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; background: var(--deep); outline: 2px solid transparent; outline-offset: 2px; }
+  .ov-grid a:hover img { outline-color: var(--ink-soft); }
+  .ov-grid a[aria-current="true"] img { outline-color: var(--ink); }
+  .ov-t { display: block; margin-top: 8px; font-size: 14px; line-height: 1.35; color: var(--ink); }
+  .ov-m { display: block; margin-top: 2px; font-size: 12px; color: var(--ink-soft); }
+
+  @media (min-width: 1500px) {
+    body.has-toc .wrap { max-width: calc(1200px + var(--tocw) + 32px); padding-left: calc(40px + var(--tocw) + 32px); }
+    body.has-toc .layout { padding-left: 40px; display: grid; grid-template-columns: var(--tocw) minmax(0, 1fr); column-gap: 32px; align-items: start; }
+    .toc:not([hidden]) { display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+    .topbar { display: none !important; }
   }
 
   @media (max-width: 760px) {
-    .sheet .idx-list { grid-template-columns: repeat(3, 1fr); }
+    .ov-grid { grid-template-columns: repeat(3, 1fr); gap: 16px 8px; }
+    .ov-t { font-size: 12px; }
+    .ov-m { display: none; }
     .wrap { padding-left: 16px; padding-right: 16px; }
     .intro { padding-top: 24px; padding-bottom: 48px; }
     .arc a + a { margin-top: 10px; }
@@ -130,25 +158,33 @@
   </div>
 </header>
 
-<main class="wrap" id="archive" aria-label="수작업 이미지 목록">
-  <p class="status" id="status">이미지를 불러오는 중…</p>
-</main>
+<div class="wrap layout">
+  <aside class="toc" id="toc" aria-label="작업 목차" hidden>
+    <div class="toc-head">
+      <div class="count" id="toc-count"></div>
+      <div class="prog"><i id="toc-prog"></i></div>
+      <p class="toc-now" id="toc-now"></p>
+      <div class="toc-actions"><button type="button" class="ui-btn fill" data-ov aria-haspopup="dialog">전체 보기</button><button type="button" class="ui-btn" data-top>맨 위로</button></div>
+    </div>
+    <nav class="toc-list" id="toc-list" aria-label="프로젝트별 작업"></nav>
+  </aside>
+  <main id="archive" aria-label="수작업 이미지 목록">
+    <p class="status" id="status">이미지를 불러오는 중…</p>
+  </main>
+</div>
 
 <footer class="wrap note"><div class="rule"><p>모든 이미지는 직접 그린 작업입니다.</p><p>© 김종일</p></div></footer>
 <nav class="wrap back bottom"><a href="../">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/">김종일 통합 포트폴리오 사이트</a></nav>
 
-<nav class="rail" id="rail" aria-label="작업 바로가기" hidden>
-  <div class="rail-scroll" id="rail-scroll"></div>
-  <div class="rail-foot"><button type="button" class="idx-top" data-top>맨 위로</button></div>
-</nav>
-<div class="tip" id="tip" role="tooltip" hidden></div>
-<div class="fab" id="fab" hidden>
-  <button type="button" data-top aria-label="맨 위로">↑</button>
-  <button type="button" id="fab-open" aria-haspopup="dialog">목록</button>
+<div class="topbar" id="topbar" hidden>
+  <p class="tb-now"><span class="count" id="tb-count"></span><span id="tb-now"></span></p>
+  <button type="button" class="ui-btn" data-top aria-label="맨 위로">↑</button>
+  <button type="button" class="ui-btn fill" data-ov aria-haspopup="dialog">목록</button>
+  <div class="prog"><i id="tb-prog"></i></div>
 </div>
-<dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
-  <div class="sheet-head"><h2 id="sheet-title">작업 목록</h2><button type="button" id="sheet-close">닫기</button></div>
-  <div class="sheet-body" id="sheet-body"></div>
+<dialog class="ov" id="ov" aria-labelledby="ov-title">
+  <div class="ov-head"><h2 id="ov-title">전체 작업</h2><span class="count" id="ov-count"></span><button type="button" class="ui-btn" id="ov-close">닫기</button></div>
+  <div class="ov-body" id="ov-body"></div>
 </dialog>
 
 <dialog class="lb" id="lb" aria-label="크게 보기">
@@ -278,29 +314,19 @@
     return list;
   }
 
-  function thumbUrl(cloud, e) {
-    var c = e.crop, t = 'c_fill,w_144,h_180,q_auto,f_auto';
-    if (c && c.width > 0 && c.height > 0) t = 'c_crop,x_' + Math.round(c.x) + ',y_' + Math.round(c.y) + ',w_' + Math.round(c.width) + ',h_' + Math.round(c.height) + '/' + t;
-    return cld(cloud, e.ids[0], t);
-  }
-
-  // 프로젝트별로 묶되, 묶음 순서와 묶음 안 순서는 페이지 순서(연도순) 그대로
-  function groupByProject(list) {
-    var groups = [], at = {};
-    list.forEach(function (e) {
-      var k = e.project || '기타';
-      if (!(k in at)) { at[k] = groups.length; groups.push({ name: k, items: [] }); }
-      groups[at[k]].items.push(e);
-    });
-    return groups;
-  }
-
-  var thumbs = {};          // slug → [레일 링크, 시트 링크]
+  var WIDE = window.matchMedia('(min-width: 1500px)');
+  var MOBILE = window.matchMedia('(max-width: 760px)');
+  var $ = function (id) { return document.getElementById(id); };
+  var idx = {};             // slug → { e, n, g, row, ov }
+  var projs = [];           // { name, items, btn, ul }
+  var total = 0;
   var jumpFix = null;       // 이동 직후 위쪽 이미지가 늦게 로드돼 밀리는 것 보정
 
+  // 도착 위치: 넓은 화면은 위 24px, 그 밖은 상단 바(48px) 아래
+  function offset() { return WIDE.matches ? 24 : 72; }
   function articleTop(id) {
-    var a = document.getElementById(id);
-    return a ? a.getBoundingClientRect().top + window.pageYOffset - 24 : null;
+    var a = $(id);
+    return a ? a.getBoundingClientRect().top + window.pageYOffset - offset() : null;
   }
   function stopFix() { if (jumpFix) { clearTimeout(jumpFix.timer); jumpFix.ro.disconnect(); jumpFix = null; } }
   function jumpTo(id, flash) {
@@ -312,19 +338,17 @@
       var y2 = articleTop(id);
       if (y2 != null && Math.abs(window.pageYOffset - y2) > 2) window.scrollTo(0, y2);
     });
-    ro.observe(document.getElementById('archive'));
+    ro.observe($('archive'));
     jumpFix = { ro: ro, timer: setTimeout(stopFix, 4000) };
     setActive(id);
-    if (flash) {
-      var a = document.getElementById(id);
-      a.classList.remove('flash'); void a.offsetWidth; a.classList.add('flash');
-    }
+    showBar(true);
+    if (flash) { var a = $(id); a.classList.remove('flash'); void a.offsetWidth; a.classList.add('flash'); }
   }
   // 사용자가 직접 스크롤하면 보정 중단
   ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (t) {
     window.addEventListener(t, function (ev) {
       if (!jumpFix) return;
-      if (ev.target.closest && ev.target.closest('.rail, .sheet, .fab')) return;
+      if (ev.target.closest && ev.target.closest('.toc, .topbar, .ov')) return;
       stopFix();
     }, { passive: true });
   });
@@ -341,94 +365,136 @@
     if (typeof s.y === 'number') window.scrollTo(0, s.y);
     else if (location.hash.length > 1) jumpTo(decodeURIComponent(location.hash.slice(1)), true);
   });
-
-  var activeId = null;
-  function setActive(id) {
-    if (id === activeId) return;
-    if (activeId && thumbs[activeId]) thumbs[activeId].forEach(function (a) { a.removeAttribute('aria-current'); });
-    activeId = id;
-    var t = thumbs[id];
-    if (!t) return;
-    t.forEach(function (a) { a.setAttribute('aria-current', 'true'); });
-    // 레일이 따라 움직여 현재 썸네일이 항상 보이게 (페이지는 건드리지 않음)
-    var sc = document.getElementById('rail-scroll'), r = t[0].getBoundingClientRect(), sr = sc.getBoundingClientRect();
-    if (r.top < sr.top + 40 || r.bottom > sr.bottom - 40) sc.scrollTop += (r.top - sr.top) - sr.height / 2 + r.height / 2;
+  function toTop() {
+    stopFix();
+    history.replaceState({ y: window.pageYOffset }, '');
+    history.pushState({ y: 0 }, '', location.pathname + location.search);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function buildIndex(list, cloud) {
-    var groups = groupByProject(list);
-    var tip = document.getElementById('tip');
-    function make(withCaption, which) {
-      var frag = document.createDocumentFragment();
-      groups.forEach(function (g) {
-        var ul = el('ul', { class: 'idx-list' });
-        g.items.forEach(function (e) {
-          var label = e.title + (e.year ? ' · ' + e.year : '');
-          var a = el('a', { href: '#' + e.slug, 'aria-label': label }, [
-            el('img', { src: thumbUrl(cloud, e), alt: '', loading: 'lazy', decoding: 'async', width: '72', height: '90' })
-          ]);
-          a.addEventListener('click', function (ev) {
-            ev.preventDefault();
-            if (which === 1) document.getElementById('sheet').close();
-            go(e.slug);
-          });
-          if (which === 0) {
-            var show = function () {
-              var r = a.getBoundingClientRect();
-              tip.textContent = label; tip.hidden = false;
-              tip.style.left = (r.right + 14) + 'px'; tip.style.top = (r.top + r.height / 2) + 'px';
-            };
-            var hide = function () { tip.hidden = true; };
-            a.addEventListener('mouseenter', show); a.addEventListener('focus', show);
-            a.addEventListener('mouseleave', hide); a.addEventListener('blur', hide);
-          }
-          (thumbs[e.slug] = thumbs[e.slug] || [])[which] = a;
-          ul.appendChild(el('li', null, [a, withCaption ? el('span', { class: 'idx-cap', text: e.title }) : null]));
-        });
-        frag.appendChild(el('section', { class: 'idx-group' }, [el('p', { class: 'idx-label', text: g.name }), ul]));
-      });
-      return frag;
+  // ---- 펼침: 현재 프로젝트만 자동으로 펼침. 직접 접은 건 프로젝트가 바뀔 때까지 존중
+  function setOpen(p, open) {
+    p.btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    p.ul.hidden = !open;
+  }
+  var activeId = null, activeG = -1;
+  function setActive(id) {
+    if (id === activeId || !idx[id]) return;
+    if (activeId && idx[activeId]) { idx[activeId].row.removeAttribute('aria-current'); idx[activeId].ov.removeAttribute('aria-current'); }
+    activeId = id;
+    var it = idx[id];
+    it.row.setAttribute('aria-current', 'true');
+    it.ov.setAttribute('aria-current', 'true');
+    if (it.g !== activeG) {
+      activeG = it.g;
+      projs.forEach(function (p, i) { setOpen(p, i === activeG); });
     }
-    document.getElementById('rail-scroll').appendChild(make(false, 0));
-    document.getElementById('sheet-body').appendChild(make(true, 1));
-    document.getElementById('rail-scroll').addEventListener('scroll', function () { tip.hidden = true; }, { passive: true });
-    document.getElementById('rail').hidden = false;
-    document.getElementById('fab').hidden = false;
-    document.body.classList.add('has-rail');
+    var pct = ((it.n + 1) / total * 100) + '%';
+    var cnt = (it.n + 1) + ' / ' + total;
+    $('toc-count').textContent = cnt; $('tb-count').textContent = cnt;
+    $('toc-prog').style.width = pct; $('tb-prog').style.width = pct;
+    var proj = projs[it.g].name;
+    $('toc-now').textContent = '';
+    $('toc-now').appendChild(el('span', { text: proj + ' · ' }));
+    $('toc-now').appendChild(document.createTextNode(it.e.title));
+    $('tb-now').textContent = proj + ' · ' + it.e.title;
+    // 목차 안에서만 따라 움직여 현재 줄이 항상 보이게 (페이지는 건드리지 않음)
+    if (WIDE.matches && !it.row.closest('[hidden]')) {
+      var sc = $('toc-list'), r = it.row.getBoundingClientRect(), sr = sc.getBoundingClientRect();
+      if (r.top < sr.top + 48 || r.bottom > sr.bottom - 48) sc.scrollTop += (r.top - sr.top) - sr.height / 2 + r.height / 2;
+    }
+  }
+
+  // ---- 상단 바(넓은 화면 아님): 목록 시작 지점을 지나면 표시, 모바일은 내릴 때 숨고 올릴 때 나타남
+  var bar = $('topbar'), lastY = 0;
+  function showBar(force) {
+    var past = $('archive').getBoundingClientRect().top < 0;
+    var y = window.pageYOffset, dy = y - lastY;
+    var on = past;
+    if (past && MOBILE.matches && !force && !jumpFix) {
+      if (Math.abs(dy) < 6) return;           // 작은 흔들림은 무시 (lastY 유지)
+      on = dy < 0;
+    }
+    bar.classList.toggle('on', on);
+    lastY = y;
+  }
+  window.addEventListener('scroll', function () { showBar(false); }, { passive: true });
+
+  function thumbUrl(cloud, e, w, h) {
+    var c = e.crop, t = 'c_fill,w_' + w + ',h_' + h + ',q_auto,f_auto';
+    if (c && c.width > 0 && c.height > 0) t = 'c_crop,x_' + Math.round(c.x) + ',y_' + Math.round(c.y) + ',w_' + Math.round(c.width) + ',h_' + Math.round(c.height) + '/' + t;
+    return cld(cloud, e.ids[0], t);
+  }
+  function metaOf(e) { return [e.year, e.category, e.ids.length + '장'].filter(Boolean).join(' · '); }
+
+  var ov = $('ov');
+  function openOv() {
+    ov.showModal();
+    var cur = activeId && idx[activeId].ov;
+    if (cur) cur.scrollIntoView({ block: 'center' });
+  }
+  $('ov-close').addEventListener('click', function () { ov.close(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ov]'), function (b) { b.addEventListener('click', openOv); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-top]'), function (b) { b.addEventListener('click', toTop); });
+
+  function buildIndex(list, cloud) {
+    total = list.length;
+    // 프로젝트별로 묶되, 묶음 순서와 묶음 안 순서는 페이지 순서(연도순) 그대로
+    var at = {};
+    list.forEach(function (e, n) {
+      var k = e.project || '기타';
+      if (!(k in at)) { at[k] = projs.length; projs.push({ name: k, items: [] }); }
+      projs[at[k]].items.push(e);
+      idx[e.slug] = { e: e, n: n, g: at[k] };
+    });
+    $('ov-count').textContent = total + '개 작업';
+
+    projs.forEach(function (p, gi) {
+      var ulId = 'proj-' + gi;
+      p.btn = el('button', { type: 'button', class: 'proj-btn', 'aria-expanded': 'false', 'aria-controls': ulId }, [
+        el('span', { text: p.name }), el('span', { class: 'n', text: '· ' + p.items.length }), el('span', { class: 'chev', 'aria-hidden': 'true', text: '▸' })
+      ]);
+      p.btn.addEventListener('click', function () {
+        var open = p.btn.getAttribute('aria-expanded') === 'true';
+        if (open) setOpen(p, false);
+        else if (gi === activeG) setOpen(p, true);
+        else go(p.items[0].slug);
+      });
+      p.ul = el('ul', { class: 'proj-items', id: ulId, hidden: '' });
+      var grid = el('ul', { class: 'ov-grid' });
+      p.items.forEach(function (e) {
+        var row = el('a', { class: 'item', href: '#' + e.slug }, [
+          el('img', { src: thumbUrl(cloud, e, 96, 120), alt: '', loading: 'lazy', decoding: 'async', width: '48', height: '60' }),
+          el('span', null, [el('span', { class: 'item-t', text: e.title }), el('span', { class: 'item-m', text: metaOf(e) })])
+        ]);
+        row.addEventListener('click', function (ev) { ev.preventDefault(); go(e.slug); });
+        p.ul.appendChild(el('li', null, [row]));
+        var card = el('a', { href: '#' + e.slug }, [
+          el('img', { src: thumbUrl(cloud, e, 300, 375), alt: '', loading: 'lazy', decoding: 'async', width: '150', height: '188' }),
+          el('span', { class: 'ov-t', text: e.title }), el('span', { class: 'ov-m', text: metaOf(e) })
+        ]);
+        card.addEventListener('click', function (ev) { ev.preventDefault(); ov.close(); go(e.slug); });
+        grid.appendChild(el('li', null, [card]));
+        idx[e.slug].row = row; idx[e.slug].ov = card;
+      });
+      $('toc-list').appendChild(el('section', { class: 'proj' }, [p.btn, p.ul]));
+      $('ov-body').appendChild(el('section', { class: 'ov-group' }, [
+        el('h3', { class: 'ov-label' }, [document.createTextNode(p.name), el('span', { class: 'n', text: p.items.length })]), grid
+      ]));
+    });
+
+    $('toc').hidden = false; bar.hidden = false;
+    document.body.classList.add('has-toc');
 
     // 화면 위쪽 40% 지점에 걸린 게시물 = 현재 게시물
     var io = new IntersectionObserver(function (ents) {
       ents.forEach(function (en) { if (en.isIntersecting) setActive(en.target.id); });
     }, { rootMargin: '-40% 0px -59% 0px' });
-    list.forEach(function (e) { io.observe(document.getElementById(e.slug)); });
+    list.forEach(function (e) { io.observe($(e.slug)); });
     setActive(list[0].slug);
 
-    if (location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)))) {
-      jumpTo(decodeURIComponent(location.hash.slice(1)), true);
-    }
-  }
-
-  var sheet = document.getElementById('sheet');
-  document.getElementById('fab-open').addEventListener('click', function () {
-    sheet.showModal();
-    var cur = activeId && thumbs[activeId] && thumbs[activeId][1];
-    if (cur) cur.scrollIntoView({ block: 'center' });
-  });
-  document.getElementById('sheet-close').addEventListener('click', function () { sheet.close(); });
-  sheet.addEventListener('click', function (e) { if (e.target === sheet) sheet.close(); });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-top]'), function (b) {
-    b.addEventListener('click', function () {
-      stopFix();
-      history.replaceState({ y: window.pageYOffset }, '');
-      history.pushState({ y: 0 }, '', location.pathname + location.search);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  });
-
-  function fail(conf) {
-    var s = document.getElementById('status');
-    s.textContent = '이미지를 불러오지 못했습니다. ';
-    if (conf && conf.galleryUrl) s.appendChild(el('a', { href: conf.galleryUrl, text: '갤러리 페이지에서 보기' }));
+    var h = decodeURIComponent(location.hash.slice(1));
+    if (h && idx[h]) jumpTo(h, true);
   }
 
   fetch('../works.json', { cache: 'no-cache' })
