@@ -110,25 +110,6 @@
   .work > a:hover h2 span, .work > a:focus-visible h2 span { background-size: 100% 2px; }
   .work-summary { margin: 0; font-size: 0.98rem; line-height: 1.65; color: var(--ink); text-shadow: 0 1px 8px rgba(40,42,45,.6); }
 
-  /* AI활용 라벨: 보드에 붙인 종이 쪽지 + 빨간 펜 글씨 */
-  .ai-tag {
-    position: absolute;
-    left: calc(-1 * min(22px, var(--gutter) - 4px));
-    top: -14px;
-    z-index: 2;
-    transform: rotate(-4deg);
-    padding: 3px 16px 1px 14px;
-    background: var(--ink);
-    color: var(--pen-dark);
-    font-family: var(--hand);
-    font-size: 1.75rem;
-    line-height: 1.15;
-    box-shadow: 0 2px 0 rgba(40,42,45,.35);
-    pointer-events: none;
-  }
-  .ai-tag svg { position: absolute; inset: -6px -10px; width: calc(100% + 20px); height: calc(100% + 12px); overflow: visible; }
-  .ai-tag path { fill: none; stroke: var(--pen); stroke-width: 2; stroke-linecap: round; }
-
   /* ── 수작업 · 푸터 ─────────────────── */
   .manual { margin-top: clamp(40px, 6vw, 72px); }
 
@@ -147,7 +128,6 @@
     }
     .caption.right .caption-inner, .caption-inner { width: auto; max-width: none; }
     .work h2, .work-summary { text-shadow: none; }
-    .ai-tag { left: 10px; top: -12px; font-size: 1.5rem; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -208,17 +188,6 @@
     img.style.transform = z === 1 ? '' : 'scale(' + z + ')';
   }
 
-  function aiTag() {
-    var t = el('span', { class: 'ai-tag', text: 'AI활용' });
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 100 40'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M8 22 C 6 8, 40 2, 70 4 C 94 6, 99 18, 94 28 C 88 38, 40 40, 16 35 C 4 32, 2 22, 14 13');
-    path.setAttribute('vector-effect', 'non-scaling-stroke');
-    svg.appendChild(path); t.appendChild(svg);
-    return t;
-  }
-
   function renderPost(post, index) {
     var panels = post.banner.panels.map(function (p) {
       var panel = el('div', { class: 'panel' + (p.spacer ? ' spacer' : '') });
@@ -256,7 +225,7 @@
     var link = post.href ? el('a', { href: post.href }, [inner]) : inner;
     // 모바일에서는 caption이 static이 되므로 banner 뒤에 자연스럽게 붙는다
     if (editing && post.href) link.addEventListener('click', function (e) { e.preventDefault(); });
-    var li = el('li', { class: 'work', id: 'work-' + post.id }, [post.ai ? aiTag() : null, link]);
+    var li = el('li', { class: 'work', id: 'work-' + post.id }, [link]);
     return li;
   }
 
