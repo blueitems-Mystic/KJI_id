@@ -134,6 +134,12 @@
     "cloudName": "duwi0pqm2",
     "skipTitles": ["새 게시물"],
     "projectAlias": { "Tacktan": "Tactan", "Tantan": "Tactan" },
-    "estimatedYears": { "Tactan": 2021, "ArcheAge2": 2019, "Triple S": 2016.5 }
+    "estimatedYears": { "Tactan": 2021, "ArcheAge2": 2019, "Triple S": 2016.5 },
+    "placeAfter": [
+      { "move": "Battle Illustration", "after": "End Battle · 배경" },
+      { "move": "Taiyon", "after": "Logan Durst" },
+      { "move": "Elisa", "after": "Rick Blood" },
+      { "move": "Concepts of Tribes", "after": "Mita Unit" }
+    ]
   }
 }

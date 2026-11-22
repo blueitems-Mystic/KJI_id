@@ -148,6 +148,22 @@
       .sort(function (a, b) { return (b.sortYear - a.sortYear) || (b.known - a.known) || (a.pos - b.pos); });
   }
 
+  // 수동 위치 조정: "제목" 또는 "제목 · 분류" 로 찾아 move 를 after 바로 밑으로. 규칙 순서대로 적용
+  function placeAfter(list, rules) {
+    function find(key) {
+      var k = key.split(' · '), title = k[0].trim(), cat = (k[1] || '').trim();
+      for (var i = 0; i < list.length; i++) if (list[i].title === title && (!cat || list[i].category === cat)) return i;
+      return -1;
+    }
+    (rules || []).forEach(function (r) {
+      var from = find(r.move);
+      if (from < 0 || find(r.after) < 0) return;
+      var e = list.splice(from, 1)[0];
+      list.splice(find(r.after) + 1, 0, e);
+    });
+    return list;
+  }
+
   var lb = { set: [], i: 0, title: '' };
   var dlg = document.getElementById('lb');
   function lbShow() {
@@ -208,7 +224,7 @@
       if (conf.summary) document.getElementById('intro').textContent = conf.summary;
       return fetch(conf.galleryApi)
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (g) { render(entries(g, conf), g.cloudName || conf.cloudName); })
+        .then(function (g) { render(placeAfter(entries(g, conf), conf.placeAfter),g.cloudName || conf.cloudName); })
         .catch(function () { fail(conf); });
     })
     .catch(function () { fail(null); });
