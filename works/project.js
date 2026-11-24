@@ -70,7 +70,7 @@
   function featureEntries(P) {
     return (P.features || []).map(function (f) {
       return {
-        title: f.title, year: f.year || null, category: f.category || '', link: f.link, linkLabel: f.linkLabel,
+        title: f.title, year: f.year || null, category: f.category || '', link: f.link, linkLabel: f.linkLabel, note: f.note,
         sortYear: 0, known: !!f.year, pos: 0, top: !!f.top, after: f.after,
         thumb: function () { return '../' + f.thumb; },
         imgs: f.images.map(function (im) { var u = '../' + im.src; return { full: u, src: u, w: im.w, h: im.h }; })
@@ -145,7 +145,7 @@
       });
       var more = e.link ? el('p', { class: 'arc-link' }, [el('a', { class: 'kji-btn kji-btn-line', href: e.link, text: (e.linkLabel || '과정 자세히 보기') + ' →' })]) : null;
       box.appendChild(el('article', { class: 'arc', id: e.slug }, [
-        el('header', { class: 'arc-head' }, [el('h2', { text: e.title }), meta ? el('p', { class: 'arc-meta', text: meta }) : null])
+        el('header', { class: 'arc-head' }, [el('h2', { text: e.title }), meta ? el('p', { class: 'arc-meta', text: meta }) : null, e.note ? el('p', { class: 'arc-note', text: e.note }) : null])
       ].concat(links, [more])));
     });
   }

@@ -64,19 +64,12 @@
         "bg": "#46484b",
         "panels": [
           {
-            "src": "roderick-blade/src/final.jpg",
-            "alt": "금장 견갑과 붉은 망토를 두른 황제 캐릭터 전신",
-            "flex": 2,
-            "x": 50,
-            "y": 40,
-            "zoom": 1
-          },
-          {
-            "src": "roderick-blade/src/final_upper.jpg",
-            "alt": "같은 캐릭터의 상반신 클로즈업",
-            "flex": 3,
-            "x": 50,
-            "y": 22,
+            "src": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_1200,q_auto,f_auto/03_z7ncne",
+            "srcSmall": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_960,q_auto,f_auto/03_z7ncne",
+            "alt": "Logan Durst. 금장 견갑에 거대한 망치를 든 백발 노장 캐릭터의 전신과 얼굴 클로즈업",
+            "flex": 5,
+            "x": 40,
+            "y": 20,
             "zoom": 1
           },
           {
@@ -125,12 +118,12 @@
         "bg": "#46484b",
         "panels": [
           {
-            "src": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_2000,q_auto,f_auto/ArcheAge2/mudeqnfjxh6staolr4sk",
-            "srcSmall": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_960,q_auto,f_auto/ArcheAge2/mudeqnfjxh6staolr4sk",
-            "alt": "파란 제복에 베레모를 쓴 여성 캐릭터 General Diana",
+            "src": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_2400,q_auto,f_auto/ArcheAge2/xhcbqoiueugao78djwme",
+            "srcSmall": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_960,q_auto,f_auto/ArcheAge2/xhcbqoiueugao78djwme",
+            "alt": "Triple S 로고와 쌍검을 든 붉은 머리 여성 캐릭터 Riho",
             "flex": 5,
             "x": 50,
-            "y": 8,
+            "y": 30,
             "zoom": 1
           },
           {
@@ -152,12 +145,21 @@
         "bg": "#46484b",
         "panels": [
           {
-            "src": "private/img/01.jpg",
-            "srcSmall": "thumbs/private.jpg",
-            "alt": "L.O. TANK 로고와 탱크를 곁에 둔 비행모 차림의 소녀",
-            "flex": 5,
+            "src": "private/img/02.jpg",
+            "srcSmall": "thumbs/private-02.jpg",
+            "alt": "총을 어깨에 멘 분홍 머리 소녀, L.O. TANK",
+            "flex": 3,
             "x": 50,
-            "y": 22,
+            "y": 20,
+            "zoom": 1
+          },
+          {
+            "src": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_2400,q_auto,f_auto/ArcheAge2/sm9zzhphix3dim3vmbwa",
+            "srcSmall": "https://res.cloudinary.com/duwi0pqm2/image/upload/c_limit,w_960,q_auto,f_auto/ArcheAge2/sm9zzhphix3dim3vmbwa",
+            "alt": "날개 투구에 큰 날개를 펼친 발키리",
+            "flex": 3,
+            "x": 50,
+            "y": 25,
             "zoom": 1
           },
           {
@@ -179,9 +181,9 @@
         "bg": "#46484b",
         "panels": [
           {
-            "src": "heroes-wanted/img/02.jpg",
+            "src": "heroes-wanted/img/04.jpg",
             "srcSmall": "thumbs/heroes-wanted.jpg",
-            "alt": "비행선과 성곽 도시가 보이는 초원의 로비 배경",
+            "alt": "천막과 비행선, 원형 관문이 있는 마을 로비 배경",
             "flex": 1,
             "x": 50,
             "y": 50,
@@ -364,7 +366,396 @@
           "archeage2"
         ]
       },
-      "estimatedYear": 2019
+      "estimatedYear": 2019,
+      "local": [
+        {
+          "title": "Ogre Illustration",
+          "category": "일러스트",
+          "images": [
+            {
+              "f": "01.jpg",
+              "w": 2400,
+              "h": 1428
+            },
+            {
+              "f": "02.jpg",
+              "w": 2400,
+              "h": 924
+            },
+            {
+              "f": "03.jpg",
+              "w": 2200,
+              "h": 721
+            }
+          ]
+        },
+        {
+          "title": "Battle Illustration",
+          "category": "일러스트",
+          "images": [
+            {
+              "f": "04.jpg",
+              "w": 2400,
+              "h": 1520
+            },
+            {
+              "f": "05.jpg",
+              "w": 2400,
+              "h": 1500
+            }
+          ]
+        },
+        {
+          "title": "Baramuk Gathering",
+          "category": "일러스트",
+          "images": [
+            {
+              "f": "06.jpg",
+              "w": 2400,
+              "h": 1500
+            },
+            {
+              "f": "07.jpg",
+              "w": 1920,
+              "h": 1200
+            },
+            {
+              "f": "08.jpg",
+              "w": 1920,
+              "h": 1200
+            },
+            {
+              "f": "09.jpg",
+              "w": 1920,
+              "h": 1200
+            }
+          ]
+        },
+        {
+          "title": "Returned",
+          "category": "캐릭터",
+          "images": [
+            {
+              "f": "10.jpg",
+              "w": 841,
+              "h": 1870
+            },
+            {
+              "f": "11.jpg",
+              "w": 1792,
+              "h": 2400
+            },
+            {
+              "f": "12.jpg",
+              "w": 2000,
+              "h": 2329
+            },
+            {
+              "f": "13.jpg",
+              "w": 1800,
+              "h": 802
+            },
+            {
+              "f": "14.jpg",
+              "w": 1307,
+              "h": 1163
+            },
+            {
+              "f": "15.jpg",
+              "w": 800,
+              "h": 1497
+            },
+            {
+              "f": "16.jpg",
+              "w": 1366,
+              "h": 1418
+            },
+            {
+              "f": "17.jpg",
+              "w": 2000,
+              "h": 1205
+            },
+            {
+              "f": "18.jpg",
+              "w": 2000,
+              "h": 1205
+            },
+            {
+              "f": "19.jpg",
+              "w": 2400,
+              "h": 1466
+            }
+          ]
+        },
+        {
+          "title": "Orc Warriors",
+          "category": "캐릭터",
+          "images": [
+            {
+              "f": "20.jpg",
+              "w": 2400,
+              "h": 1531
+            },
+            {
+              "f": "21.jpg",
+              "w": 2400,
+              "h": 1073
+            },
+            {
+              "f": "22.jpg",
+              "w": 2000,
+              "h": 1101
+            },
+            {
+              "f": "23.jpg",
+              "w": 2400,
+              "h": 682
+            },
+            {
+              "f": "24.jpg",
+              "w": 2000,
+              "h": 691
+            }
+          ]
+        },
+        {
+          "title": "Elemental Spirits",
+          "category": "캐릭터",
+          "images": [
+            {
+              "f": "25.jpg",
+              "w": 304,
+              "h": 308
+            },
+            {
+              "f": "26.jpg",
+              "w": 286,
+              "h": 291
+            },
+            {
+              "f": "27.jpg",
+              "w": 2000,
+              "h": 548
+            }
+          ]
+        },
+        {
+          "title": "Underground Ruins",
+          "category": "배경",
+          "images": [
+            {
+              "f": "28.jpg",
+              "w": 2400,
+              "h": 1530
+            },
+            {
+              "f": "29.jpg",
+              "w": 2400,
+              "h": 1530
+            },
+            {
+              "f": "30.jpg",
+              "w": 2000,
+              "h": 1235
+            },
+            {
+              "f": "31.jpg",
+              "w": 2100,
+              "h": 1296
+            }
+          ]
+        },
+        {
+          "title": "Ruins Modules",
+          "category": "프랍",
+          "images": [
+            {
+              "f": "32.jpg",
+              "w": 2200,
+              "h": 1375
+            },
+            {
+              "f": "33.jpg",
+              "w": 2400,
+              "h": 1698
+            },
+            {
+              "f": "34.jpg",
+              "w": 1692,
+              "h": 995
+            },
+            {
+              "f": "35.jpg",
+              "w": 2000,
+              "h": 1167
+            },
+            {
+              "f": "36.jpg",
+              "w": 1840,
+              "h": 1114
+            }
+          ]
+        },
+        {
+          "title": "Orc Village",
+          "category": "배경",
+          "images": [
+            {
+              "f": "37.jpg",
+              "w": 2000,
+              "h": 1208
+            },
+            {
+              "f": "38.jpg",
+              "w": 2000,
+              "h": 1073
+            },
+            {
+              "f": "39.jpg",
+              "w": 1600,
+              "h": 905
+            },
+            {
+              "f": "40.jpg",
+              "w": 1600,
+              "h": 1217
+            },
+            {
+              "f": "41.jpg",
+              "w": 2400,
+              "h": 2320
+            },
+            {
+              "f": "42.jpg",
+              "w": 1800,
+              "h": 1129
+            },
+            {
+              "f": "43.jpg",
+              "w": 1800,
+              "h": 1225
+            },
+            {
+              "f": "44.jpg",
+              "w": 1600,
+              "h": 1001
+            },
+            {
+              "f": "45.jpg",
+              "w": 1200,
+              "h": 2165
+            },
+            {
+              "f": "46.jpg",
+              "w": 2400,
+              "h": 1470
+            },
+            {
+              "f": "47.jpg",
+              "w": 997,
+              "h": 2400
+            }
+          ]
+        },
+        {
+          "title": "Orc Village Props",
+          "category": "프랍",
+          "images": [
+            {
+              "f": "48.jpg",
+              "w": 1900,
+              "h": 1924
+            },
+            {
+              "f": "49.jpg",
+              "w": 1200,
+              "h": 1990
+            },
+            {
+              "f": "50.jpg",
+              "w": 1700,
+              "h": 1722
+            },
+            {
+              "f": "51.jpg",
+              "w": 1900,
+              "h": 1214
+            },
+            {
+              "f": "52.jpg",
+              "w": 1900,
+              "h": 999
+            },
+            {
+              "f": "53.jpg",
+              "w": 1900,
+              "h": 1343
+            },
+            {
+              "f": "54.jpg",
+              "w": 1500,
+              "h": 1293
+            },
+            {
+              "f": "55.jpg",
+              "w": 1407,
+              "h": 1970
+            },
+            {
+              "f": "56.jpg",
+              "w": 1000,
+              "h": 2092
+            },
+            {
+              "f": "57.jpg",
+              "w": 1800,
+              "h": 660
+            },
+            {
+              "f": "58.jpg",
+              "w": 1600,
+              "h": 747
+            }
+          ]
+        },
+        {
+          "title": "Returned Bombs & Barricade",
+          "category": "프랍",
+          "images": [
+            {
+              "f": "59.jpg",
+              "w": 1200,
+              "h": 1365
+            },
+            {
+              "f": "60.jpg",
+              "w": 1323,
+              "h": 2400
+            },
+            {
+              "f": "61.jpg",
+              "w": 1800,
+              "h": 518
+            },
+            {
+              "f": "62.jpg",
+              "w": 1600,
+              "h": 1029
+            }
+          ]
+        },
+        {
+          "title": "Item Icons",
+          "category": "UI",
+          "images": [
+            {
+              "f": "63.jpg",
+              "w": 2211,
+              "h": 1106
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "triple-s",
@@ -445,6 +836,12 @@
               "h": 976
             }
           ]
+        }
+      ],
+      "placeAfter": [
+        {
+          "move": "Assassin",
+          "after": "Core Online Promotion Poster"
         }
       ]
     },
@@ -816,7 +1213,7 @@
           "category": "배경",
           "top": true,
           "link": "../giran-trade-city/",
-          "linkLabel": "완성 과정 보기",
+          "linkLabel": "디테일업 과정",
           "thumb": "thumbs/giran-trade-city.jpg",
           "images": [
             {
@@ -824,7 +1221,8 @@
               "w": 2560,
               "h": 1265
             }
-          ]
+          ],
+          "note": "2012년도 작업을 2025에 AI로 디테일업"
         }
       ],
       "local": [

@@ -29,6 +29,7 @@
   .arc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0 0 20px; }
   .arc-head h2 { font: 700 clamp(24px, 3vw, 32px)/1.3 var(--serif); margin: 0; }
   .arc-meta { margin: 0; color: var(--ink-soft); font-size: 15px; }
+  .arc-note { flex-basis: 100%; margin: 0; color: var(--ink-soft); font-size: 15px; }
   .arc a { display: block; cursor: zoom-in; background: var(--deep); }
   .arc a + a { margin-top: 16px; }
   .arc .arc-link { margin: 28px 0 0; }
