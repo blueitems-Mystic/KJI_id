@@ -31,7 +31,10 @@
   .arc-meta { margin: 0; color: var(--ink-soft); font-size: 15px; }
   .arc-note { flex-basis: 100%; margin: 0; color: var(--ink-soft); font-size: 15px; }
   .arc a { display: block; cursor: zoom-in; background: var(--deep); }
-  .arc a + a { margin-top: 16px; }
+  .arc-imgs { display: flex; flex-direction: column; gap: 16px; }
+  /* 편집 모드에서 한 줄로 묶은 이미지: 높이를 맞춰 비율대로 폭을 나눔 */
+  .arc-row { display: flex; gap: 16px; align-items: flex-start; }
+  .arc-row a { flex: 1 1 0; min-width: 0; }
   .arc .arc-link { margin: 28px 0 0; }
   .arc .arc-link a { display: inline-flex; background: none; cursor: pointer; margin-top: 0; }
   .arc img { display: block; width: 100%; height: auto; }
@@ -126,7 +129,8 @@
     .ov-m { display: none; }
     .wrap { padding-left: 16px; padding-right: 16px; }
     .intro { padding-top: 24px; padding-bottom: 48px; }
-    .arc a + a { margin-top: 10px; }
+    .arc-imgs, .arc-row { gap: 10px; }
+    .arc-row { gap: 6px; }
     .note { margin-top: 80px; }
     .lb-title { display: none; }
     .lb-close { position: static; }

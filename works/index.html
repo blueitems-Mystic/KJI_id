@@ -131,14 +131,6 @@
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
-  /* ── 크롭 편집 모드 (?edit=1) ──────── */
-  .edit-bar { position: sticky; top: 0; z-index: 10; background: var(--deep); border-bottom: 1px solid var(--rule); padding: 10px var(--gutter); display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; font-size: 0.85rem; }
-  .edit-bar button { font: inherit; background: var(--ink); color: var(--deep); border: 0; padding: 6px 14px; cursor: pointer; }
-  .edit-bar span { color: var(--ink-soft); }
-  body.editing .panel:not(.spacer) { cursor: grab; outline: 1px dashed rgba(230,228,223,.35); outline-offset: -1px; }
-  body.editing .panel.dragging { cursor: grabbing; }
-  body.editing .caption { opacity: .55; }
-  .panel-readout { position: absolute; right: 6px; top: 6px; z-index: 3; background: rgba(58,60,63,.85); padding: 2px 6px; font-size: 0.72rem; font-family: var(--sans); }
 </style>
 </head>
 <body>
@@ -202,7 +194,6 @@
         }
         applyCrop(img, p);
         panel.appendChild(img);
-        if (editing) attachCropEditor(panel, img, p);
       }
       return panel;
     });
@@ -226,64 +217,51 @@
     return li;
   }
 
-  function attachCropEditor(panel, img, p) {
-    var readout = el('span', { class: 'panel-readout' });
-    panel.appendChild(readout);
-    function show() { readout.textContent = 'x ' + Math.round(p.x) + '  y ' + Math.round(p.y) + '  zoom ' + (p.zoom || 1).toFixed(2); }
-    show();
-    var start = null;
-    panel.addEventListener('pointerdown', function (e) {
-      e.preventDefault();
-      panel.setPointerCapture(e.pointerId); panel.classList.add('dragging');
-      start = { px: e.clientX, py: e.clientY, x: p.x == null ? 50 : p.x, y: p.y == null ? 50 : p.y };
-    });
-    panel.addEventListener('pointermove', function (e) {
-      if (!start) return;
-      var r = panel.getBoundingClientRect(), z = p.zoom || 1;
-      // 끌면 그림이 손을 따라 움직이도록: 초점은 반대로 이동
-      p.x = Math.max(0, Math.min(100, start.x - (e.clientX - start.px) / r.width * 100 / z));
-      p.y = Math.max(0, Math.min(100, start.y - (e.clientY - start.py) / r.height * 100 / z));
-      applyCrop(img, p); show();
-    });
-    function end() { start = null; panel.classList.remove('dragging'); }
-    panel.addEventListener('pointerup', end);
-    panel.addEventListener('pointercancel', end);
-    panel.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      p.zoom = Math.max(1, Math.min(4, (p.zoom || 1) * (e.deltaY < 0 ? 1.06 : 1 / 1.06)));
-      p.zoom = Math.round(p.zoom * 100) / 100;
-      applyCrop(img, p); show();
-    }, { passive: false });
+  // 편집값 서버(Worker). 로컬 확인용으로만 ?api= 덮어쓰기 허용
+  function apiBase(d) {
+    var q = new URLSearchParams(location.search).get('api');
+    if (q && /^(127\.0\.0\.1|localhost)$/.test(location.hostname)) return q.replace(/\/$/, '');
+    var s = d.site || {}, g = (d.manual || {}).galleryApi || '';
+    return (s.worksApi || g.replace(/\/api\/gallery$/, '')).replace(/\/$/, '');
   }
-
-  function editBar() {
-    var status = el('span', { text: '그림을 끌어 위치, 휠로 확대. 끝나면 JSON을 복사해 works/works.json에 붙여 넣으세요.' });
-    var copy = el('button', { type: 'button', text: 'JSON 복사' });
-    copy.addEventListener('click', function () {
-      data.posts.concat(data.manual ? [data.manual] : []).forEach(function (post) { post.banner.panels.forEach(function (p) { if (!p.spacer) { p.x = Math.round(p.x); p.y = Math.round(p.y); } }); });
-      var json = JSON.stringify(data, null, 2) + '\n';
-      (navigator.clipboard ? navigator.clipboard.writeText(json) : Promise.reject())
-        .then(function () { status.textContent = '복사했습니다. works/works.json 전체를 이 내용으로 바꾸세요.'; })
-        .catch(function () { console.log(json); status.textContent = '복사가 막혀 콘솔에 출력했습니다.'; });
+  // 편집값(배너)을 못 받으면 works.json 그대로 (2.5초 넘기면 포기)
+  function loadOverlay(base) {
+    if (!base) return Promise.resolve({});
+    var t = new Promise(function (res) { setTimeout(function () { res({}); }, 2500); });
+    var f = fetch(base + '/api/works', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+    return Promise.race([f, t]);
+  }
+  function applyBanners(posts, banners) {
+    posts.forEach(function (post) {
+      var b = banners && banners[post.id];
+      post.defaultPanels = JSON.parse(JSON.stringify(post.banner.panels));
+      if (b && Array.isArray(b.panels) && b.panels.length) post.banner.panels = b.panels;
     });
-    document.body.classList.add('editing');
-    document.body.insertBefore(el('div', { class: 'edit-bar' }, [el('strong', { text: '크롭 편집' }), copy, status]), document.body.firstChild);
   }
 
   fetch('works.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
       data = d;
-      var s = d.site || {};
-      if (s.title) { document.getElementById('site-title').textContent = s.title; }
-      document.getElementById('site-intro').textContent = s.intro || '';
-      var pl = document.getElementById('portfolio-link');
-      if (s.portfolioUrl) pl.href = s.portfolioUrl;
-      if (s.portfolioLabel) document.getElementById('portfolio-label').textContent = s.portfolioLabel;
-      document.getElementById('ai-note').textContent = s.aiNote || '';
-      var list = document.getElementById('works');
-      d.posts.forEach(function (post, i) { list.appendChild(renderPost(post, i)); });
-      if (editing) editBar();
+      var base = apiBase(d);
+      return loadOverlay(base).then(function (cfg) {
+        applyBanners(d.posts, (cfg || {}).banners);
+        var s = d.site || {};
+        if (s.title) { document.getElementById('site-title').textContent = s.title; }
+        document.getElementById('site-intro').textContent = s.intro || '';
+        var pl = document.getElementById('portfolio-link');
+        if (s.portfolioUrl) pl.href = s.portfolioUrl;
+        if (s.portfolioLabel) document.getElementById('portfolio-label').textContent = s.portfolioLabel;
+        document.getElementById('ai-note').textContent = s.aiNote || '';
+        var list = document.getElementById('works');
+        d.posts.forEach(function (post, i) { list.appendChild(renderPost(post, i)); });
+        if (editing) {
+          var sc = document.createElement('script');
+          sc.src = 'edit/hub-editor.js';
+          sc.onload = function () { window.KJIHubEditor({ data: d, api: base, renderPost: renderPost, applyCrop: applyCrop, list: list }); };
+          document.body.appendChild(sc);
+        }
+      });
     })
     .catch(function () {
       document.getElementById('works').appendChild(el('li', { class: 'load-error', text: '작업 목록을 불러오지 못했습니다. 페이지를 새로 고쳐 주세요.' }));

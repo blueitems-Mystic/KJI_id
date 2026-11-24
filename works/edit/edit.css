@@ -1,0 +1,87 @@
+/* works 편집 모드 (?edit=1) 전용. 공개 화면에서는 불러오지 않음 */
+.edit-bar { position: sticky; top: 0; z-index: 40; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px clamp(16px, 4vw, 40px); background: #2f3133; border-bottom: 1px solid #6d6f72; color: #e6e4df; font: 400 14px/1.4 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; }
+.eb-title { margin-right: 6px; font-weight: 500; }
+.eb-btn { font: 500 13px/1.2 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; color: #e6e4df; background: none; border: 1px solid #6d6f72; border-radius: 2px; padding: 7px 12px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.eb-btn:hover:not(:disabled) { border-color: #b9b7b2; }
+.eb-btn:disabled { opacity: .45; cursor: default; }
+.eb-btn.fill { background: #e6e4df; border-color: #e6e4df; color: #2b2c2e; }
+.eb-btn.ghost { border-color: transparent; color: #b9b7b2; }
+.eb-btn.sm { padding: 4px 9px; font-size: 12px; }
+.eb-login { display: flex; gap: 6px; }
+.eb-login[hidden], .eb-btn[hidden] { display: none; }
+.eb-pw { font: inherit; width: 11em; padding: 6px 8px; color: #e6e4df; background: #3a3c3f; border: 1px solid #6d6f72; border-radius: 2px; }
+.eb-status { flex-basis: 100%; color: #b9b7b2; font-size: 13px; }
+.eb-status.ok { color: #9fd3a8; }
+.eb-status.err { color: #f2a08f; }
+.ed-ghost { opacity: .35; }
+
+/* ── 허브 배너 ───────────────────── */
+body.editing .work { position: relative; }
+.bn-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 13px; }
+.bn-name { font-weight: 500; margin-right: 4px; }
+.bn-state { color: #f0c27a; }
+body.editing .caption { pointer-events: none; opacity: .55; }
+body.editing .panel { position: relative; outline: 1px dashed rgba(230,228,223,.35); outline-offset: -1px; touch-action: none; cursor: grab; }
+body.editing .panel.spacer { background: repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 10px, transparent 10px 20px); cursor: default; }
+body.editing .panel.dragging { cursor: grabbing; }
+.pn-tools { position: absolute; z-index: 4; left: 6px; top: 6px; right: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; pointer-events: none; }
+.pn-tools > * { pointer-events: auto; }
+.pn-btn, .pn-grip { font: 500 12px/1.2 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; color: #e6e4df; background: rgba(40,41,43,.88); border: 1px solid #6d6f72; border-radius: 2px; padding: 4px 8px; cursor: pointer; }
+.pn-grip { cursor: grab; font-size: 14px; padding: 2px 8px; }
+.pn-btn:hover, .pn-grip:hover { border-color: #e6e4df; }
+.pn-btn.danger:hover { border-color: #f2a08f; color: #f2a08f; }
+.pn-zoom { width: 90px; accent-color: #e6e4df; }
+.pn-readout { position: absolute; z-index: 3; right: 6px; bottom: 6px; padding: 2px 6px; background: rgba(40,41,43,.85); font: 400 12px/1.4 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; color: #e6e4df; pointer-events: none; }
+/* 모바일 비율 미리보기: 실제 모바일(≤720px)과 같은 16:10, 빈 칸 숨김 */
+body.preview-mobile .works { max-width: 480px; margin-left: auto; margin-right: auto; }
+body.preview-mobile .banner { aspect-ratio: 16 / 10; }
+body.preview-mobile .panel.spacer { display: none; }
+body.preview-mobile .caption { display: none; }
+
+/* ── 이미지 고르기 창 ─────────────── */
+.pick { width: min(1100px, 96vw); height: min(820px, 92vh); max-width: none; max-height: none; padding: 0; border: 1px solid #6d6f72; background: #2f3133; color: #e6e4df; font: 400 14px/1.4 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; }
+.pick::backdrop { background: rgba(0,0,0,.6); }
+.pick-head { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 16px; background: #2f3133; border-bottom: 1px solid #6d6f72; }
+.pick-tabs { display: flex; gap: 6px; }
+.pick-q { flex: 1; min-width: 10em; font: inherit; padding: 6px 8px; color: #e6e4df; background: #3a3c3f; border: 1px solid #6d6f72; border-radius: 2px; }
+.pick-msg { margin: 10px 16px 0; color: #b9b7b2; font-size: 13px; }
+.pick-grid { list-style: none; margin: 0; padding: 12px 16px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.pick-grid button { display: block; width: 100%; padding: 0; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; }
+.pick-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: #3a3c3f; outline: 2px solid transparent; outline-offset: 2px; }
+.pick-grid button:hover img, .pick-grid button:focus-visible img { outline-color: #e6e4df; }
+.pick-grid span { display: block; margin-top: 4px; font-size: 11px; color: #b9b7b2; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ── 상세 페이지 ──────────────────── */
+.ed-root[hidden], #archive[hidden] { display: none; }
+.ed-list { list-style: none; margin: 0; padding: 0; }
+.ed-arc { margin: 0 0 14px; padding: 10px 12px 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(109,111,114,.6); }
+.ed-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.ed-head.all-hidden .ed-title { opacity: .5; text-decoration: line-through; }
+.ed-grip { font-size: 16px; line-height: 1; padding: 6px 10px; color: #e6e4df; background: #3a3c3f; border: 1px solid #6d6f72; border-radius: 2px; cursor: grab; touch-action: none; }
+.ed-no { min-width: 2em; color: #b9b7b2; font-variant-numeric: tabular-nums; font-size: 13px; }
+.ed-title { font: 700 18px/1.3 'Gowun Batang', 'IBM Plex Sans KR', serif; }
+.ed-meta { color: #b9b7b2; font-size: 13px; }
+.ed-tools { margin-left: auto; display: flex; gap: 6px; }
+.ed-rows { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.heads-only .ed-rows { display: none; }
+.ed-row { position: relative; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; min-height: 40px; padding: 4px; border: 1px solid transparent; }
+.ed-row.multi { border-color: rgba(230,228,223,.45); background: rgba(230,228,223,.05); }
+.ed-row.new { border: 1px dashed #6d6f72; min-height: 36px; }
+.ed-row.new:empty::after { content: attr(data-hint); align-self: center; padding: 0 8px; color: #8d8b87; font-size: 12px; }
+.ed-tile { position: relative; flex: none; height: 140px; width: 110px; background: #3a3c3f; cursor: grab; outline: 2px solid transparent; outline-offset: 1px; touch-action: manipulation; }
+.ed-tile img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.ed-tile.sel { outline-color: #f0c27a; }
+.ed-tile.sel::before { content: '✓'; position: absolute; left: 4px; top: 4px; z-index: 1; width: 20px; height: 20px; display: grid; place-items: center; background: #f0c27a; color: #2b2c2e; font-size: 13px; border-radius: 2px; }
+.ed-tile.is-hidden img { opacity: .25; filter: grayscale(1); }
+.ed-hide { position: absolute; right: 4px; bottom: 4px; font: 500 11px/1.2 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; color: #e6e4df; background: rgba(40,41,43,.9); border: 1px solid #6d6f72; border-radius: 2px; padding: 3px 6px; cursor: pointer; }
+.ed-tile.is-hidden .ed-hide { border-color: #f0c27a; color: #f0c27a; }
+.ed-split { align-self: center; margin-left: 4px; font: 500 12px/1.2 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; color: #e6e4df; background: none; border: 1px solid #6d6f72; border-radius: 2px; padding: 4px 8px; cursor: pointer; }
+@media (max-width: 760px) {
+  .ed-tile { height: 96px; }
+  .ed-tools { margin-left: 0; }
+  .edit-bar { gap: 6px; padding: 8px 12px; }
+  .edit-bar .eb-btn { padding: 5px 8px; font-size: 12px; }
+  .eb-title { flex-basis: 100%; font-size: 13px; }
+  .eb-status { font-size: 12px; }
+  .eb-status:not(.ok):not(.err) { display: none; }   /* 안내문은 데스크톱에서만, 저장 결과·오류는 표시 */
+}

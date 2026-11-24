@@ -33,15 +33,18 @@
       var year = t.year || p.year;
       var crop = grp.thumbnail && grp.thumbnail.imageId === mainId ? grp.thumbnail.crop : null;
       return {
+        key: 'g:' + grp.id,
         title: t.name, year: year, category: grp.category || '',
         sortYear: year || P.estimatedYear || 0, known: !!year, pos: grp.gridPosition || 0,
-        thumb: function (w, h) {
-          var tr = 'c_fill,w_' + w + ',h_' + h + ',q_auto,f_auto';
-          if (crop && crop.width > 0 && crop.height > 0) tr = 'c_crop,x_' + Math.round(crop.x) + ',y_' + Math.round(crop.y) + ',w_' + Math.round(crop.width) + ',h_' + Math.round(crop.height) + '/' + tr;
-          return cld(cloud, ids[0], tr);
-        },
         imgs: ids.map(function (id) {
           return {
+            key: id,
+            thumb: function (w, h) {
+              var tr = 'c_fill,w_' + w + ',h_' + h + ',q_auto,f_auto';
+              if (id === mainId && crop && crop.width > 0 && crop.height > 0) tr = 'c_crop,x_' + Math.round(crop.x) + ',y_' + Math.round(crop.y) + ',w_' + Math.round(crop.width) + ',h_' + Math.round(crop.height) + '/' + tr;
+              return cld(cloud, id, tr);
+            },
+            tile: cld(cloud, id, 'c_limit,h_320,q_auto,f_auto'),
             full: cld(cloud, id, 'c_limit,w_2400,q_auto,f_auto'),
             src: cld(cloud, id, 'c_limit,w_1600,q_auto,f_auto'),
             srcset: [800, 1200, 1600, 2400].map(function (w) { return cld(cloud, id, 'c_limit,w_' + w + ',q_auto,f_auto') + ' ' + w + 'w'; }).join(', ')
@@ -55,12 +58,13 @@
   function localEntries(P) {
     return (P.local || []).map(function (l, i) {
       return {
+        key: 'l:' + l.title + (l.category ? ' · ' + l.category : ''),
         title: l.title, year: l.year || null, category: l.category || '',
         sortYear: l.sortYear || l.year || P.estimatedYear || 0, known: !!l.year, pos: 100000 + i,
-        thumb: function () { return '../' + P.dir + '/th/' + l.images[0].f; },
-        imgs: l.images.map(function (im) {
+        imgs: l.images.map(function (im, k) {
           var u = '../' + P.dir + '/img/' + im.f;
-          return { full: u, src: u, w: im.w, h: im.h };
+          var th = k === 0 ? '../' + P.dir + '/th/' + im.f : u;   // th/ 는 게시물 첫 이미지만 있음
+          return { key: 'l/' + im.f, full: u, src: u, w: im.w, h: im.h, thumb: function () { return th; } };
         })
       };
     });
@@ -70,10 +74,13 @@
   function featureEntries(P) {
     return (P.features || []).map(function (f) {
       return {
+        key: 'f:' + f.title,
         title: f.title, year: f.year || null, category: f.category || '', link: f.link, linkLabel: f.linkLabel, note: f.note,
         sortYear: 0, known: !!f.year, pos: 0, top: !!f.top, after: f.after,
-        thumb: function () { return '../' + f.thumb; },
-        imgs: f.images.map(function (im) { var u = '../' + im.src; return { full: u, src: u, w: im.w, h: im.h }; })
+        imgs: f.images.map(function (im, k) {
+          var u = '../' + im.src, th = k === 0 && f.thumb ? '../' + f.thumb : u;
+          return { key: im.src, full: u, src: u, w: im.w, h: im.h, thumb: function () { return th; } };
+        })
       };
     });
   }
@@ -106,6 +113,52 @@
     return tops.concat(list);
   }
 
+  // ---------- 편집 레이아웃 (Worker KV works-config.pages[slug]) ----------
+  // pc = { order: [게시물 key], entries: { key: { rows: [[이미지 key]], hidden: [이미지 key] } } }
+  // 레이아웃에 없는 게시물은 기본 순서상 바로 앞 게시물 뒤에, 없는 이미지는 그 게시물 끝에 한 장씩 붙는다
+  function applyOrder(list, order) {
+    if (!order || !order.length) return list.slice();
+    var pos = {};
+    order.forEach(function (k, i) { pos[k] = i; });
+    var res = list.filter(function (e) { return e.key in pos; }).sort(function (a, b) { return pos[a.key] - pos[b.key]; });
+    list.forEach(function (e, i) {
+      if (e.key in pos) return;
+      var j = i - 1;
+      while (j >= 0 && res.indexOf(list[j]) < 0) j--;
+      res.splice(j < 0 ? 0 : res.indexOf(list[j]) + 1, 0, e);
+    });
+    return res;
+  }
+  function rowsOf(e, ec) {
+    var byKey = {}, used = {}, rows = [];
+    e.imgs.forEach(function (im) { byKey[im.key] = im; });
+    ((ec && ec.rows) || []).forEach(function (r) {
+      var row = (r || []).map(function (k) { return byKey[k]; }).filter(function (im) { return im && !used[im.key]; });
+      row.forEach(function (im) { used[im.key] = 1; });
+      if (row.length) rows.push(row);
+    });
+    e.imgs.forEach(function (im) { if (!used[im.key]) rows.push([im]); });
+    return rows;
+  }
+  // 편집기와 공개 화면이 같이 쓰는 계산. all = 숨김 포함 전체, 반환 = 화면에 보일 목록
+  function applyLayout(all, pc) {
+    pc = pc || {};
+    var ents = pc.entries || {};
+    var out = [];
+    applyOrder(all, pc.order).forEach(function (e) {
+      var ec = ents[e.key] || {}, hidden = ec.hidden || [];
+      e.rowsAll = rowsOf(e, ec);
+      e.hidden = hidden.slice();
+      var rows = e.rowsAll.map(function (r) { return r.filter(function (im) { return hidden.indexOf(im.key) < 0; }); }).filter(function (r) { return r.length; });
+      if (!rows.length) return;
+      var v = Object.create(e);
+      v.rows = rows;
+      v.shown = [].concat.apply([], rows);
+      out.push(v);
+    });
+    return out;
+  }
+
   var lb = { set: [], i: 0, title: '' };
   var dlg = document.getElementById('lb');
   function lbShow() {
@@ -134,19 +187,34 @@
     list.forEach(function (e, n) {
       var alt = e.title + (e.year ? ' (' + e.year + ')' : '');
       var meta = [e.year, e.category].filter(Boolean).join(' · ');
-      var set = e.imgs.map(function (im, k) { return { src: im.full, alt: alt + ' ' + (k + 1) }; });
-      var links = e.imgs.map(function (im, k) {
-        var at = { src: im.src, alt: set[k].alt, decoding: 'async', loading: n === 0 && k === 0 ? 'eager' : 'lazy' };
-        if (im.srcset) { at.srcset = im.srcset; at.sizes = '(max-width: 1200px) calc(100vw - 32px), 1120px'; }
+      var set = e.shown.map(function (im, k) { return { src: im.full, alt: alt + ' ' + (k + 1) }; });
+      var k = 0;
+      function link(im, inRow) {
+        var i = k++;
+        var at = { src: im.src, alt: set[i].alt, decoding: 'async', loading: n === 0 && i === 0 ? 'eager' : 'lazy' };
+        if (im.srcset) { at.srcset = im.srcset; at.sizes = inRow ? '(max-width: 1200px) 50vw, 600px' : '(max-width: 1200px) calc(100vw - 32px), 1120px'; }
         if (im.w) { at.width = im.w; at.height = im.h; }
-        var a = el('a', { href: im.full, 'aria-label': alt + ' ' + (k + 1) + '번째 크게 보기' }, [el('img', at)]);
-        a.addEventListener('click', function (ev) { ev.preventDefault(); lbOpen(set, k, alt); });
+        var img = el('img', at);
+        var a = el('a', { href: im.full, 'aria-label': alt + ' ' + (i + 1) + '번째 크게 보기' }, [img]);
+        a.addEventListener('click', function (ev) { ev.preventDefault(); lbOpen(set, i, alt); });
+        // 한 줄 묶음: 비율만큼 폭을 나눠 높이를 맞춤. 크기를 모르면 로드 후 보정
+        if (inRow) {
+          var fit = function (w, h) { if (w && h) a.style.flex = (w / h).toFixed(4) + ' 1 0'; };
+          fit(im.w, im.h);
+          if (!im.w) img.addEventListener('load', function () { fit(img.naturalWidth, img.naturalHeight); });
+        }
         return a;
+      }
+      var blocks = e.rows.map(function (row) {
+        if (row.length === 1) return link(row[0], false);
+        return el('div', { class: 'arc-row' }, row.map(function (im) { return link(im, true); }));
       });
       var more = e.link ? el('p', { class: 'arc-link' }, [el('a', { class: 'kji-btn kji-btn-line', href: e.link, text: (e.linkLabel || '과정 자세히 보기') + ' →' })]) : null;
       box.appendChild(el('article', { class: 'arc', id: e.slug }, [
-        el('header', { class: 'arc-head' }, [el('h2', { text: e.title }), meta ? el('p', { class: 'arc-meta', text: meta }) : null, e.note ? el('p', { class: 'arc-note', text: e.note }) : null])
-      ].concat(links, [more])));
+        el('header', { class: 'arc-head' }, [el('h2', { text: e.title }), meta ? el('p', { class: 'arc-meta', text: meta }) : null, e.note ? el('p', { class: 'arc-note', text: e.note }) : null]),
+        el('div', { class: 'arc-imgs' }, blocks),
+        more
+      ]));
     });
   }
 
@@ -268,7 +336,7 @@
   }
   window.addEventListener('scroll', function () { showBar(false); }, { passive: true });
 
-  function metaOf(e) { return [e.year, e.category, e.imgs.length + '장'].filter(Boolean).join(' · '); }
+  function metaOf(e) { return [e.year, e.category, e.shown.length + '장'].filter(Boolean).join(' · '); }
 
   var ov = $('ov');
   function openOv() {
@@ -307,13 +375,13 @@
       var grid = el('ul', { class: 'ov-grid' });
       p.items.forEach(function (e) {
         var row = el('a', { class: 'item', href: '#' + e.slug }, [
-          el('img', { src: e.thumb(96, 120), alt: '', loading: 'lazy', decoding: 'async', width: '48', height: '60' }),
+          el('img', { src: e.shown[0].thumb(96, 120), alt: '', loading: 'lazy', decoding: 'async', width: '48', height: '60' }),
           el('span', null, [el('span', { class: 'item-t', text: e.title }), el('span', { class: 'item-m', text: metaOf(e) })])
         ]);
         row.addEventListener('click', function (ev) { ev.preventDefault(); go(e.slug); });
         p.ul.appendChild(el('li', null, [row]));
         var card = el('a', { href: '#' + e.slug }, [
-          el('img', { src: e.thumb(300, 375), alt: '', loading: 'lazy', decoding: 'async', width: '150', height: '188' }),
+          el('img', { src: e.shown[0].thumb(300, 375), alt: '', loading: 'lazy', decoding: 'async', width: '150', height: '188' }),
           el('span', { class: 'ov-t', text: e.title }), el('span', { class: 'ov-m', text: metaOf(e) })
         ]);
         card.addEventListener('click', function (ev) { ev.preventDefault(); ov.close(); go(e.slug); });
@@ -344,7 +412,23 @@
     var s = document.getElementById('status');
     if (s) s.textContent = msg || '이미지를 불러오지 못했습니다. 페이지를 새로 고쳐 주세요.';
   }
+  // 편집값 서버(Worker). 로컬 확인용으로만 ?api= 덮어쓰기 허용
+  function apiBase(d) {
+    var q = new URLSearchParams(location.search).get('api');
+    if (q && /^(127\.0\.0\.1|localhost)$/.test(location.hostname)) return q.replace(/\/$/, '');
+    var s = d.site || {}, g = (d.manual || {}).galleryApi || '';
+    return (s.worksApi || g.replace(/\/api\/gallery$/, '')).replace(/\/$/, '');
+  }
+  // 편집값을 못 받으면 works.json 기본 레이아웃으로 (2.5초 넘기면 포기)
+  function loadOverlay(base) {
+    if (!base) return Promise.resolve({});
+    var t = new Promise(function (res) { setTimeout(function () { res({}); }, 2500); });
+    var f = fetch(base + '/api/works', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+    return Promise.race([f, t]);
+  }
+
   var SLUG = window.KJI_PROJECT;
+  var EDIT = new URLSearchParams(location.search).get('edit') === '1';
   fetch('../works.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
@@ -356,12 +440,39 @@
       P.projectAlias = P.projectAlias || man.projectAlias; P.skipTitles = P.skipTitles || man.skipTitles;
       document.getElementById('title').textContent = P.title;
       document.getElementById('intro').textContent = P.summary || '';
+      var base = apiBase(d);
+      if (new URLSearchParams(location.search).get('api') && base) P.galleryApi = base + '/api/gallery';   // 로컬 확인용
+      var overlay = loadOverlay(base);
       var pending = P.gallery
         ? fetch(P.galleryApi).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (g) { return galleryEntries(g, P); })
         : Promise.resolve([]);
-      return pending.catch(function () { return null; }).then(function (ge) {
+      return Promise.all([pending.catch(function () { return null; }), overlay]).then(function (res) {
+        var ge = res[0], cfg = res[1] || {};
         var all = (ge || []).concat(localEntries(P));
-        var list = addSlugs(withFeatures(placeAfter(arrange(all), P.placeAfter), featureEntries(P)));
+        all = withFeatures(placeAfter(arrange(all), P.placeAfter), featureEntries(P));
+        var pc = (cfg.pages || {})[SLUG];
+        if (EDIT) {
+          var s = document.createElement('script');
+          s.src = '../edit/page-editor.js';
+          s.onload = function () {
+            window.KJIPageEditor({
+              slug: SLUG, project: P, all: all, layout: pc, api: base,
+              resolve: function (layout) {
+                layout = layout || {};
+                var ents = layout.entries || {};
+                return applyOrder(all, layout.order).map(function (e) {
+                  var ec = ents[e.key] || {};
+                  return { e: e, rows: rowsOf(e, ec), hidden: (ec.hidden || []).slice() };
+                });
+              },
+              preview: function (layout) { var list = addSlugs(applyLayout(all, layout)); render(list); return list; },
+              partial: ge === null
+            });
+          };
+          document.body.appendChild(s);
+          return;
+        }
+        var list = addSlugs(applyLayout(all, pc));
         if (!list.length) return fail();
         render(list);
         buildIndex(list, P.title);
