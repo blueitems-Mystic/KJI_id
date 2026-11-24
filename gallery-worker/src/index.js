@@ -10,6 +10,139 @@ export class StatsCounter {
     this.sql.exec("CREATE TABLE IF NOT EXISTS daily_counts  (date TEXT PRIMARY KEY, uniques INTEGER NOT NULL DEFAULT 0)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS image_views   (image_id TEXT PRIMARY KEY, group_id TEXT, views INTEGER NOT NULL DEFAULT 0)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS totals        (k TEXT PRIMARY KEY, v INTEGER NOT NULL DEFAULT 0)");
+    // works 방문 기록 — 상세(works_views/works_items)는 WORKS_KEEP_DAYS 보관, 합계 테이블은 영구
+    this.sql.exec("CREATE TABLE IF NOT EXISTS works_views (pv TEXT PRIMARY KEY, vid TEXT NOT NULL, date TEXT NOT NULL, ts INTEGER NOT NULL, page TEXT NOT NULL, ref TEXT, device TEXT, country TEXT, ms INTEGER NOT NULL DEFAULT 0, scroll INTEGER NOT NULL DEFAULT 0)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS works_views_date ON works_views(date)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS works_views_vid ON works_views(vid, date)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS works_items (pv TEXT NOT NULL, item TEXT NOT NULL, page TEXT NOT NULL, date TEXT NOT NULL, ms INTEGER NOT NULL DEFAULT 0, opens INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(pv, item))");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS works_items_date ON works_items(date)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS works_daily (date TEXT PRIMARY KEY, visitors INTEGER NOT NULL DEFAULT 0, views INTEGER NOT NULL DEFAULT 0)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS works_pages (page TEXT PRIMARY KEY, title TEXT, views INTEGER NOT NULL DEFAULT 0, ms INTEGER NOT NULL DEFAULT 0)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS works_item_totals (page TEXT NOT NULL, item TEXT NOT NULL, label TEXT, views INTEGER NOT NULL DEFAULT 0, ms INTEGER NOT NULL DEFAULT 0, opens INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(page, item))");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS works_meta (k TEXT PRIMARY KEY, v TEXT)");
+  }
+
+  // ── works 방문 기록 ──────────────────────────────
+  // ev.t = "v"(페이지 열림) | "u"(누적 체류시간 갱신, 같은 pv 로 여러 번 와도 안전: 늘어난 만큼만 더함)
+  worksTrack({ date, ts, vid, device, country, ev }) {
+    const MAX_MS = 30 * 60 * 1000; // 페이지 하나에 30분 넘는 체류는 자리 비움으로 보고 자름
+    const one = (q, ...a) => [...this.sql.exec(q, ...a)][0];
+
+    if (ev.t === "v") {
+      const lastPrune = one("SELECT v FROM works_meta WHERE k='prune'")?.v;
+      if (lastPrune !== date) {
+        const cutoff = new Date(Date.parse(date) - WORKS_KEEP_DAYS * 86400000).toISOString().slice(0, 10);
+        this.sql.exec("DELETE FROM works_views WHERE date < ?", cutoff);
+        this.sql.exec("DELETE FROM works_items WHERE date < ?", cutoff);
+        this.sql.exec("INSERT INTO works_meta(k,v) VALUES('prune',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v", date);
+      }
+      const seen = one("SELECT 1 AS x FROM works_views WHERE vid=? AND date=? LIMIT 1", vid, date);
+      const cur = this.sql.exec(
+        "INSERT OR IGNORE INTO works_views(pv,vid,date,ts,page,ref,device,country) VALUES(?,?,?,?,?,?,?,?)",
+        ev.pv, vid, date, ts, ev.page, ev.ref, device, country
+      );
+      if (cur.rowsWritten > 0) {
+        this.sql.exec(
+          "INSERT INTO works_daily(date,visitors,views) VALUES(?,?,1) ON CONFLICT(date) DO UPDATE SET visitors=visitors+excluded.visitors, views=views+1",
+          date, seen ? 0 : 1
+        );
+        this.sql.exec(
+          "INSERT INTO works_pages(page,title,views) VALUES(?,?,1) ON CONFLICT(page) DO UPDATE SET views=views+1, title=COALESCE(excluded.title, works_pages.title)",
+          ev.page, ev.title
+        );
+      }
+      return { ok: true };
+    }
+
+    if (ev.t === "u") {
+      const row = one("SELECT vid,date,page,ms,scroll FROM works_views WHERE pv=?", ev.pv);
+      if (!row || row.vid !== vid || row.page !== ev.page) return { ok: false };
+      const ms = Math.min(ev.ms, MAX_MS);
+      const dms = Math.max(0, ms - row.ms);
+      if (dms > 0 || ev.scroll > row.scroll) {
+        this.sql.exec("UPDATE works_views SET ms=MAX(ms,?), scroll=MAX(scroll,?) WHERE pv=?", ms, ev.scroll, ev.pv);
+        if (dms > 0) this.sql.exec("UPDATE works_pages SET ms=ms+? WHERE page=?", dms, row.page);
+      }
+      for (const it of ev.items) {
+        const ims = Math.min(it.ms, MAX_MS);
+        const prev = one("SELECT ms,opens FROM works_items WHERE pv=? AND item=?", ev.pv, it.key) || { ms: 0, opens: 0 };
+        const d = Math.max(0, ims - prev.ms), dOpen = Math.max(0, it.opens - prev.opens);
+        if (!d && !dOpen && prev.ms) continue;
+        this.sql.exec(
+          "INSERT INTO works_items(pv,item,page,date,ms,opens) VALUES(?,?,?,?,?,?) ON CONFLICT(pv,item) DO UPDATE SET ms=MAX(ms,excluded.ms), opens=MAX(opens,excluded.opens)",
+          ev.pv, it.key, row.page, row.date, ims, it.opens
+        );
+        const newView = prev.ms < WORKS_ITEM_VIEW_MS && ims >= WORKS_ITEM_VIEW_MS ? 1 : 0;
+        this.sql.exec(
+          "INSERT INTO works_item_totals(page,item,label,views,ms,opens) VALUES(?,?,?,?,?,?) ON CONFLICT(page,item) DO UPDATE SET views=views+excluded.views, ms=ms+excluded.ms, opens=opens+excluded.opens, label=COALESCE(excluded.label, works_item_totals.label)",
+          row.page, it.key, it.label, newView, d, dOpen
+        );
+      }
+      return { ok: true };
+    }
+    return { ok: false };
+  }
+
+  // days = 숫자(상세 테이블 기준) | 0 = 전체 기간(합계 테이블 기준, 방문자 목록은 보관 기간 안만)
+  getWorksStats({ today, days, offset }) {
+    const all = (q, ...a) => [...this.sql.exec(q, ...a)];
+    const keep = days > 0 ? Math.min(days, WORKS_KEEP_DAYS) : WORKS_KEEP_DAYS;
+    const from = new Date(Date.parse(today) - (keep - 1) * 86400000).toISOString().slice(0, 10);
+    const dailyFrom = days > 0 ? from : "0000-00-00";
+    const titles = Object.fromEntries(all("SELECT page,title FROM works_pages").map(r => [r.page, r.title]));
+    const labels = {};
+    for (const r of all("SELECT page,item,label FROM works_item_totals")) labels[r.page + "\u0000" + r.item] = r.label;
+
+    const daily = all("SELECT date,visitors,views FROM works_daily WHERE date>=? ORDER BY date", dailyFrom);
+
+    let pages, items;
+    if (days > 0) {
+      pages = all(
+        "SELECT page, COUNT(*) AS views, COUNT(DISTINCT vid||date) AS visitors, SUM(ms) AS ms, AVG(scroll) AS scroll FROM works_views WHERE date>=? GROUP BY page ORDER BY views DESC",
+        from
+      ).map(r => ({ page: r.page, title: titles[r.page] || null, views: r.views, visitors: r.visitors, ms: r.ms, avgMs: r.views ? Math.round(r.ms / r.views) : 0, scroll: Math.round(r.scroll || 0) }));
+      items = all(
+        "SELECT page, item, SUM(CASE WHEN ms>=? THEN 1 ELSE 0 END) AS views, SUM(ms) AS ms, SUM(opens) AS opens FROM works_items WHERE date>=? GROUP BY page,item ORDER BY ms DESC LIMIT 200",
+        WORKS_ITEM_VIEW_MS, from
+      );
+    } else {
+      pages = all("SELECT page,title,views,ms FROM works_pages ORDER BY views DESC")
+        .map(r => ({ page: r.page, title: r.title, views: r.views, visitors: null, ms: r.ms, avgMs: r.views ? Math.round(r.ms / r.views) : 0, scroll: null }));
+      items = all("SELECT page,item,views,ms,opens FROM works_item_totals ORDER BY ms DESC LIMIT 200");
+    }
+    items = items.map(r => ({ page: r.page, item: r.item, label: labels[r.page + "\u0000" + r.item] || r.item, views: r.views, ms: r.ms, avgMs: r.views ? Math.round(r.ms / r.views) : 0, opens: r.opens }));
+
+    // 유입: 방문자-일마다 첫 페이지의 ref
+    const entries = all(
+      "SELECT v.ref AS ref, v.page AS page, v.device AS device, v.country AS country FROM works_views v JOIN (SELECT vid, date, MIN(ts) AS t FROM works_views WHERE date>=? GROUP BY vid, date) f ON v.vid=f.vid AND v.date=f.date AND v.ts=f.t",
+      from
+    );
+    const tally = (key) => {
+      const m = {};
+      for (const e of entries) { const k = key(e) || ""; m[k] = (m[k] || 0) + 1; }
+      return Object.entries(m).map(([k, n]) => ({ key: k, n })).sort((a, b) => b.n - a.n).slice(0, 20);
+    };
+
+    const LIMIT = 40;
+    const visitorRows = all(
+      "SELECT vid, date, MIN(ts) AS first, MAX(ts) AS last, COUNT(*) AS views, SUM(ms) AS ms, MAX(device) AS device, MAX(country) AS country FROM works_views WHERE date>=? GROUP BY vid, date ORDER BY first DESC LIMIT ? OFFSET ?",
+      from, LIMIT + 1, offset
+    );
+    const visitors = visitorRows.slice(0, LIMIT).map(v => {
+      const views = all("SELECT pv, ts, page, ref, ms, scroll FROM works_views WHERE vid=? AND date=? ORDER BY ts", v.vid, v.date).map(p => ({
+        ts: p.ts, page: p.page, ref: p.ref, ms: p.ms, scroll: p.scroll,
+        items: all("SELECT item, ms, opens FROM works_items WHERE pv=? ORDER BY ms DESC LIMIT 8", p.pv)
+          .map(i => ({ item: i.item, label: labels[p.page + "\u0000" + i.item] || i.item, ms: i.ms, opens: i.opens })),
+      }));
+      return { id: v.vid.slice(0, 6), date: v.date, first: v.first, last: v.last, views: v.views, ms: v.ms, device: v.device, country: v.country, path: views };
+    });
+
+    return {
+      today, days, from: days > 0 ? from : null, keepDays: WORKS_KEEP_DAYS, itemViewMs: WORKS_ITEM_VIEW_MS,
+      daily, pages, items,
+      referrers: tally(e => e.ref), landing: tally(e => e.page), devices: tally(e => e.device), countries: tally(e => e.country),
+      visitors, more: visitorRows.length > LIMIT, offset,
+    };
   }
 
   async fetch(request) {
@@ -37,6 +170,12 @@ export class StatsCounter {
     }
     if (path === "/reset" && request.method === "POST") {
       return Response.json(this.reset());
+    }
+    if (path === "/worksTrack" && request.method === "POST") {
+      return Response.json(this.worksTrack(await readBody()));
+    }
+    if (path === "/getWorksStats" && request.method === "POST") {
+      return Response.json(this.getWorksStats(await readBody()));
     }
 
     return new Response("Not Found", { status: 404 });
@@ -167,6 +306,24 @@ export default {
         if (authErr) return corsResponse(env, request, authErr);
         const publicId = decodeURIComponent(path.replace("/api/images/", ""));
         return corsResponse(env, request, await handleDeleteImage(publicId, env));
+      }
+
+      // --- Works (컨셉아트 허브) 레이아웃 ---
+
+      if (path === "/api/works" && method === "GET") {
+        return corsResponse(env, request, await handleGetWorks(env));
+      }
+
+      if (path === "/api/works" && method === "PUT") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        return corsResponse(env, request, await handlePutWorks(request, env));
+      }
+
+      if (path === "/api/works/revert" && method === "POST") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        return corsResponse(env, request, await handleRevertWorks(env));
       }
 
       // --- Portfolio endpoints ---
@@ -325,6 +482,23 @@ export default {
         return corsResponse(env, request, postsJson({ ...dashboard, generatedAt: new Date().toISOString() }));
       }
 
+      // works 방문 기록 수집 (works/track.js 의 sendBeacon, text/plain JSON). 응답은 안 읽으므로 204
+      if (path === "/api/works/track" && method === "POST") {
+        return await handleWorksTrack(request, env);
+      }
+      if (path === "/api/admin/works-stats" && method === "GET") {
+        const authErr = checkAuth(request, env);
+        if (authErr) return corsResponse(env, request, authErr);
+        const d = url.searchParams.get("days");
+        const days = d === "all" ? 0 : [1, 7, 30, 90, 180].includes(Number(d)) ? Number(d) : 30;
+        const offset = Math.max(0, Math.min(100000, parseInt(url.searchParams.get("offset") || "0", 10) || 0));
+        const res = await getStatsStub(env).fetch("https://do/getWorksStats", {
+          method: "POST",
+          body: JSON.stringify({ today: kstDate(), days, offset }),
+        });
+        return corsResponse(env, request, postsJson({ ...(await res.json()), generatedAt: new Date().toISOString() }));
+      }
+
       if (path === "/api/admin/stats/reset" && method === "POST") {
         const authErr = checkAuth(request, env);
         if (authErr) return corsResponse(env, request, authErr);
@@ -390,6 +564,61 @@ function checkAuth(request, env) {
 function getStatsStub(env) {
   const id = env.STATS.idFromName("global");
   return env.STATS.get(id);
+}
+
+// ── works 방문 기록 ──
+const WORKS_KEEP_DAYS = 180;      // 방문자별 상세 보관 기간 (종일군 결정 2026-11-24)
+const WORKS_ITEM_VIEW_MS = 1000;  // 게시물이 화면에 1초 이상 보이면 '봤다'로 셈
+const BOT_UA = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|embedly|curl|wget|python|scrapy/i;
+const LOCAL_ORIGIN = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/;
+
+function cleanStr(v, max) {
+  if (typeof v !== "string") return null;
+  const s = v.replace(/[\u0000-\u001f]/g, "").trim().slice(0, max);
+  return s || null;
+}
+function cleanMs(v) {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n > 0 ? Math.min(n, 24 * 3600 * 1000) : 0;
+}
+
+async function handleWorksTrack(request, env) {
+  const done = new Response(null, { status: 204 });
+  const origin = request.headers.get("Origin") || "";
+  if (!(PROD_ORIGINS.has(origin) || LOCAL_ORIGIN.test(origin))) return done;
+  const ua = request.headers.get("user-agent") || "";
+  if (!ua || BOT_UA.test(ua)) return done;
+  const raw = await request.text();
+  if (raw.length > 32000) return done;
+  let b;
+  try { b = JSON.parse(raw); } catch { return done; }
+  const pv = cleanStr(b?.pv, 40), page = cleanStr(b?.page, 160);
+  if (!pv || !page || (b.t !== "v" && b.t !== "u")) return done;
+
+  const ev = { t: b.t, pv, page };
+  if (b.t === "v") {
+    ev.title = cleanStr(b.title, 120);
+    ev.ref = cleanStr(b.ref, 200);
+  } else {
+    ev.ms = cleanMs(b.ms);
+    ev.scroll = Math.max(0, Math.min(100, Math.round(Number(b.scroll) || 0)));
+    ev.items = (Array.isArray(b.items) ? b.items : []).slice(0, 150).map(it => ({
+      key: cleanStr(it?.[0], 120), ms: cleanMs(it?.[1]), opens: Math.max(0, Math.min(500, Math.round(Number(it?.[2]) || 0))), label: cleanStr(it?.[3], 120),
+    })).filter(it => it.key);
+  }
+
+  const ip = request.headers.get("cf-connecting-ip") || "";
+  const date = kstDate();
+  const salt = env.STATS_SALT || "kji";
+  // 방문자 ID = IP·브라우저·날짜·솔트 해시. 날짜가 바뀌면 같은 사람도 다른 ID (IP 원문은 저장 안 함)
+  const vid = (await sha256Hex(`works|${ip}|${ua}|${date}|${salt}`)).slice(0, 20);
+  const device = /iPad|Tablet/i.test(ua) ? "tablet" : /Mobi|Android|iPhone/i.test(ua) ? "mobile" : "desktop";
+  const country = cleanStr(request.cf?.country, 4);
+  await getStatsStub(env).fetch("https://do/worksTrack", {
+    method: "POST",
+    body: JSON.stringify({ date, ts: Date.now(), vid, device, country, ev }),
+  });
+  return done;
 }
 
 function kstDate() {
@@ -505,6 +734,56 @@ async function handleListFolders(env) {
   return new Response(JSON.stringify({ folders }), {
     headers: { "Content-Type": "application/json" },
   });
+}
+
+// --- Works 레이아웃 (works.json 위에 덮어쓰는 편집값) ---
+// KV "works-config" = { version, updatedAt, banners: {postId: {panels}}, pages: {projectId: {order, entries}} }
+// 저장할 때마다 직전 값을 "works-config:prev" 에 한 벌 보관 (되돌리기용)
+
+const WORKS_MAX_BYTES = 512 * 1024;
+
+function jsonResponse(obj, status = 200, extra = {}) {
+  return new Response(JSON.stringify(obj), {
+    status, headers: { "Content-Type": "application/json", ...extra },
+  });
+}
+
+function isPlainObject(v) {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+
+async function handleGetWorks(env) {
+  const raw = await env.GALLERY_KV.get("works-config");
+  return new Response(raw || "{}", {
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
+}
+
+async function handlePutWorks(request, env) {
+  const text = await request.text();
+  if (text.length > WORKS_MAX_BYTES) return jsonResponse({ error: "too large" }, 413);
+  let body;
+  try { body = JSON.parse(text); } catch { return jsonResponse({ error: "invalid JSON" }, 400); }
+  if (!isPlainObject(body)) return jsonResponse({ error: "object required" }, 400);
+  if (body.banners !== undefined && !isPlainObject(body.banners)) return jsonResponse({ error: "banners must be object" }, 400);
+  if (body.pages !== undefined && !isPlainObject(body.pages)) return jsonResponse({ error: "pages must be object" }, 400);
+  for (const [id, b] of Object.entries(body.banners || {})) {
+    if (!isPlainObject(b) || !Array.isArray(b.panels)) return jsonResponse({ error: `banners.${id}.panels array required` }, 400);
+  }
+  const config = { version: 1, banners: body.banners || {}, pages: body.pages || {}, updatedAt: new Date().toISOString() };
+  const prev = await env.GALLERY_KV.get("works-config");
+  if (prev) await env.GALLERY_KV.put("works-config:prev", prev);
+  await env.GALLERY_KV.put("works-config", JSON.stringify(config));
+  return jsonResponse({ ok: true, updatedAt: config.updatedAt });
+}
+
+async function handleRevertWorks(env) {
+  const prev = await env.GALLERY_KV.get("works-config:prev");
+  if (!prev) return jsonResponse({ error: "no previous version" }, 404);
+  const cur = await env.GALLERY_KV.get("works-config");
+  await env.GALLERY_KV.put("works-config", prev);
+  if (cur) await env.GALLERY_KV.put("works-config:prev", cur);
+  return new Response(prev, { headers: { "Content-Type": "application/json" } });
 }
 
 async function handleListImages(env) {
