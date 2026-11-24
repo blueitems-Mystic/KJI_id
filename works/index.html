@@ -157,9 +157,6 @@
 
 <main class="wrap">
   <ul class="works" id="works" aria-label="작업 목록"></ul>
-  <section class="manual" id="manual" hidden>
-    <ul class="works" id="manual-card" aria-label="수작업 프로젝트"></ul>
-  </section>
 </main>
 
 <footer class="wrap"><p id="ai-note"></p><p>© 김종일</p></footer>
@@ -286,10 +283,6 @@
       document.getElementById('ai-note').textContent = s.aiNote || '';
       var list = document.getElementById('works');
       d.posts.forEach(function (post, i) { list.appendChild(renderPost(post, i)); });
-      if (d.manual) {
-        document.getElementById('manual-card').appendChild(renderPost(d.manual, 1));
-        document.getElementById('manual').hidden = false;
-      }
       if (editing) editBar();
     })
     .catch(function () {
