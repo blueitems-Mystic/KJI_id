@@ -4,6 +4,10 @@
 (function () {
   var SORTABLE = 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js';
   var SORTABLE_SRI = 'sha384-DgmC6Xe2bSN2WjTDXzWYbUbxyhNP+NNkGDR/g78pCXV7E7rcVTGxVg0uIVCUUcBc';
+  // 방문 기록 대시보드 (works/stats/). 이 파일(works/edit/common.js) 기준 경로
+  var STATS_URL = new URL('../stats/', (document.currentScript && document.currentScript.src) || location.href).href;
+  // 관리자로 로그인한 브라우저는 방문 기록에서 뺀다 (works/track.js 가 읽음)
+  function noTrack() { try { localStorage.setItem('kji_works_notrack', '1'); } catch (e) {} }
 
   function el(tag, attrs, children) {
     var n = document.createElement(tag);
@@ -57,11 +61,13 @@
     var save = el('button', { type: 'button', class: 'eb-btn fill', text: '저장' });
     var revert = el('button', { type: 'button', class: 'eb-btn', text: '직전 저장으로 되돌리기', title: '마지막 저장 바로 전 상태로 돌아갑니다' });
     var exit = el('a', { class: 'eb-btn ghost', href: location.pathname + location.hash, text: '편집 끝내기' });
+    var stats = el('a', { class: 'eb-btn', href: STATS_URL, text: '방문 기록', title: '방문자·게시물별 조회수와 체류시간 (관리자 전용)' });
 
     function setStatus(t, kind) { status.textContent = t; status.className = 'eb-status' + (kind ? ' ' + kind : ''); }
     function refresh() {
       var on = !!token();
-      login.hidden = on; save.hidden = !on; revert.hidden = !on;
+      login.hidden = on; save.hidden = !on; revert.hidden = !on; stats.hidden = !on;
+      if (on) noTrack();
       save.disabled = !dirty;
       save.textContent = dirty ? '저장' : '저장됨';
     }
@@ -111,7 +117,7 @@
 
     var node = el('div', { class: 'edit-bar', role: 'region', 'aria-label': '편집 도구' }, [
       el('strong', { class: 'eb-title', text: opts.title })
-    ].concat(opts.extra || [], [login, save, revert, exit, status]));
+    ].concat(opts.extra || [], [login, save, revert, stats, exit, status]));
     document.body.classList.add('editing');
     document.body.insertBefore(node, document.body.firstChild);
     refresh();
