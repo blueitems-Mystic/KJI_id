@@ -2,7 +2,9 @@
  *   <script src="../static-layout.js" data-slug="project-cx" defer></script>
  * - 시트형 (main 안 .seq 블록): 이미지 순서·한 줄 묶기·숨기기·추가
  * - 보드형 (그 밖): 원래 내용은 그대로, 맨 아래 "추가 이미지" 영역만 편집
- * 편집값 = Worker /api/works → pages[slug] = { order: ['page'], entries: { page: { rows, hidden, added } } }
+ * 편집값 = Worker /api/works → pages[slug] = { order: ['page', 'n:…'], entries: { page: { rows, hidden, added, removed }, 'n:…': { block: { title }, rows, added } } }
+ * - 새 블록('n:…'): 원래 내용 뒤(푸터 앞)에 제목 + 이미지 섹션으로 붙음
+ * - page.removed (시트형만): 원래 이미지 블록 전체를 숨김 (되살리기 가능)
  * 편집값이 없으면 페이지를 건드리지 않는다. */
 (function () {
   var me = document.currentScript;
@@ -35,12 +37,19 @@
     '.kji-extra .kji-xrow{display:flex;gap:16px;align-items:flex-start}' +
     '.kji-extra .kji-xrow a{flex:1 1 0;min-width:0;display:block;cursor:zoom-in}' +
     '.kji-extra img{display:block;width:100%;height:auto}' +
+    '.kji-extra[hidden],.kji-blocks[hidden]{display:none}' +
+    '.kji-blocks{max-width:1200px;margin:96px auto 0;padding:0 clamp(16px,4vw,40px);display:flex;flex-direction:column;gap:72px}' +
+    '.kji-block{display:flex;flex-direction:column;gap:16px}' +
+    '.kji-block h2{margin:0 0 4px;font-size:clamp(20px,2.4vw,28px);line-height:1.3;font-weight:700}' +
+    '.kji-block .kji-xrow{display:flex;gap:16px;align-items:flex-start}' +
+    '.kji-block .kji-xrow a{flex:1 1 0;min-width:0;display:block;cursor:zoom-in}' +
+    '.kji-block img{display:block;width:100%;height:auto}' +
     '.kji-lb{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(30,31,33,.96)}' +
     '.kji-lb::backdrop{background:transparent}' +
     '.kji-lb img{position:absolute;inset:16px 16px 60px;margin:auto;max-width:calc(100% - 32px);max-height:calc(100% - 76px);width:auto;height:auto;object-fit:contain}' +
     '.kji-lb .bar{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;gap:8px;align-items:center;justify-content:center;color:#e6e4df;font:14px "IBM Plex Sans KR",sans-serif}' +
     '.kji-lb button{font:inherit;color:inherit;background:none;border:1px solid #6d6f72;border-radius:2px;padding:4px 14px;cursor:pointer}' +
-    '@media (max-width:760px){.seq.kji-row,.kji-extra,.kji-extra .kji-xrow{gap:8px}}';
+    '@media (max-width:760px){.seq.kji-row,.kji-extra,.kji-extra .kji-xrow,.kji-block,.kji-block .kji-xrow{gap:8px}.kji-blocks{gap:48px;margin-top:64px}}';
   document.head.appendChild(css);
 
   // ---- 원래 페이지 읽기 ----
@@ -82,8 +91,9 @@
     im.a = el('a', { href: im.full }, [img]);
     return im.a;
   }
-  function rowsOf(ec) {
-    var imgs = items.concat(((ec && ec.added) || []).filter(function (a) { return a && a.id; }).map(addedImg));
+  function rowsOf(ec, e) {
+    var page = !e || e === entry;
+    var imgs = (page ? items : []).concat(((ec && ec.added) || []).filter(function (a) { return a && a.id; }).map(addedImg));
     var byKey = {}, used = {}, rows = [];
     imgs.forEach(function (im) { byKey[im.key] = im; });
     ((ec && ec.rows) || []).forEach(function (r) {
@@ -92,7 +102,7 @@
       if (row.length) rows.push(row);
     });
     // 레이아웃에 없는 원래 이미지·추가 이미지는 원래 순서대로 뒤에
-    if (!(ec && ec.rows)) origRows.forEach(function (o) {
+    if (page && !(ec && ec.rows)) origRows.forEach(function (o) {
       var row = o.keys.map(function (k) { return byKey[k]; }).filter(function (im) { return im && !used[im.key]; });
       row.forEach(function (im) { used[im.key] = 1; });
       if (row.length) rows.push(row);
@@ -101,6 +111,41 @@
     return rows;
   }
   function ecOf(pc) { return ((pc || {}).entries || {}).page || null; }
+  // 새로 만든 블록 (pc.order 순서, 없는 것은 뒤에)
+  function blocksOf(pc) {
+    var ents = (pc && pc.entries) || {}, order = (pc && pc.order) || [];
+    var keys = Object.keys(ents).filter(function (k) { return k !== 'page' && ents[k] && ents[k].block; });
+    keys.sort(function (a, b) { var i = order.indexOf(a), j = order.indexOf(b); return (i < 0 ? 1e9 : i) - (j < 0 ? 1e9 : j); });
+    return keys.map(function (k) { return { key: k, title: String(ents[k].block.title || '새 블록'), category: '', imgs: [], created: true }; });
+  }
+  function visibleRows(ec, e) {
+    var hidden = (ec && ec.hidden) || [];
+    return rowsOf(ec, e).map(function (r) { return r.filter(function (im) { return hidden.indexOf(im.key) < 0; }); }).filter(function (r) { return r.length; });
+  }
+  function xrow(r) {
+    return el('div', { class: 'kji-xrow' }, r.map(function (im) { var a = linkFor(im); if (r.length > 1) fit(a, im); else a.style.flex = ''; return a; }));
+  }
+  var blocksBox = null;
+  function renderBlocks(pc) {
+    var ents = (pc && pc.entries) || {};
+    var list = blocksOf(pc).filter(function (b) { return !(ents[b.key] || {}).removed; });
+    if (!blocksBox) {
+      blocksBox = el('div', { class: 'kji-blocks' });
+      var foot = document.querySelector('body > footer');
+      if (foot) foot.parentNode.insertBefore(blocksBox, foot);
+      else document.body.insertBefore(blocksBox, document.querySelector('body > script') || null);
+    }
+    blocksBox.textContent = '';
+    list.forEach(function (b) {
+      var rows = visibleRows(ents[b.key], b);
+      if (!rows.length) return;
+      var sec = el('section', { class: 'kji-block', 'aria-label': b.title }, [el('h2')]);
+      sec.firstChild.textContent = b.title;
+      rows.forEach(function (r) { sec.appendChild(xrow(r)); });
+      blocksBox.appendChild(sec);
+    });
+    blocksBox.hidden = !blocksBox.children.length;
+  }
 
   // ---- 적용 ----
   function sameAs(row) {
@@ -137,20 +182,18 @@
     return extraBox;
   }
   function apply(pc) {
-    var ec = ecOf(pc), hidden = (ec && ec.hidden) || [];
-    var rows = rowsOf(ec).map(function (r) { return r.filter(function (im) { return hidden.indexOf(im.key) < 0; }); }).filter(function (r) { return r.length; });
+    var ec = ecOf(pc);
+    var rows = ec && ec.removed && MODE === 'seq' ? [] : visibleRows(ec, entry);
     if (MODE === 'seq') {
       Array.prototype.slice.call(main.children).forEach(function (n) { if (n.classList.contains('seq')) n.remove(); });
       rows.forEach(function (r) { main.appendChild(blockFor(r)); });
     } else {
       var box = extraHost();
       box.textContent = '';
-      rows.forEach(function (r) {
-        var x = el('div', { class: 'kji-xrow' }, r.map(function (im) { var a = linkFor(im); if (r.length > 1) fit(a, im); else a.style.flex = ''; return a; }));
-        box.appendChild(x);
-      });
+      rows.forEach(function (r) { box.appendChild(xrow(r)); });
       box.hidden = !rows.length;
     }
+    renderBlocks(pc);          // 보드형 추가 이미지 영역 다음에 붙도록 마지막에
   }
   function restoreOriginal() {
     if (MODE === 'seq') {
@@ -162,15 +205,17 @@
         main.appendChild(b);
       });
     } else if (extraBox) { extraBox.textContent = ''; extraBox.hidden = true; }
+    if (blocksBox) { blocksBox.textContent = ''; blocksBox.hidden = true; }
   }
 
-  // 보드형: 추가 이미지 크게 보기
-  if (MODE === 'extra') {
+  // 추가 이미지(보드형)·새 블록 크게 보기 — 원래 페이지 뷰어는 main 안만 다룸
+  var LB_SEL = '.kji-extra a, .kji-blocks a';
+  {
     document.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('.kji-extra a');
+      var a = e.target.closest && e.target.closest(LB_SEL);
       if (!a || document.body.classList.contains('editing')) return;
       e.preventDefault();
-      var list = Array.prototype.slice.call(document.querySelectorAll('.kji-extra a')), i = list.indexOf(a);
+      var list = Array.prototype.slice.call(document.querySelectorAll(LB_SEL)), i = list.indexOf(a);
       var dlg = el('dialog', { class: 'kji-lb', 'aria-label': '크게 보기' });
       var img = el('img', { alt: '' }), cnt = el('span');
       function show(k) { i = (k + list.length) % list.length; img.src = list[i].getAttribute('href'); cnt.textContent = (i + 1) + ' / ' + list.length; }
@@ -201,9 +246,15 @@
         hint: MODE === 'seq'
           ? '이미지 끌기 = 순서·줄 이동. 이미지를 눌러 여러 장 고른 뒤 "한 줄로". "+ 이미지" = 올리기·Cloudinary 에서 추가.'
           : '이 페이지는 보드 배치라 원래 내용은 그대로 두고, 맨 아래 "추가 이미지" 영역만 편집합니다.',
+        canRemovePage: MODE === 'seq',
+        hideInEdit: function () { return blocksBox ? [blocksBox] : []; },
         resolve: function (layout) {
-          var ec = ecOf(layout) || {};
-          return [{ e: entry, rows: rowsOf(layout ? ec : null), hidden: (ec.hidden || []).slice(), added: (ec.added || []).slice() }];
+          var ec = ecOf(layout) || {}, ents = (layout && layout.entries) || {};
+          return [{ e: entry, rows: rowsOf(layout ? ec : null, entry), hidden: (ec.hidden || []).slice(), added: (ec.added || []).slice(), removed: !!ec.removed }]
+            .concat(blocksOf(layout).map(function (b) {
+              var bc = ents[b.key] || {};
+              return { e: b, rows: rowsOf(bc, b), hidden: (bc.hidden || []).slice(), added: (bc.added || []).slice(), removed: !!bc.removed, block: bc.block };
+            }));
         },
         makeImg: addedImg,
         preview: function (layout) { if (layout) apply(layout); else restoreOriginal(); }

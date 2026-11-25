@@ -157,13 +157,24 @@
     imgs.forEach(function (im) { if (!used[im.key]) rows.push([im]); });
     return rows;
   }
+  // 편집 모드에서 새로 만든 블록 = entries[key].block = { title } (key 'n:…'), 이미지는 전부 added
+  function blocksOf(pc) {
+    var ents = (pc && pc.entries) || {};
+    return Object.keys(ents).filter(function (k) { return ents[k] && ents[k].block; }).map(function (k) {
+      var b = ents[k].block;
+      return { key: k, title: String(b.title || '새 블록'), category: b.category || '', imgs: [], created: true, sortYear: 0, known: 0, pos: 0 };
+    });
+  }
+  function withBlocks(all, pc) { return all.concat(blocksOf(pc)); }
   // 편집기와 공개 화면이 같이 쓰는 계산. all = 숨김 포함 전체, 반환 = 화면에 보일 목록
+  // entries[key].removed = 블록 삭제(원래 게시물은 숨김으로 남아 되살릴 수 있음)
   function applyLayout(all, pc) {
     pc = pc || {};
     var ents = pc.entries || {};
     var out = [];
-    applyOrder(all, pc.order).forEach(function (e) {
+    applyOrder(withBlocks(all, pc), pc.order).forEach(function (e) {
       var ec = ents[e.key] || {}, hidden = ec.hidden || [];
+      if (ec.removed) return;
       e.rowsAll = rowsOf(e, ec);
       e.hidden = hidden.slice();
       var rows = e.rowsAll.map(function (r) { return r.filter(function (im) { return hidden.indexOf(im.key) < 0; }); }).filter(function (r) { return r.length; });
@@ -483,9 +494,9 @@
               resolve: function (layout) {
                 layout = layout || {};
                 var ents = layout.entries || {};
-                return applyOrder(all, layout.order).map(function (e) {
+                return applyOrder(withBlocks(all, layout), layout.order).map(function (e) {
                   var ec = ents[e.key] || {};
-                  return { e: e, rows: rowsOf(e, ec), hidden: (ec.hidden || []).slice(), added: (ec.added || []).slice() };
+                  return { e: e, rows: rowsOf(e, ec), hidden: (ec.hidden || []).slice(), added: (ec.added || []).slice(), removed: !!ec.removed, block: ec.block || null };
                 });
               },
               makeImg: function (a) { return addedImg(a, CLOUD); },

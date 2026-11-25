@@ -2,7 +2,9 @@
  * - 게시물 순서: 게시물 머리의 ☰ 를 끌기
  * - 이미지 순서·한 줄 묶기: 이미지를 끌어 다른 줄에 넣거나 "새 줄" 칸에 놓기 / 여러 장 선택 → "한 줄로"
  * - 숨기기: 이미지의 "숨기기" (이 페이지에서만, 갤러리에는 그대로)
- * 저장값 = works-config.pages[slug] = { order, entries: { key: { rows, hidden } } } */
+ * - 새 블록: 바의 "+ 새 블록" → 제목 + 이미지 추가. 블록 삭제: 새 블록은 지워지고, 원래 블록은 숨김(되살리기 가능)
+ * - 줄 삭제: 그 줄의 원래 이미지는 숨김, 추가한 이미지는 뺌
+ * 저장값 = works-config.pages[slug] = { order, entries: { key: { rows, hidden, added, removed, block: { title } } } } */
 (function () {
   var here = document.currentScript.src.replace(/[^/]*$/, '');
 
@@ -31,7 +33,7 @@
   function start(ctx) {
     var E = window.KJIEdit, el = E.el, Sortable = window.Sortable;
     var archive = ctx.archive || document.getElementById('archive');
-    var model = [];            // [{ e, rows: [[img]], hidden: [key] }]
+    var model = [];            // [{ e, rows: [[img]], hidden: [key], added, removed, block }]
     var useDefault = false;    // "기본 배치로" 누른 상태 = 저장 시 이 페이지 편집값 삭제
     var mode = 'edit';         // edit | preview
     var headsOnly = false;
@@ -45,6 +47,8 @@
         var ent = { rows: m.rows.map(function (r) { return r.map(function (im) { return im.key; }); }) };
         if (m.hidden.length) ent.hidden = m.hidden.slice();
         if (m.added && m.added.length) ent.added = m.added.slice();
+        if (m.removed) ent.removed = true;
+        if (m.block) ent.block = { title: m.block.title };
         entries[m.e.key] = ent;
       });
       return { order: model.map(function (m) { return m.e.key; }), entries: entries };
@@ -54,11 +58,12 @@
     var previewBtn = el('button', { type: 'button', class: 'eb-btn', text: '미리보기' });
     var headsBtn = el('button', { type: 'button', class: 'eb-btn', text: '게시물만 보기', 'aria-pressed': 'false' });
     var resetBtn = el('button', { type: 'button', class: 'eb-btn', text: '기본 배치로' });
+    var newBtn = el('button', { type: 'button', class: 'eb-btn fill', text: '+ 새 블록', title: '제목이 있는 새 이미지 블록을 맨 아래에 만듭니다' });
     var bar = E.bar({
       title: ctx.project.title + ' 편집',
-      hint: ctx.hint || '☰ 끌기 = 게시물 순서, 이미지 끌기 = 순서·줄 이동. 이미지를 눌러 여러 장 고른 뒤 "한 줄로". "+ 이미지" = 올리기·Cloudinary 에서 추가.',
+      hint: ctx.hint || '☰ 끌기 = 게시물 순서, 이미지 끌기 = 순서·줄 이동. 이미지를 눌러 여러 장 고른 뒤 "한 줄로". "+ 이미지" = 올리기·Cloudinary 에서 추가. "+ 새 블록" / "블록 삭제" = 블록 만들기·지우기.',
       api: ctx.api,
-      extra: ctx.single ? [previewBtn, resetBtn] : [previewBtn, headsBtn, resetBtn],
+      extra: ctx.single ? [newBtn, previewBtn, resetBtn] : [newBtn, previewBtn, headsBtn, resetBtn],
       collect: function (cfg) {
         if (useDefault) delete cfg.pages[ctx.slug];
         else cfg.pages[ctx.slug] = serialize();
@@ -72,7 +77,23 @@
       previewBtn.textContent = mode === 'edit' ? '미리보기' : '편집으로';
       previewBtn.className = 'eb-btn' + (mode === 'preview' ? ' fill' : '');
       headsBtn.hidden = mode === 'preview';
+      newBtn.hidden = mode === 'preview';
       draw();
+    });
+    newBtn.addEventListener('click', function () {
+      var t = prompt('새 블록 제목', '새 블록');
+      if (t === null) return;
+      t = t.trim() || '새 블록';
+      var key = 'n:' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      var m = { e: { key: key, title: t, category: '', imgs: [], created: true }, rows: [], hidden: [], added: [], removed: false, block: { title: t } };
+      model.push(m);
+      changed(); draw();
+      var li = root.querySelectorAll('.ed-arc')[model.length - 1];
+      if (li) {
+        li.scrollIntoView({ block: 'center' });
+        var add = li.querySelector('.ed-add');
+        if (add) add.click();      // 바로 이미지 고르기
+      }
     });
     headsBtn.addEventListener('click', function () {
       headsOnly = !headsOnly;
@@ -81,7 +102,7 @@
       root.classList.toggle('heads-only', headsOnly);
     });
     resetBtn.addEventListener('click', function () {
-      if (!confirm('이 페이지의 순서·묶음·숨김·추가한 이미지를 모두 지우고 원래 배치로 돌릴까요? 저장해야 반영됩니다. (올린 파일은 Cloudinary 에 남습니다)')) return;
+      if (!confirm('이 페이지의 순서·묶음·숨김·추가한 이미지·새 블록을 모두 지우고 원래 배치로 돌릴까요? 저장해야 반영됩니다. (올린 파일은 Cloudinary 에 남습니다)')) return;
       load(null); useDefault = true; bar.changed(); draw();
     });
 
@@ -93,6 +114,7 @@
     function draw() {
       root.hidden = mode !== 'edit';
       archive.hidden = mode === 'edit';
+      if (ctx.hideInEdit) ctx.hideInEdit().forEach(function (n) { n.hidden = mode === 'edit'; });
       if (mode === 'preview') {
         var layout = useDefault ? null : serialize();
         ctx.preview(layout);
@@ -118,12 +140,43 @@
     }
 
     function entryNode(m) {
-      var li = el('li', { class: 'ed-arc' });
+      var isPage = ctx.single && !m.e.created;
+      var li = el('li', { class: 'ed-arc' + (isPage ? ' is-page' : '') + (m.e.created ? ' is-new' : '') + (m.removed ? ' is-removed' : '') });
+      function redraw() { li.replaceWith(entryNode(m)); }
+      var canRemove = m.e.created || !isPage || ctx.canRemovePage;
+      var delBtn = canRemove ? el('button', { type: 'button', class: 'eb-btn sm danger', text: m.removed ? '되살리기' : '블록 삭제',
+        title: m.e.created ? '새로 만든 블록을 지웁니다' : '이 블록을 페이지에서 숨깁니다 (되살리기 가능)' }) : null;
+      if (delBtn) delBtn.addEventListener('click', function () {
+        if (m.removed) { m.removed = false; changed(); redraw(); return; }
+        if (m.e.created) {
+          if (!confirm('"' + m.e.title + '" 블록을 지울까요? 저장해야 반영됩니다. (올린 파일은 Cloudinary 에 남습니다)')) return;
+          model.splice(model.indexOf(m), 1);
+          changed(); draw(); return;
+        }
+        m.removed = true; changed(); redraw();
+      });
+      if (m.removed) {
+        li.appendChild(el('div', { class: 'ed-head all-hidden' }, [
+          el('button', { type: 'button', class: 'ed-grip', 'aria-label': m.e.title + ' 순서 옮기기 (끌기)', title: '끌어서 게시물 순서 바꾸기', text: '☰' }),
+          el('span', { class: 'ed-no', text: String(model.indexOf(m) + 1) }),
+          el('strong', { class: 'ed-title', text: m.e.title }),
+          el('span', { class: 'ed-meta', text: '삭제됨 · 페이지에서 안 보임' }),
+          el('span', { class: 'ed-tools' }, [delBtn])
+        ]));
+        return li;
+      }
       var sel = {};             // 선택된 이미지 key
       var shown = m.rows.reduce(function (n, r) { return n + r.filter(function (im) { return m.hidden.indexOf(im.key) < 0; }).length; }, 0);
       var total = m.rows.reduce(function (n, r) { return n + r.length; }, 0);
       var joinBtn = el('button', { type: 'button', class: 'eb-btn sm', text: '고른 이미지 한 줄로', disabled: true });
-      var addBtn = el('button', { type: 'button', class: 'eb-btn sm fill', text: '+ 이미지', title: '새로 올리거나 Cloudinary 에서 골라 이 게시물에 추가' });
+      var addBtn = el('button', { type: 'button', class: 'eb-btn sm fill ed-add', text: '+ 이미지', title: '새로 올리거나 Cloudinary 에서 골라 이 게시물에 추가' });
+      var renBtn = m.e.created ? el('button', { type: 'button', class: 'eb-btn sm', text: '제목' }) : null;
+      if (renBtn) renBtn.addEventListener('click', function () {
+        var t = prompt('블록 제목', m.e.title);
+        if (t === null || !t.trim()) return;
+        m.e.title = m.block.title = t.trim();
+        changed(); redraw();
+      });
       addBtn.addEventListener('click', function () {
         E.chooseImages({ api: ctx.api, folder: 'works/' + ctx.slug }).then(function (items) {
           if (!items || !items.length) return;
@@ -146,13 +199,11 @@
         el('span', { class: 'ed-no' }),
         el('strong', { class: 'ed-title', text: m.e.title }),
         el('span', { class: 'ed-meta', text: [m.e.year, m.e.category, (total ? shown + '/' + total + '장' + (shown ? '' : ' · 페이지에서 안 보임') : '아직 이미지 없음 · "+ 이미지"로 추가')].filter(Boolean).join(' · ') }),
-        el('span', { class: 'ed-tools' }, [addBtn, joinBtn, splitAll])
+        el('span', { class: 'ed-tools' }, [addBtn, joinBtn, splitAll, renBtn, delBtn])
       ]);
       var rowsBox = el('div', { class: 'ed-rows' });
       li.appendChild(head); li.appendChild(rowsBox);
       li.querySelector('.ed-no').textContent = model.indexOf(m) + 1;
-
-      function redraw() { li.replaceWith(entryNode(m)); }
 
       // DOM 순서 → model
       function readDom() {
@@ -200,6 +251,17 @@
           tile.addEventListener('keydown', function (ev) { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); toggle(); } });
           row.appendChild(tile);
         });
+        if (!isNew) {
+          row.appendChild(el('button', { type: 'button', class: 'ed-split ed-rowdel', text: '줄 삭제', title: '원래 이미지는 숨기고, 추가한 이미지는 뺍니다', onclick: function () {
+            r.forEach(function (im) {
+              if (im.added) m.added = m.added.filter(function (a) { return a.key !== im.key; });
+              else if (m.hidden.indexOf(im.key) < 0) m.hidden.push(im.key);
+            });
+            var at = m.rows.indexOf(r), keep = r.filter(function (im) { return !im.added; });
+            if (keep.length) m.rows[at] = keep; else m.rows.splice(at, 1);
+            changed(); redraw();
+          } }));
+        }
         if (r.length > 1) {
           row.appendChild(el('button', { type: 'button', class: 'ed-split', text: '줄 풀기', title: '이 줄의 이미지를 한 장씩 나눕니다', onclick: function () {
             var at = m.rows.indexOf(r);
