@@ -28,6 +28,7 @@
     var d = ctx.data, man = d.manual || {};
     var cloud = man.cloudName || 'duwi0pqm2';
     var touched = {};          // postId → 'edit' | 'default'
+    var textTouched = {};      // postId 또는 '_site' → 'edit' | 'default'
     var galleryP = null;
 
     var mobileBtn = el('button', { type: 'button', class: 'eb-btn', text: '모바일 비율로 보기', 'aria-pressed': 'false' });
@@ -49,14 +50,34 @@
           if (touched[id] === 'default') delete cfg.banners[id];
           else cfg.banners[id] = { panels: clean(post.banner.panels) };
         });
+        cfg.texts.posts = cfg.texts.posts || {};
+        Object.keys(textTouched).forEach(function (id) {
+          var def = textTouched[id] === 'default';
+          if (id === '_site') {
+            if (def) delete cfg.texts.site;
+            else cfg.texts.site = { title: d.site.title || '', intro: d.site.intro || '' };
+            return;
+          }
+          var post = find(id);
+          if (def) { delete cfg.texts.posts[id]; return; }
+          var t = {};
+          ['meta', 'title', 'summary', 'textAlign'].forEach(function (k) { t[k] = post[k] || ''; });
+          cfg.texts.posts[id] = t;
+        });
       },
       onReverted: function (cfg) {
         var b = cfg.banners || {};
         d.posts.forEach(function (post) {
           post.banner.panels = b[post.id] && b[post.id].panels && b[post.id].panels.length ? b[post.id].panels : clone(post.defaultPanels);
+          var t = ((cfg.texts || {}).posts || {})[post.id] || {};
+          ['meta', 'title', 'summary', 'textAlign'].forEach(function (k) { post[k] = typeof t[k] === 'string' ? t[k] : post.defaultText[k]; });
           redraw(post);
         });
-        touched = {};
+        var ts = (cfg.texts || {}).site || {};
+        d.site.title = typeof ts.title === 'string' ? ts.title : d.defaultSite.title;
+        d.site.intro = typeof ts.intro === 'string' ? ts.intro : d.defaultSite.intro;
+        siteForm.sync();
+        touched = {}; textTouched = {};
       }
     });
 
@@ -126,7 +147,7 @@
       return E.pickImage([
         { label: '이 게시물', load: function () { return postImages(post); } },
         { label: 'Cloudinary 전체', load: function () { return E.cloudinaryAll(ctx.api, cloud); } }
-      ]);
+      ], { api: ctx.api, folder: 'works/banners', cloud: cloud });
     }
 
     // ---- 배너마다 도구 ----
@@ -160,6 +181,7 @@
         el('span', { class: 'bn-state', text: touched[post.id] === 'default' ? '기본값으로 돌림 (저장 전)' : touched[post.id] ? '바뀜 (저장 전)' : '' })
       ]);
       li.insertBefore(tools, li.firstChild);
+      tools.insertBefore(textToggle(post, li), tools.querySelector('.bn-state'));
 
       post.banner.panels.forEach(function (p, i) { panelTools(post, p, panels[i]); });
 
@@ -173,6 +195,69 @@
         }
       });
     }
+
+    // ---- 배너 글 (분류·제목·소개·글 위치) ----
+    function field(label, input) { return el('label', { class: 'tx-field' }, [el('span', { text: label }), input]); }
+    function swapCaption(post, li) {
+      var fresh = ctx.renderPost(post, d.posts.indexOf(post)).querySelector('.caption');
+      var old = li.querySelector('.caption');
+      if (old && fresh) old.replaceWith(fresh);
+    }
+    function textToggle(post, li) {
+      var open = !!openText[post.id];
+      var btn = el('button', { type: 'button', class: 'eb-btn sm' + (open ? ' fill' : ''), text: '글 편집', 'aria-expanded': open ? 'true' : 'false' });
+      btn.addEventListener('click', function () { openText[post.id] = !openText[post.id]; redraw(post); });
+      if (open) setTimeout(function () { li.insertBefore(textForm(post, li), li.children[1]); });
+      return btn;
+    }
+    var openText = {};
+    function textForm(post, li) {
+      function inp(k, multi) {
+        var n = el(multi ? 'textarea' : 'input', multi ? { rows: '2' } : { type: 'text' });
+        n.value = post[k] || '';
+        n.addEventListener('input', function () { post[k] = n.value; textTouched[post.id] = 'edit'; bar.changed(); swapCaption(post, li); });
+        return n;
+      }
+      var align = el('select', null, [el('option', { value: 'left', text: '왼쪽' }), el('option', { value: 'right', text: '오른쪽' })]);
+      align.value = post.textAlign === 'right' ? 'right' : 'left';
+      align.addEventListener('change', function () { post.textAlign = align.value; textTouched[post.id] = 'edit'; bar.changed(); swapCaption(post, li); });
+      return el('div', { class: 'tx-form' }, [
+        field('분류', inp('meta')), field('제목', inp('title')), field('글 위치', align),
+        el('div', { class: 'tx-wide' }, [field('소개', inp('summary', true))]),
+        el('button', { type: 'button', class: 'eb-btn sm', text: '글 기본값으로', title: 'works.json 에 적힌 원래 문구로', onclick: function () {
+          ['meta', 'title', 'summary', 'textAlign'].forEach(function (k) { post[k] = post.defaultText[k]; });
+          textTouched[post.id] = 'default'; bar.changed(); redraw(post);
+        } })
+      ]);
+    }
+    // 허브 머리글 (사이트 제목·소개)
+    var siteForm = (function () {
+      var t = el('input', { type: 'text' }), i = el('textarea', { rows: '2' });
+      function sync() {
+        t.value = d.site.title || ''; i.value = d.site.intro || '';
+        document.getElementById('site-title').textContent = d.site.title || '';
+        document.getElementById('site-intro').textContent = d.site.intro || '';
+      }
+      function upd() {
+        d.site.title = t.value; d.site.intro = i.value;
+        document.getElementById('site-title').textContent = t.value;
+        document.getElementById('site-intro').textContent = i.value;
+        textTouched._site = 'edit'; bar.changed();
+      }
+      t.addEventListener('input', upd); i.addEventListener('input', upd);
+      var node = el('div', { class: 'tx-form site' }, [
+        el('strong', { class: 'tx-title', text: '허브 머리글' }),
+        field('사이트 제목', t), el('div', { class: 'tx-wide' }, [field('소개', i)]),
+        el('button', { type: 'button', class: 'eb-btn sm', text: '기본값으로', onclick: function () {
+          d.site.title = d.defaultSite.title; d.site.intro = d.defaultSite.intro; sync();
+          textTouched._site = 'default'; bar.changed();
+        } })
+      ]);
+      sync();
+      return { node: node, sync: sync };
+    })();
+    var masthead = document.querySelector('.masthead');
+    if (masthead) masthead.appendChild(siteForm.node);
 
     function panelTools(post, p, panel) {
       var img = panel.querySelector('img');

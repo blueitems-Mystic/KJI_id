@@ -231,6 +231,22 @@
     var f = fetch(base + '/api/works', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
     return Promise.race([f, t]);
   }
+  // 허브 문구 덮어쓰기: texts = { site: {title, intro}, posts: { id: {meta, title, summary, textAlign} } }
+  var TEXT_KEYS = ['meta', 'title', 'summary', 'textAlign'];
+  function applyTexts(d, texts) {
+    texts = texts || {};
+    var s = d.site = d.site || {};
+    d.defaultSite = { title: s.title || '', intro: s.intro || '' };
+    var ts = texts.site || {};
+    ['title', 'intro'].forEach(function (k) { if (typeof ts[k] === 'string') s[k] = ts[k]; });
+    var tp = texts.posts || {};
+    d.posts.forEach(function (post) {
+      post.defaultText = {};
+      TEXT_KEYS.forEach(function (k) { post.defaultText[k] = post[k] || ''; });
+      var t = tp[post.id] || {};
+      TEXT_KEYS.forEach(function (k) { if (typeof t[k] === 'string') post[k] = t[k]; });
+    });
+  }
   function applyBanners(posts, banners) {
     posts.forEach(function (post) {
       var b = banners && banners[post.id];
@@ -246,6 +262,7 @@
       var base = apiBase(d);
       return loadOverlay(base).then(function (cfg) {
         applyBanners(d.posts, (cfg || {}).banners);
+        applyTexts(d, (cfg || {}).texts);
         var s = d.site || {};
         if (s.title) { document.getElementById('site-title').textContent = s.title; }
         document.getElementById('site-intro').textContent = s.intro || '';

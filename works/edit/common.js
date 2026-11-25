@@ -91,9 +91,9 @@
       // 다른 페이지에서 저장한 부분을 지우지 않도록 최신 값을 받아 내 조각만 바꿔 저장
       call(opts.api, '/api/works', { auth: false }).then(function (cfg) {
         cfg = cfg || {};
-        cfg.banners = cfg.banners || {}; cfg.pages = cfg.pages || {};
+        cfg.banners = cfg.banners || {}; cfg.pages = cfg.pages || {}; cfg.texts = cfg.texts || {};
         opts.collect(cfg);
-        return call(opts.api, '/api/works', { method: 'PUT', body: JSON.stringify({ banners: cfg.banners, pages: cfg.pages }) });
+        return call(opts.api, '/api/works', { method: 'PUT', body: JSON.stringify({ banners: cfg.banners, pages: cfg.pages, texts: cfg.texts }) });
       }).then(function () {
         dirty = false; refresh(); setStatus('저장했습니다. 공개 페이지에 바로 반영됩니다.', 'ok');
       }).catch(function (err) {
@@ -131,7 +131,8 @@
 
   /* 이미지 고르기 창
    * tabs: [{ label, load(): Promise<[{ src, srcSmall, thumb, alt, label }]> }] → Promise<item|null> */
-  function pickImage(tabs) {
+  // up = { api, folder, cloud } 이면 "파일 올리기" 버튼 (올린 이미지를 바로 고름)
+  function pickImage(tabs, up) {
     return new Promise(function (resolve) {
       var dlg = el('dialog', { class: 'pick', 'aria-label': '이미지 고르기' });
       var head = el('div', { class: 'pick-head' });
@@ -143,6 +144,18 @@
         return el('button', { type: 'button', class: 'eb-btn', role: 'tab', onclick: function () { show(i); } , text: t.label });
       });
       head.appendChild(el('div', { class: 'pick-tabs', role: 'tablist' }, tabBtns));
+      if (up) {
+        var inp = fileInput(false, function (files) {
+          if (!token()) { msg.textContent = '먼저 편집 바에서 로그인하세요.'; return; }
+          uploadAll(up.api, files, up.folder, function (t) { msg.textContent = t; }).then(function (items) {
+            var it = cldItem(up.cloud, items[0].id, items[0].id);
+            it.w = items[0].w; it.h = items[0].h;
+            picked = it; dlg.close();
+          }).catch(function (err) { msg.textContent = err.message === 'auth' ? '로그인이 풀렸습니다. 다시 로그인하세요.' : '올리지 못했습니다: ' + err.message; });
+        });
+        head.appendChild(inp);
+        head.appendChild(el('button', { type: 'button', class: 'eb-btn fill', text: '파일 올리기…', onclick: function () { inp.click(); } }));
+      }
       head.appendChild(q);
       head.appendChild(el('button', { type: 'button', class: 'eb-btn', text: '닫기', onclick: function () { dlg.close(); } }));
       dlg.appendChild(head); dlg.appendChild(msg); dlg.appendChild(grid);
@@ -191,5 +204,100 @@
     };
   }
 
-  window.KJIEdit = { el: el, call: call, token: token, loadSortable: loadSortable, bar: bar, pickImage: pickImage, cloudinaryAll: cloudinaryAll, cldItem: cldItem };
+
+  // 이미지 올리기: 기존 관리자 /api/upload (Worker 가 서명해 Cloudinary 로 전달. Secret 은 브라우저에 없음)
+  function upload(base, file, folder) {
+    var fd = new FormData();
+    fd.append('file', file);
+    if (folder) fd.append('folder', folder);
+    return fetch(base + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token() }, body: fd })
+      .then(function (r) {
+        if (r.status === 401) { sessionStorage.removeItem('admin_token'); throw new Error('auth'); }
+        return r.json().then(function (j) { if (!r.ok || j.error) throw new Error(j.error || String(r.status)); return j; });
+      });
+  }
+  function fileInput(multiple, onFiles) {
+    var inp = el('input', { type: 'file', accept: 'image/*', multiple: multiple || null, hidden: true });
+    inp.addEventListener('change', function () { var f = Array.prototype.slice.call(inp.files || []); inp.value = ''; if (f.length) onFiles(f); });
+    return inp;
+  }
+  // 파일들을 차례로 올림. 진행 상황은 say(문구)
+  function uploadAll(base, files, folder, say) {
+    var out = [], i = 0;
+    function next() {
+      if (i >= files.length) return Promise.resolve(out);
+      var f = files[i++];
+      say('올리는 중 ' + i + ' / ' + files.length + ' · ' + f.name);
+      return upload(base, f, folder).then(function (j) {
+        out.push({ id: j.publicId, w: j.width, h: j.height, url: j.url });
+        return next();
+      });
+    }
+    return next();
+  }
+
+  /* 이미지 여러 장 고르기 (상세 페이지 "+ 이미지")
+   * 위: 파일 올리기 / 아래: Cloudinary 전체에서 여러 장 선택 → Promise<[{ id, w, h }]> */
+  function chooseImages(opts) {
+    return new Promise(function (resolve) {
+      if (!token()) { alert('먼저 편집 바에서 로그인하세요.'); resolve([]); return; }
+      var dlg = el('dialog', { class: 'pick', 'aria-label': '이미지 추가' });
+      var picked = [], result = null, all = [];
+      var msg = el('p', { class: 'pick-msg', text: '불러오는 중…' });
+      var grid = el('ul', { class: 'pick-grid' });
+      var q = el('input', { type: 'search', class: 'pick-q', placeholder: '이름·폴더로 찾기', 'aria-label': '이미지 찾기' });
+      var ok = el('button', { type: 'button', class: 'eb-btn fill', text: '추가', disabled: true });
+      function count() { ok.disabled = !picked.length; ok.textContent = picked.length ? picked.length + '장 추가' : '추가'; }
+      var inp = fileInput(true, function (files) {
+        upBtn.disabled = true;
+        uploadAll(opts.api, files, opts.folder, function (t) { msg.textContent = t; }).then(function (items) {
+          upBtn.disabled = false;
+          result = picked.concat(items);
+          dlg.close();
+        }).catch(function (err) {
+          upBtn.disabled = false;
+          msg.textContent = err.message === 'auth' ? '로그인이 풀렸습니다. 다시 로그인하세요.' : '올리지 못했습니다: ' + err.message;
+        });
+      });
+      var upBtn = el('button', { type: 'button', class: 'eb-btn fill', text: '파일 올리기…', title: '내 컴퓨터의 이미지를 Cloudinary 에 올려 바로 추가', onclick: function () { inp.click(); } });
+      dlg.appendChild(el('div', { class: 'pick-head' }, [
+        el('strong', { text: '이미지 추가' }), upBtn, inp, q, ok,
+        el('button', { type: 'button', class: 'eb-btn', text: '닫기', onclick: function () { dlg.close(); } })
+      ]));
+      dlg.appendChild(msg); dlg.appendChild(grid);
+      ok.addEventListener('click', function () { result = picked.slice(); dlg.close(); });
+      function draw() {
+        var term = q.value.trim().toLowerCase();
+        grid.textContent = '';
+        var items = all.filter(function (it) { return !term || it.id.toLowerCase().indexOf(term) >= 0; });
+        msg.textContent = 'Cloudinary 전체 ' + items.length + '장 · 눌러서 여러 장 고르기';
+        items.slice(0, 400).forEach(function (it) {
+          var on = picked.indexOf(it) >= 0;
+          var b = el('button', { type: 'button', class: on ? 'on' : '', title: it.id, 'aria-pressed': on ? 'true' : 'false' }, [
+            el('img', { src: it.thumb, alt: '', loading: 'lazy', decoding: 'async' }), el('span', { text: it.id })
+          ]);
+          b.addEventListener('click', function () {
+            var at = picked.indexOf(it);
+            if (at >= 0) picked.splice(at, 1); else picked.push(it);
+            b.classList.toggle('on', at < 0); b.setAttribute('aria-pressed', at < 0 ? 'true' : 'false');
+            count();
+          });
+          grid.appendChild(el('li', null, [b]));
+        });
+      }
+      q.addEventListener('input', draw);
+      call(opts.api, '/api/images').then(function (d) {
+        all = (d.images || []).map(function (im) {
+          var cloud = (im.url || '').split('/')[3] || 'duwi0pqm2';
+          return { id: im.publicId, w: im.width, h: im.height, thumb: 'https://res.cloudinary.com/' + cloud + '/image/upload/c_fill,w_240,h_240,q_auto,f_auto/' + im.publicId };
+        });
+        draw();
+      }).catch(function (err) { msg.textContent = err.message === 'auth' ? '로그인한 뒤 볼 수 있습니다.' : 'Cloudinary 목록을 불러오지 못했습니다. 파일 올리기는 쓸 수 있습니다.'; });
+      dlg.addEventListener('close', function () { dlg.remove(); resolve(result || []); });
+      document.body.appendChild(dlg);
+      dlg.showModal();
+    });
+  }
+
+  window.KJIEdit = { el: el, call: call, token: token, loadSortable: loadSortable, bar: bar, pickImage: pickImage, cloudinaryAll: cloudinaryAll, cldItem: cldItem, upload: upload, uploadAll: uploadAll, fileInput: fileInput, chooseImages: chooseImages };
 })();

@@ -273,7 +273,7 @@
 <footer class="wrap note">
   <div class="rule">
     <p>화면은 로컬에서 실행한 PCA Builder 캡처. 시안은 이미지 생성 AI 결과. 리터치, 빨간 펜, 채택은 직접 작업. 프로젝트 설정 내용은 모자이크 처리.</p>
-    <p>작업자 김종일</p>
+    <p><a href="?edit=1" style="color:inherit;text-decoration:none">작업자 김종일</a></p>
   </div>
 </footer>
 
@@ -351,8 +351,14 @@
       count.textContent = (cur + 1) + ' / ' + links.length;
       if (img.complete && img.naturalWidth) img.onload();
     }
-    links.forEach(function (a, i) {
-      a.addEventListener('click', function (e) { e.preventDefault(); dlg.showModal(); show(i); });
+    // 편집값(static-layout.js)으로 순서가 바뀌거나 이미지가 추가돼도 맞도록 누를 때마다 다시 셈
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('main a.zoom');
+      if (!a || document.body.classList.contains('editing')) return;
+      links = Array.prototype.slice.call(document.querySelectorAll('main a.zoom'));
+      var i = links.indexOf(a);
+      if (i < 0) return;
+      e.preventDefault(); dlg.showModal(); show(i);
     });
     dlg.querySelector('.prev').addEventListener('click', function () { show(cur - 1); });
     dlg.querySelector('.next').addEventListener('click', function () { show(cur + 1); });
@@ -440,6 +446,7 @@
   })();
 </script>
 <nav class="kji-back" style="padding:40px clamp(16px,4vw,40px) 48px;font:15px/1.5 'IBM Plex Sans KR',sans-serif"><a href="../" style="color:#e6e4df;text-decoration:none;border-bottom:1px solid #6d6f72;padding-bottom:2px">← 컨셉아트 작업 목록</a><a href="https://kji.blueitems.net/" style="color:#b9b7b2;text-decoration:none;margin-left:24px">김종일 통합 포트폴리오 사이트</a></nav>
+<script src="../static-layout.js" data-slug="pca-builder" defer></script>
 <script src="../track.js" defer></script>
 </body>
 </html>

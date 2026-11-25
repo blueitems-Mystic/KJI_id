@@ -30,7 +30,7 @@
 
   function start(ctx) {
     var E = window.KJIEdit, el = E.el, Sortable = window.Sortable;
-    var archive = document.getElementById('archive');
+    var archive = ctx.archive || document.getElementById('archive');
     var model = [];            // [{ e, rows: [[img]], hidden: [key] }]
     var useDefault = false;    // "기본 배치로" 누른 상태 = 저장 시 이 페이지 편집값 삭제
     var mode = 'edit';         // edit | preview
@@ -44,6 +44,7 @@
       model.forEach(function (m) {
         var ent = { rows: m.rows.map(function (r) { return r.map(function (im) { return im.key; }); }) };
         if (m.hidden.length) ent.hidden = m.hidden.slice();
+        if (m.added && m.added.length) ent.added = m.added.slice();
         entries[m.e.key] = ent;
       });
       return { order: model.map(function (m) { return m.e.key; }), entries: entries };
@@ -55,9 +56,9 @@
     var resetBtn = el('button', { type: 'button', class: 'eb-btn', text: '기본 배치로' });
     var bar = E.bar({
       title: ctx.project.title + ' 편집',
-      hint: '☰ 끌기 = 게시물 순서, 이미지 끌기 = 순서·줄 이동. 이미지를 눌러 여러 장 고른 뒤 "한 줄로".',
+      hint: ctx.hint || '☰ 끌기 = 게시물 순서, 이미지 끌기 = 순서·줄 이동. 이미지를 눌러 여러 장 고른 뒤 "한 줄로". "+ 이미지" = 올리기·Cloudinary 에서 추가.',
       api: ctx.api,
-      extra: [previewBtn, headsBtn, resetBtn],
+      extra: ctx.single ? [previewBtn, resetBtn] : [previewBtn, headsBtn, resetBtn],
       collect: function (cfg) {
         if (useDefault) delete cfg.pages[ctx.slug];
         else cfg.pages[ctx.slug] = serialize();
@@ -80,7 +81,7 @@
       root.classList.toggle('heads-only', headsOnly);
     });
     resetBtn.addEventListener('click', function () {
-      if (!confirm('이 페이지의 순서·묶음·숨김을 모두 지우고 기본 배치(연도순)로 돌릴까요? 저장해야 반영됩니다.')) return;
+      if (!confirm('이 페이지의 순서·묶음·숨김·추가한 이미지를 모두 지우고 원래 배치로 돌릴까요? 저장해야 반영됩니다. (올린 파일은 Cloudinary 에 남습니다)')) return;
       load(null); useDefault = true; bar.changed(); draw();
     });
 
@@ -98,7 +99,7 @@
         return;
       }
       root.textContent = '';
-      var list = el('ol', { class: 'ed-list', 'aria-label': '게시물 순서' });
+      var list = el('ol', { class: 'ed-list' + (ctx.single ? ' single' : ''), 'aria-label': '게시물 순서' });
       model.forEach(function (m, i) { list.appendChild(entryNode(m, i)); });
       root.appendChild(list);
       Sortable.create(list, {
@@ -122,13 +123,30 @@
       var shown = m.rows.reduce(function (n, r) { return n + r.filter(function (im) { return m.hidden.indexOf(im.key) < 0; }).length; }, 0);
       var total = m.rows.reduce(function (n, r) { return n + r.length; }, 0);
       var joinBtn = el('button', { type: 'button', class: 'eb-btn sm', text: '고른 이미지 한 줄로', disabled: true });
+      var addBtn = el('button', { type: 'button', class: 'eb-btn sm fill', text: '+ 이미지', title: '새로 올리거나 Cloudinary 에서 골라 이 게시물에 추가' });
+      addBtn.addEventListener('click', function () {
+        E.chooseImages({ api: ctx.api, folder: 'works/' + ctx.slug }).then(function (items) {
+          if (!items || !items.length) return;
+          m.added = m.added || [];
+          var have = {};
+          m.rows.forEach(function (r) { r.forEach(function (im) { have[im.key] = 1; }); });
+          items.forEach(function (it) {
+            var a = { key: 'u:' + it.id, id: it.id, w: it.w || undefined, h: it.h || undefined };
+            if (have[a.key]) return;
+            have[a.key] = 1;
+            m.added.push(a);
+            m.rows.push([ctx.makeImg(a)]);
+          });
+          changed(); redraw();
+        });
+      });
       var splitAll = el('button', { type: 'button', class: 'eb-btn sm', text: '모두 한 장씩', disabled: m.rows.every(function (r) { return r.length === 1; }) });
-      var head = el('div', { class: 'ed-head' + (shown ? '' : ' all-hidden') }, [
+      var head = el('div', { class: 'ed-head' + (shown || !total ? '' : ' all-hidden') }, [
         el('button', { type: 'button', class: 'ed-grip', 'aria-label': m.e.title + ' 순서 옮기기 (끌기)', title: '끌어서 게시물 순서 바꾸기', text: '☰' }),
         el('span', { class: 'ed-no' }),
         el('strong', { class: 'ed-title', text: m.e.title }),
-        el('span', { class: 'ed-meta', text: [m.e.year, m.e.category, shown + '/' + total + '장' + (shown ? '' : ' · 페이지에서 안 보임')].filter(Boolean).join(' · ') }),
-        el('span', { class: 'ed-tools' }, [joinBtn, splitAll])
+        el('span', { class: 'ed-meta', text: [m.e.year, m.e.category, (total ? shown + '/' + total + '장' + (shown ? '' : ' · 페이지에서 안 보임') : '아직 이미지 없음 · "+ 이미지"로 추가')].filter(Boolean).join(' · ') }),
+        el('span', { class: 'ed-tools' }, [addBtn, joinBtn, splitAll])
       ]);
       var rowsBox = el('div', { class: 'ed-rows' });
       li.appendChild(head); li.appendChild(rowsBox);
@@ -152,14 +170,22 @@
         r.forEach(function (im) {
           var hid = m.hidden.indexOf(im.key) >= 0;
           var pic = el('img', { src: im.tile || im.src, alt: '', loading: 'lazy', decoding: 'async', draggable: 'false' });
-          var hideBtn = el('button', { type: 'button', class: 'ed-hide', text: hid ? '보이기' : '숨기기', 'aria-pressed': hid ? 'true' : 'false' });
-          var tile = el('div', { class: 'ed-tile' + (hid ? ' is-hidden' : ''), 'data-key': im.key, tabindex: '0', role: 'checkbox', 'aria-checked': 'false', 'aria-label': m.e.title + ' 이미지' + (hid ? ' (숨김)' : '') }, [pic, hideBtn]);
+          var isAdded = !!im.added;
+          var hideBtn = isAdded
+            ? el('button', { type: 'button', class: 'ed-hide', text: '빼기', title: '추가한 이미지를 이 페이지에서 뺍니다 (Cloudinary 파일은 남음)' })
+            : el('button', { type: 'button', class: 'ed-hide', text: hid ? '보이기' : '숨기기', 'aria-pressed': hid ? 'true' : 'false' });
+          var tile = el('div', { class: 'ed-tile' + (hid ? ' is-hidden' : '') + (isAdded ? ' is-added' : ''), 'data-key': im.key, tabindex: '0', role: 'checkbox', 'aria-checked': 'false', 'aria-label': m.e.title + ' 이미지' + (hid ? ' (숨김)' : '') }, [pic, hideBtn]);
           // 세로 높이 고정, 폭은 비율대로 (편집 화면은 작게)
           function fit(w, h) { if (w && h) { tile.style.aspectRatio = w + ' / ' + h; tile.style.width = 'auto'; } }
           fit(im.w, im.h);
           if (!im.w) pic.addEventListener('load', function () { fit(pic.naturalWidth, pic.naturalHeight); });
           hideBtn.addEventListener('click', function (ev) {
             ev.stopPropagation();
+            if (isAdded) {
+              m.added = m.added.filter(function (a) { return a.key !== im.key; });
+              m.rows = m.rows.map(function (r) { return r.filter(function (x) { return x.key !== im.key; }); }).filter(function (r) { return r.length; });
+              changed(); redraw(); return;
+            }
             var at = m.hidden.indexOf(im.key);
             if (at >= 0) m.hidden.splice(at, 1); else m.hidden.push(im.key);
             changed(); redraw();

@@ -20,13 +20,37 @@
   function cld(cloud, id, t) { return 'https://res.cloudinary.com/' + cloud + '/image/upload/' + t + '/' + id; }
   function norm(s) { return (s || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
+  // Cloudinary 이미지 한 장 (갤러리 게시물, 편집 모드에서 추가한 이미지 공용)
+  function cldImg(cloud, id, crop, wh) {
+    return {
+      key: id,
+      thumb: function (w, h) {
+        var tr = 'c_fill,w_' + w + ',h_' + h + ',q_auto,f_auto';
+        if (crop && crop.width > 0 && crop.height > 0) tr = 'c_crop,x_' + Math.round(crop.x) + ',y_' + Math.round(crop.y) + ',w_' + Math.round(crop.width) + ',h_' + Math.round(crop.height) + '/' + tr;
+        return cld(cloud, id, tr);
+      },
+      tile: cld(cloud, id, 'c_limit,h_320,q_auto,f_auto'),
+      full: cld(cloud, id, 'c_limit,w_2400,q_auto,f_auto'),
+      src: cld(cloud, id, 'c_limit,w_1600,q_auto,f_auto'),
+      srcset: [800, 1200, 1600, 2400].map(function (w) { return cld(cloud, id, 'c_limit,w_' + w + ',q_auto,f_auto') + ' ' + w + 'w'; }).join(', '),
+      w: wh && wh.w, h: wh && wh.h
+    };
+  }
+  // 편집 모드에서 게시물에 추가한 이미지: { key: 'u:<publicId>', id, w, h }
+  function addedImg(a, cloud) {
+    var im = cldImg(cloud, a.id, null, a);
+    im.key = a.key; im.added = a;
+    return im;
+  }
+
   function galleryEntries(g, P) {
-    var cloud = g.cloudName || P.cloudName, alias = P.projectAlias || {}, skip = P.skipTitles || [];
+    var cloud = g.cloudName || P.cloudName, alias = P.projectAlias || {}, skip = P.skipTitles || [], est = P.estimatedYears || {};
+    var all = !!P.gallery.all;     // 수작업 페이지: 모든 프로젝트
     var match = (P.gallery.match || []).map(norm);
     return (g.groups || []).map(function (grp) {
       var t = splitYear(grp.title), p = splitYear(grp.project);
-      var pname = norm(alias[p.name] || p.name);
-      if (match.indexOf(pname) < 0) return null;
+      var project = alias[p.name] || p.name;
+      if (!all && match.indexOf(norm(project)) < 0) return null;
       var images = (grp.images || []).filter(function (i) { return i.visible !== false; }).map(function (i) { return i.imageId; });
       var mainId = grp.thumbnail && images.indexOf(grp.thumbnail.imageId) >= 0 ? grp.thumbnail.imageId : images[0];
       var ids = mainId ? [mainId].concat(images.filter(function (id) { return id !== mainId; })) : [];
@@ -35,21 +59,9 @@
       return {
         key: 'g:' + grp.id,
         title: t.name, year: year, category: grp.category || '',
-        sortYear: year || P.estimatedYear || 0, known: !!year, pos: grp.gridPosition || 0,
-        imgs: ids.map(function (id) {
-          return {
-            key: id,
-            thumb: function (w, h) {
-              var tr = 'c_fill,w_' + w + ',h_' + h + ',q_auto,f_auto';
-              if (id === mainId && crop && crop.width > 0 && crop.height > 0) tr = 'c_crop,x_' + Math.round(crop.x) + ',y_' + Math.round(crop.y) + ',w_' + Math.round(crop.width) + ',h_' + Math.round(crop.height) + '/' + tr;
-              return cld(cloud, id, tr);
-            },
-            tile: cld(cloud, id, 'c_limit,h_320,q_auto,f_auto'),
-            full: cld(cloud, id, 'c_limit,w_2400,q_auto,f_auto'),
-            src: cld(cloud, id, 'c_limit,w_1600,q_auto,f_auto'),
-            srcset: [800, 1200, 1600, 2400].map(function (w) { return cld(cloud, id, 'c_limit,w_' + w + ',q_auto,f_auto') + ' ' + w + 'w'; }).join(', ')
-          };
-        })
+        group: all ? project : null, project: all ? project : null,
+        sortYear: year || est[project] || P.estimatedYear || 0, known: !!year, pos: grp.gridPosition || 0,
+        imgs: ids.map(function (id) { return cldImg(cloud, id, id === mainId ? crop : null); })
       };
     }).filter(function (e) { return e && e.title && skip.indexOf(e.title) < 0 && e.imgs.length; });
   }
@@ -129,15 +141,20 @@
     });
     return res;
   }
+  var CLOUD = 'duwi0pqm2';
+  // 게시물 이미지 + 편집 모드에서 추가한 이미지
+  function imgsOf(e, ec) {
+    return e.imgs.concat(((ec && ec.added) || []).filter(function (a) { return a && a.id; }).map(function (a) { return addedImg(a, CLOUD); }));
+  }
   function rowsOf(e, ec) {
-    var byKey = {}, used = {}, rows = [];
-    e.imgs.forEach(function (im) { byKey[im.key] = im; });
+    var byKey = {}, used = {}, rows = [], imgs = imgsOf(e, ec);
+    imgs.forEach(function (im) { byKey[im.key] = im; });
     ((ec && ec.rows) || []).forEach(function (r) {
       var row = (r || []).map(function (k) { return byKey[k]; }).filter(function (im) { return im && !used[im.key]; });
       row.forEach(function (im) { used[im.key] = 1; });
       if (row.length) rows.push(row);
     });
-    e.imgs.forEach(function (im) { if (!used[im.key]) rows.push([im]); });
+    imgs.forEach(function (im) { if (!used[im.key]) rows.push([im]); });
     return rows;
   }
   // 편집기와 공개 화면이 같이 쓰는 계산. all = 숨김 포함 전체, 반환 = 화면에 보일 목록
@@ -186,7 +203,7 @@
     box.textContent = '';
     list.forEach(function (e, n) {
       var alt = e.title + (e.year ? ' (' + e.year + ')' : '');
-      var meta = [e.year, e.category].filter(Boolean).join(' · ');
+      var meta = [e.year, e.project, e.category].filter(Boolean).join(' · ');
       var set = e.shown.map(function (im, k) { return { src: im.full, alt: alt + ' ' + (k + 1) }; });
       var k = 0;
       function link(im, inRow) {
@@ -353,7 +370,7 @@
     // 프로젝트별로 묶되, 묶음 순서와 묶음 안 순서는 페이지 순서(연도순) 그대로
     var at = {};
     list.forEach(function (e, n) {
-      var k = pname;
+      var k = e.group || pname;
       if (!(k in at)) { at[k] = projs.length; projs.push({ name: k, items: [] }); }
       projs[at[k]].items.push(e);
       idx[e.slug] = { e: e, n: n, g: at[k] };
@@ -432,14 +449,20 @@
   fetch('../works.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
+      var man = d.manual || {};
       var P = (d.projects || []).filter(function (p) { return p.id === SLUG; })[0];
+      // 수작업 페이지: 모든 프로젝트의 갤러리 게시물, 목차는 프로젝트별 묶음
+      if (!P && SLUG === 'manual') P = {
+        id: 'manual', title: document.getElementById('title').textContent, summary: document.getElementById('intro').textContent,
+        gallery: { all: true }, estimatedYears: man.estimatedYears, placeAfter: man.placeAfter
+      };
       if (!P) throw new Error('no project');
       P.dir = P.dir || P.id;
-      var man = d.manual || {};
       P.cloudName = P.cloudName || man.cloudName; P.galleryApi = P.galleryApi || man.galleryApi;
       P.projectAlias = P.projectAlias || man.projectAlias; P.skipTitles = P.skipTitles || man.skipTitles;
       document.getElementById('title').textContent = P.title;
       document.getElementById('intro').textContent = P.summary || '';
+      CLOUD = P.cloudName || CLOUD;
       var base = apiBase(d);
       if (new URLSearchParams(location.search).get('api') && base) P.galleryApi = base + '/api/gallery';   // 로컬 확인용
       var overlay = loadOverlay(base);
@@ -462,9 +485,10 @@
                 var ents = layout.entries || {};
                 return applyOrder(all, layout.order).map(function (e) {
                   var ec = ents[e.key] || {};
-                  return { e: e, rows: rowsOf(e, ec), hidden: (ec.hidden || []).slice() };
+                  return { e: e, rows: rowsOf(e, ec), hidden: (ec.hidden || []).slice(), added: (ec.added || []).slice() };
                 });
               },
+              makeImg: function (a) { return addedImg(a, CLOUD); },
               preview: function (layout) { var list = addSlugs(applyLayout(all, layout)); render(list); return list; },
               partial: ge === null
             });

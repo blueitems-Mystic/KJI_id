@@ -85,3 +85,19 @@ body.preview-mobile .caption { display: none; }
   .eb-status { font-size: 12px; }
   .eb-status:not(.ok):not(.err) { display: none; }   /* 안내문은 데스크톱에서만, 저장 결과·오류는 표시 */
 }
+
+/* ── 배너 글 / 허브 머리글 편집 ───── */
+.tx-form { display: grid; grid-template-columns: 1fr 2fr 8em; gap: 8px 12px; align-items: end; margin: 0 0 10px; padding: 10px 12px; background: #2f3133; border: 1px solid #6d6f72; font: 400 13px/1.4 'IBM Plex Sans KR', 'Gowun Dodum', sans-serif; color: #e6e4df; }
+.tx-form.site { grid-template-columns: 1fr; margin-top: 20px; }
+.tx-title { font-weight: 500; }
+.tx-wide { grid-column: 1 / -1; }
+.tx-field { display: flex; flex-direction: column; gap: 4px; }
+.tx-field span { color: #b9b7b2; font-size: 12px; }
+.tx-field input, .tx-field textarea, .tx-field select { font: inherit; font-size: 14px; color: #e6e4df; background: #3a3c3f; border: 1px solid #6d6f72; border-radius: 2px; padding: 6px 8px; width: 100%; resize: vertical; }
+.tx-form > .eb-btn { justify-self: start; }
+@media (max-width: 760px) { .tx-form { grid-template-columns: 1fr; } }
+
+/* ── 이미지 추가 ─────────────────── */
+.pick-grid button.on img { outline: 3px solid #f0c27a; outline-offset: 1px; }
+.ed-tile.is-added { box-shadow: 0 0 0 2px #7fb0d8; }
+.ed-list.single .ed-grip, .ed-list.single .ed-no { display: none; }
