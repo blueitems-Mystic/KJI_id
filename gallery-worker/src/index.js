@@ -767,11 +767,15 @@ async function handlePutWorks(request, env) {
   if (!isPlainObject(body)) return jsonResponse({ error: "object required" }, 400);
   if (body.banners !== undefined && !isPlainObject(body.banners)) return jsonResponse({ error: "banners must be object" }, 400);
   if (body.pages !== undefined && !isPlainObject(body.pages)) return jsonResponse({ error: "pages must be object" }, 400);
+  if (body.texts !== undefined && !isPlainObject(body.texts)) return jsonResponse({ error: "texts must be object" }, 400);
   for (const [id, b] of Object.entries(body.banners || {})) {
     if (!isPlainObject(b) || !Array.isArray(b.panels)) return jsonResponse({ error: `banners.${id}.panels array required` }, 400);
   }
-  const config = { version: 1, banners: body.banners || {}, pages: body.pages || {}, updatedAt: new Date().toISOString() };
   const prev = await env.GALLERY_KV.get("works-config");
+  // texts(허브 문구)를 안 보내는 예전 편집기가 저장해도 기존 문구가 지워지지 않게 유지
+  let texts = body.texts;
+  if (texts === undefined && prev) { try { texts = JSON.parse(prev).texts; } catch { texts = undefined; } }
+  const config = { version: 1, banners: body.banners || {}, pages: body.pages || {}, texts: texts || {}, updatedAt: new Date().toISOString() };
   if (prev) await env.GALLERY_KV.put("works-config:prev", prev);
   await env.GALLERY_KV.put("works-config", JSON.stringify(config));
   return jsonResponse({ ok: true, updatedAt: config.updatedAt });
